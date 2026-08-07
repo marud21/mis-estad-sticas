@@ -25,10 +25,10 @@
                             <td>{{ $tipo->nombre }}</td>
                             <td style="width:160px;">
                                 <input type="hidden" name="cargos[{{ $i }}][tipo_cargo_id]" class="cargo-tipo-input" data-index="{{ $i }}" disabled value="{{ $tipo->id }}">
-                                <input type="number" step="0.01" class="cargo-monto-input" data-index="{{ $i }}" disabled value="{{ $tipo->monto_default }}" style="margin-bottom:0;">
+                                <input type="number" step="0.01" name="cargos[{{ $i }}][monto]" class="cargo-monto-input" data-index="{{ $i }}" disabled value="{{ $tipo->monto_default }}" style="margin-bottom:0;">
                             </td>
                             <td style="width:170px;">
-                                <input type="date" class="cargo-fecha-input" data-index="{{ $i }}" disabled value="{{ date('Y-m-d') }}" style="margin-bottom:0;">
+                                <input type="date" name="cargos[{{ $i }}][fecha]" class="cargo-fecha-input" data-index="{{ $i }}" disabled value="{{ date('Y-m-d') }}" style="margin-bottom:0;">
                             </td>
                         </tr>
                     @endforeach
