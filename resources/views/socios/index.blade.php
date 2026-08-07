@@ -37,7 +37,7 @@
                         <td><a href="{{ route('socios.show', $socio) }}">{{ $socio->nombre_completo }}</a></td>
                         <td>{{ $socio->numero_documento }}</td>
                         <td>{{ $socio->posicion_juego }}</td>
-                        <td>{{ ['1' => 'Bueno', '2' => 'Regular', '3' => 'Malo'][$socio->nivel_jugador] }}</td>
+                        <td>{{ [1 => 'Bueno', 2 => 'Regular', 3 => 'Malo'][$socio->nivel_jugador] ?? 'Sin registrar' }}</td>
                         <td>{{ $socio->equipoActual()?->nombre ?? '-' }}</td>
                         <td><span class="badge badge-{{ $socio->estado }}">{{ ucfirst($socio->estado) }}</span></td>
                         <td class="{{ $socio->deuda_total > 0 ? 'deuda-positiva' : 'deuda-cero' }}">

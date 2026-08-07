@@ -1,4 +1,7 @@
-@php $posiciones = ['Portero', 'Defensa', 'Mediocampista', 'Delantero']; @endphp
+@php
+    $posiciones = ['Portero', 'Defensa', 'Mediocampista', 'Delantero'];
+    $equipoActualId = $socio?->equipos->first()->id ?? null;
+@endphp
 <div class="grid-2">
     <div>
         <label>Nombre completo</label>
@@ -10,7 +13,7 @@
     </div>
     <div>
         <label>Fecha de nacimiento</label>
-        <input type="date" name="fecha_nacimiento" value="{{ old('fecha_nacimiento', optional($socio->fecha_nacimiento ?? null)->format('Y-m-d')) }}" required>
+        <input type="date" name="fecha_nacimiento" value="{{ old('fecha_nacimiento', optional($socio->fecha_nacimiento ?? null)->format('Y-m-d')) }}">
     </div>
     <div>
         <label>Fecha de ingreso</label>
@@ -18,23 +21,33 @@
     </div>
     <div>
         <label>Entidad de salud</label>
-        <input type="text" name="entidad_salud" value="{{ old('entidad_salud', $socio->entidad_salud ?? '') }}" required>
+        <input type="text" name="entidad_salud" value="{{ old('entidad_salud', $socio->entidad_salud ?? '') }}">
     </div>
     <div>
         <label>Numero de celular</label>
-        <input type="text" name="celular" value="{{ old('celular', $socio->celular ?? '') }}" required>
+        <input type="text" name="celular" value="{{ old('celular', $socio->celular ?? '') }}">
     </div>
     <div>
         <label>Tipo de sangre</label>
-        <input type="text" name="tipo_sangre" placeholder="O+, A-, ..." value="{{ old('tipo_sangre', $socio->tipo_sangre ?? '') }}" required>
+        <input type="text" name="tipo_sangre" placeholder="O+, A-, ..." value="{{ old('tipo_sangre', $socio->tipo_sangre ?? '') }}">
     </div>
     <div style="grid-column: 1 / -1;">
         <label>Direccion de residencia</label>
-        <input type="text" name="direccion_residencia" value="{{ old('direccion_residencia', $socio->direccion_residencia ?? '') }}" required>
+        <input type="text" name="direccion_residencia" value="{{ old('direccion_residencia', $socio->direccion_residencia ?? '') }}">
+    </div>
+    <div>
+        <label>Equipo</label>
+        <select name="equipo_id">
+            <option value="">-- Sin asignar --</option>
+            @foreach ($equipos as $equipo)
+                <option value="{{ $equipo->id }}" @selected(old('equipo_id', $equipoActualId) == $equipo->id)>{{ $equipo->nombre }}</option>
+            @endforeach
+        </select>
     </div>
     <div>
         <label>Posicion de juego</label>
-        <select name="posicion_juego" required>
+        <select name="posicion_juego">
+            <option value="">-- Selecciona --</option>
             @foreach ($posiciones as $posicion)
                 <option value="{{ $posicion }}" @selected(old('posicion_juego', $socio->posicion_juego ?? '') === $posicion)>{{ $posicion }}</option>
             @endforeach
@@ -46,7 +59,8 @@
     </div>
     <div>
         <label>Nivel de jugador</label>
-        <select name="nivel_jugador" required>
+        <select name="nivel_jugador">
+            <option value="">-- Selecciona --</option>
             <option value="1" @selected(old('nivel_jugador', $socio->nivel_jugador ?? '') == 1)>1 - Bueno</option>
             <option value="2" @selected(old('nivel_jugador', $socio->nivel_jugador ?? '') == 2)>2 - Regular</option>
             <option value="3" @selected(old('nivel_jugador', $socio->nivel_jugador ?? '') == 3)>3 - Malo</option>

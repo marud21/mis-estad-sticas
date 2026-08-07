@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\SocioRequest;
+use App\Models\Equipo;
 use App\Models\Socio;
 use App\Models\TipoCargo;
 use App\Services\SocioService;
@@ -35,13 +36,14 @@ class SocioController extends Controller
     public function create()
     {
         $tiposCargo = TipoCargo::orderBy('nombre')->get();
+        $equipos = Equipo::orderBy('nombre')->get();
 
-        return view('socios.create', compact('tiposCargo'));
+        return view('socios.create', compact('tiposCargo', 'equipos'));
     }
 
     public function store(SocioRequest $request)
     {
-        $datos = $request->safe()->except(['cargos', 'foto']);
+        $datos = $request->safe()->except(['cargos', 'foto', 'equipo_id']);
         $cargos = collect($request->input('cargos', []))
             ->filter(fn ($cargo) => filled($cargo['tipo_cargo_id'] ?? null))
             ->all();
@@ -50,7 +52,7 @@ class SocioController extends Controller
             $datos['foto_path'] = $request->file('foto')->store('socios', 'public');
         }
 
-        $socio = $this->socios->crear($datos, $cargos);
+        $socio = $this->socios->crear($datos, $cargos, $request->integer('equipo_id') ?: null);
 
         return redirect()->route('socios.show', $socio)->with('status', 'Socio registrado correctamente.');
     }
@@ -64,12 +66,15 @@ class SocioController extends Controller
 
     public function edit(Socio $socio)
     {
-        return view('socios.edit', compact('socio'));
+        $socio->load('equipos');
+        $equipos = Equipo::orderBy('nombre')->get();
+
+        return view('socios.edit', compact('socio', 'equipos'));
     }
 
     public function update(SocioRequest $request, Socio $socio)
     {
-        $datos = $request->safe()->except(['cargos', 'foto']);
+        $datos = $request->safe()->except(['cargos', 'foto', 'equipo_id']);
 
         if ($request->hasFile('foto')) {
             if ($socio->foto_path) {
@@ -79,7 +84,7 @@ class SocioController extends Controller
             $datos['foto_path'] = $request->file('foto')->store('socios', 'public');
         }
 
-        $this->socios->actualizar($socio, $datos);
+        $this->socios->actualizar($socio, $datos, $request->integer('equipo_id') ?: null, $request->has('equipo_id'));
 
         return redirect()->route('socios.show', $socio)->with('status', 'Socio actualizado correctamente.');
     }

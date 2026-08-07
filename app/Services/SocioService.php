@@ -9,10 +9,14 @@ use Illuminate\Support\Facades\Storage;
 
 class SocioService
 {
-    public function crear(array $datos, array $cargosIniciales = []): Socio
+    public function crear(array $datos, array $cargosIniciales = [], ?int $equipoId = null): Socio
     {
-        return DB::transaction(function () use ($datos, $cargosIniciales) {
+        return DB::transaction(function () use ($datos, $cargosIniciales, $equipoId) {
             $socio = Socio::create($datos);
+
+            if ($equipoId) {
+                $socio->equipos()->sync([$equipoId]);
+            }
 
             foreach ($cargosIniciales as $cargo) {
                 $socio->cargos()->create([
@@ -27,9 +31,13 @@ class SocioService
         });
     }
 
-    public function actualizar(Socio $socio, array $datos): Socio
+    public function actualizar(Socio $socio, array $datos, ?int $equipoId = null, bool $equipoEnviado = false): Socio
     {
         $socio->update($datos);
+
+        if ($equipoEnviado) {
+            $socio->equipos()->sync($equipoId ? [$equipoId] : []);
+        }
 
         return $socio;
     }

@@ -25,15 +25,15 @@
             <div>
                 <p><strong>Documento:</strong> {{ $socio->numero_documento }}</p>
                 <p><strong>Fecha de nacimiento:</strong> {{ optional($socio->fecha_nacimiento)->format('d/m/Y') ?? 'Sin registrar' }}</p>
-                <p><strong>Entidad de salud:</strong> {{ $socio->entidad_salud }}</p>
-                <p><strong>Celular:</strong> {{ $socio->celular }}</p>
+                <p><strong>Entidad de salud:</strong> {{ $socio->entidad_salud ?? 'Sin registrar' }}</p>
+                <p><strong>Celular:</strong> {{ $socio->celular ?? 'Sin registrar' }}</p>
             </div>
             <div>
-                <p><strong>Tipo de sangre:</strong> {{ $socio->tipo_sangre }}</p>
-                <p><strong>Direccion:</strong> {{ $socio->direccion_residencia }}</p>
-                <p><strong>Posicion:</strong> {{ $socio->posicion_juego }}</p>
+                <p><strong>Tipo de sangre:</strong> {{ $socio->tipo_sangre ?? 'Sin registrar' }}</p>
+                <p><strong>Direccion:</strong> {{ $socio->direccion_residencia ?? 'Sin registrar' }}</p>
+                <p><strong>Posicion:</strong> {{ $socio->posicion_juego ?? 'Sin registrar' }}</p>
                 <p><strong>Numero de camiseta:</strong> {{ $socio->numero_camiseta ?? 'Sin asignar' }}</p>
-                <p><strong>Nivel:</strong> {{ ['1' => 'Bueno', '2' => 'Regular', '3' => 'Malo'][$socio->nivel_jugador] }}</p>
+                <p><strong>Nivel:</strong> {{ [1 => 'Bueno', 2 => 'Regular', 3 => 'Malo'][$socio->nivel_jugador] ?? 'Sin registrar' }}</p>
             </div>
         </div>
 
