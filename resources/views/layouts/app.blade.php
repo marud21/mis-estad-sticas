@@ -263,6 +263,9 @@
                 @csrf
                 <button type="submit" style="background:none; border:1px solid rgba(255,255,255,.5); color:#fff; padding:5px 12px; border-radius:6px; cursor:pointer; font-size:13px;">Cerrar sesion</button>
             </form>
+            <form id="form-logout-inactividad" action="{{ route('logout') }}" method="POST" style="display:none;">
+                @csrf
+            </form>
         </div>
     </header>
     <nav class="mainnav">
@@ -293,5 +296,28 @@
         @yield('content')
     </main>
     @include('partials.footer-firma')
+
+    <script>
+        (function () {
+            const MINUTOS_INACTIVIDAD = 20;
+            const LIMITE_MS = MINUTOS_INACTIVIDAD * 60 * 1000;
+            let temporizador;
+
+            function cerrarSesionPorInactividad() {
+                document.getElementById('form-logout-inactividad').submit();
+            }
+
+            function reiniciarTemporizador() {
+                clearTimeout(temporizador);
+                temporizador = setTimeout(cerrarSesionPorInactividad, LIMITE_MS);
+            }
+
+            ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'click'].forEach(function (evento) {
+                document.addEventListener(evento, reiniciarTemporizador, { passive: true });
+            });
+
+            reiniciarTemporizador();
+        })();
+    </script>
 </body>
 </html>

@@ -76,6 +76,15 @@
             margin-bottom: 16px;
             font-size: 13px;
         }
+        .alert-info {
+            background: #e7f0fb;
+            border: 1px solid var(--azul-claro);
+            color: var(--azul-oscuro);
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            font-size: 13px;
+        }
         .public-link {
             text-align: center;
             margin-top: 16px;
@@ -90,6 +99,11 @@
             <img src="{{ $logoUrl }}" alt="Logo" style="display:block; height:56px; width:56px; object-fit:contain; margin:0 auto 12px;">
         @endif
         <h1>{{ $nombreSistema }} &mdash; Administracion</h1>
+        @if (session('status'))
+            <div class="alert-info">
+                {{ session('status') }}
+            </div>
+        @endif
         @if ($errors->any())
             <div class="alert-error">
                 {{ $errors->first() }}
