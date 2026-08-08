@@ -272,6 +272,7 @@
         <a href="{{ route('planilla-juego.index') }}" class="{{ request()->routeIs('planilla-juego.*') ? 'active' : '' }}">Planilla de juego</a>
         <a href="{{ route('tipos-cargo.index') }}" class="{{ request()->routeIs('tipos-cargo.*') ? 'active' : '' }}">Tipos de cargo</a>
         <a href="{{ route('reportes-contables.index') }}" class="{{ request()->routeIs('reportes-contables.*') ? 'active' : '' }}">Reportes</a>
+        <a href="{{ route('cierre-caja.index') }}" class="{{ request()->routeIs('cierre-caja.*') ? 'active' : '' }}">Cierre de caja</a>
         <a href="{{ route('importar.index') }}" class="{{ request()->routeIs('importar.*') ? 'active' : '' }}">Importar</a>
         <a href="{{ route('configuracion.index') }}" class="{{ request()->routeIs('configuracion.*') ? 'active' : '' }}">Configuracion</a>
         <a href="{{ route('password.edit') }}" class="{{ request()->routeIs('password.*') ? 'active' : '' }}">Cambiar contrasena</a>

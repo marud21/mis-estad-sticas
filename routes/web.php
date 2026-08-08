@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\CargoController;
+use App\Http\Controllers\CierreCajaController;
 use App\Http\Controllers\ConfiguracionController;
 use App\Http\Controllers\ConsultaPublicaController;
 use App\Http\Controllers\EquipoController;
@@ -59,6 +60,11 @@ Route::middleware('auth')->group(function () {
     Route::get('reportes-contables', [ReporteContableController::class, 'index'])->name('reportes-contables.index');
     Route::post('reportes-contables', [ReporteContableController::class, 'exportar'])->name('reportes-contables.exportar');
     Route::post('reportes-contables/excel', [ReporteContableController::class, 'exportarExcel'])->name('reportes-contables.exportar-excel');
+
+    Route::get('cierre-caja', [CierreCajaController::class, 'index'])->name('cierre-caja.index');
+    Route::get('cierre-caja/nuevo', [CierreCajaController::class, 'create'])->name('cierre-caja.create');
+    Route::post('cierre-caja', [CierreCajaController::class, 'store'])->name('cierre-caja.store');
+    Route::get('cierre-caja/{cierreCaja}', [CierreCajaController::class, 'show'])->name('cierre-caja.show');
 
     Route::get('password', [PasswordController::class, 'edit'])->name('password.edit');
     Route::put('password', [PasswordController::class, 'update'])->name('password.update');

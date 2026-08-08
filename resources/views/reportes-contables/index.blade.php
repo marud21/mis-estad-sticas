@@ -4,6 +4,20 @@
 
 @section('content')
     <x-breadcrumbs :items="['Reportes' => null]" />
+
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <h1 style="margin:0;">Cierre de caja</h1>
+                <p style="color:#666; font-size:14px; margin:4px 0 0;">Registra el cierre de caja del dia: ingresos en efectivo, transferencia, gastos y el total neto.</p>
+            </div>
+            <div class="actions">
+                <a class="btn" href="{{ route('cierre-caja.create') }}">Nuevo cierre</a>
+                <a class="btn btn-secondary" href="{{ route('cierre-caja.index') }}">Ver historial</a>
+            </div>
+        </div>
+    </div>
+
     <div class="card">
         <h1>Reportes de contabilidad</h1>
         <p style="color:#666; font-size:14px;">Exporta un PDF con todos los cargos y pagos registrados en el periodo seleccionado.</p>
