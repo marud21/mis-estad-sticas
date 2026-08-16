@@ -67,31 +67,46 @@
 
     <div class="card">
         <h2>Cargos</h2>
-        <table>
-            <thead>
-                <tr><th>Tipo</th><th>Monto</th><th>Fecha</th><th>Descripcion</th><th></th></tr>
-            </thead>
-            <tbody>
-                @forelse ($socio->cargos as $cargo)
-                    <tr>
-                        <td>{{ $cargo->tipoCargo->nombre }}</td>
-                        <td>${{ number_format($cargo->monto, 0, ',', '.') }}</td>
-                        <td>{{ $cargo->fecha->format('d/m/Y') }}</td>
-                        <td>{{ $cargo->descripcion }}</td>
-                        <td class="actions">
-                            <a class="btn btn-sm btn-secondary" href="{{ route('socios.cargos.edit', [$socio, $cargo]) }}">Editar</a>
-                            <form action="{{ route('socios.cargos.destroy', [$socio, $cargo]) }}" method="POST" onsubmit="return confirm('¿Eliminar cargo?');">
-                                @csrf
-                                @method('DELETE')
-                                <button class="btn btn-sm btn-danger" type="submit">Eliminar</button>
-                            </form>
-                        </td>
-                    </tr>
-                @empty
-                    <tr><td colspan="5">Sin cargos registrados.</td></tr>
-                @endforelse
-            </tbody>
-        </table>
+        <p style="font-size:12px; color:#666; margin-top:-8px;">Agrupados por año y, dentro de cada año, por torneo (el torneo se asigna segun el equipo del cargo en el momento en que se creo; si el equipo cambia de torneo despues, los cargos ya creados no se mueven).</p>
+
+        @foreach ($cargosPorAnio as $anio => $cargosPorTorneoDelAnio)
+            <button type="button" class="btn-anio-toggle {{ $loop->first ? '' : 'colapsado' }}" onclick="document.getElementById('cargos-anio-{{ $anio }}').classList.toggle('oculto'); this.classList.toggle('colapsado');">
+                <span class="flecha">&#9660;</span> {{ $anio }}
+                <span style="font-weight:normal; color:#666; font-size:12px;">({{ $cargosPorTorneoDelAnio->flatten()->count() }} cargo(s))</span>
+            </button>
+            <div id="cargos-anio-{{ $anio }}" class="{{ $loop->first ? '' : 'oculto' }}">
+                @foreach ($cargosPorTorneoDelAnio as $nombreTorneo => $cargosDelTorneo)
+                    <h4 style="font-size:13px; margin:0 0 6px; color:#555;">{{ $nombreTorneo }}</h4>
+                    <table style="margin-bottom:18px;">
+                        <thead>
+                            <tr><th>Tipo</th><th>Equipo</th><th>Monto</th><th>Fecha</th><th>Descripcion</th><th></th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($cargosDelTorneo as $cargo)
+                                <tr>
+                                    <td>{{ $cargo->tipoCargo->nombre }}</td>
+                                    <td>{{ $cargo->equipo->nombre ?? '-' }}</td>
+                                    <td>${{ number_format($cargo->monto, 0, ',', '.') }}</td>
+                                    <td>{{ $cargo->fecha->format('d/m/Y') }}</td>
+                                    <td>{{ $cargo->descripcion }}</td>
+                                    <td class="actions">
+                                        <a class="btn btn-sm btn-secondary" href="{{ route('socios.cargos.edit', [$socio, $cargo]) }}">Editar</a>
+                                        <form action="{{ route('socios.cargos.destroy', [$socio, $cargo]) }}" method="POST" onsubmit="return confirm('¿Eliminar cargo?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="btn btn-sm btn-danger" type="submit">Eliminar</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @endforeach
+            </div>
+        @endforeach
+        @if ($socio->cargos->isEmpty())
+            <p>Sin cargos registrados.</p>
+        @endif
 
         <h3>Agregar cargo</h3>
         <form action="{{ route('socios.cargos.store', $socio) }}" method="POST">
@@ -114,6 +129,15 @@
                     <input type="date" name="fecha" value="{{ date('Y-m-d') }}" required>
                 </div>
                 <div>
+                    <label>Equipo (opcional)</label>
+                    <select name="equipo_id">
+                        <option value="">-- General, sin equipo --</option>
+                        @foreach ($socio->equipos as $equipo)
+                            <option value="{{ $equipo->id }}">{{ $equipo->nombre }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div style="grid-column: 1 / -1;">
                     <label>Descripcion</label>
                     <input type="text" name="descripcion">
                 </div>
@@ -124,32 +148,46 @@
 
     <div class="card">
         <h2>Pagos</h2>
-        <table>
-            <thead>
-                <tr><th>Valor</th><th>Fecha</th><th>Tipo</th><th>Equipo</th><th>Abona a</th><th></th></tr>
-            </thead>
-            <tbody>
-                @forelse ($socio->pagos as $pago)
-                    <tr>
-                        <td>${{ number_format($pago->valor, 0, ',', '.') }}</td>
-                        <td>{{ $pago->fecha->format('d/m/Y') }}</td>
-                        <td>{{ ucfirst($pago->tipo) }}</td>
-                        <td>{{ $pago->equipo->nombre ?? '-' }}</td>
-                        <td>{{ $pago->cargo->tipoCargo->nombre ?? '-' }}</td>
-                        <td class="actions">
-                            <a class="btn btn-sm btn-secondary" href="{{ route('pagos.recibo', $pago) }}" target="_blank">Imprimir recibo</a>
-                            <form action="{{ route('socios.pagos.destroy', [$socio, $pago]) }}" method="POST" onsubmit="return confirm('¿Eliminar pago?');">
-                                @csrf
-                                @method('DELETE')
-                                <button class="btn btn-sm btn-danger" type="submit">Eliminar</button>
-                            </form>
-                        </td>
-                    </tr>
-                @empty
-                    <tr><td colspan="6">Sin pagos registrados.</td></tr>
-                @endforelse
-            </tbody>
-        </table>
+        <p style="font-size:12px; color:#666; margin-top:-8px;">Agrupados por año y, dentro de cada año, por torneo (segun el equipo que se asocio al pago en el momento en que se registro).</p>
+
+        @foreach ($pagosPorAnio as $anio => $pagosPorTorneoDelAnio)
+            <button type="button" class="btn-anio-toggle {{ $loop->first ? '' : 'colapsado' }}" onclick="document.getElementById('pagos-anio-{{ $anio }}').classList.toggle('oculto'); this.classList.toggle('colapsado');">
+                <span class="flecha">&#9660;</span> {{ $anio }}
+                <span style="font-weight:normal; color:#666; font-size:12px;">({{ $pagosPorTorneoDelAnio->flatten()->count() }} pago(s))</span>
+            </button>
+            <div id="pagos-anio-{{ $anio }}" class="{{ $loop->first ? '' : 'oculto' }}">
+                @foreach ($pagosPorTorneoDelAnio as $nombreTorneo => $pagosDelTorneo)
+                    <h4 style="font-size:13px; margin:0 0 6px; color:#555;">{{ $nombreTorneo }}</h4>
+                    <table style="margin-bottom:18px;">
+                        <thead>
+                            <tr><th>Valor</th><th>Fecha</th><th>Tipo</th><th>Equipo</th><th>Abona a</th><th></th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($pagosDelTorneo as $pago)
+                                <tr>
+                                    <td>${{ number_format($pago->valor, 0, ',', '.') }}</td>
+                                    <td>{{ $pago->fecha->format('d/m/Y') }}</td>
+                                    <td>{{ ucfirst($pago->tipo) }}</td>
+                                    <td>{{ $pago->equipo->nombre ?? '-' }}</td>
+                                    <td>{{ $pago->cargo->tipoCargo->nombre ?? '-' }}</td>
+                                    <td class="actions">
+                                        <a class="btn btn-sm btn-secondary" href="{{ route('pagos.recibo', $pago) }}" target="_blank">Imprimir recibo</a>
+                                        <form action="{{ route('socios.pagos.destroy', [$socio, $pago]) }}" method="POST" onsubmit="return confirm('¿Eliminar pago?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="btn btn-sm btn-danger" type="submit">Eliminar</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @endforeach
+            </div>
+        @endforeach
+        @if ($socio->pagos->isEmpty())
+            <p>Sin pagos registrados.</p>
+        @endif
 
         <h3>Registrar pago</h3>
         <form action="{{ route('socios.pagos.store', $socio) }}" method="POST">
@@ -192,6 +230,33 @@
             <button class="btn" type="submit">Registrar pago</button>
         </form>
     </div>
+
+    <style>
+        .oculto { display: none; }
+        .btn-anio-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            background: var(--gris-claro);
+            border: 1px solid var(--gris-borde);
+            border-radius: 6px;
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--azul-oscuro);
+            cursor: pointer;
+            text-align: left;
+        }
+        .btn-anio-toggle:hover { background: #eaeef3; }
+        .btn-anio-toggle .flecha {
+            display: inline-block;
+            font-size: 11px;
+            transition: transform 0.15s ease;
+        }
+        .btn-anio-toggle.colapsado .flecha { transform: rotate(-90deg); }
+    </style>
 
     @if (session('pago_recibo_id'))
         <script>

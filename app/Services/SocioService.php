@@ -15,7 +15,7 @@ class SocioService
             $socio = Socio::create($datos);
 
             if ($equipoId) {
-                $socio->equipos()->sync([$equipoId]);
+                $socio->equipos()->syncWithoutDetaching([$equipoId]);
             }
 
             foreach ($cargosIniciales as $cargo) {
@@ -35,8 +35,11 @@ class SocioService
     {
         $socio->update($datos);
 
-        if ($equipoEnviado) {
-            $socio->equipos()->sync($equipoId ? [$equipoId] : []);
+        // Un socio puede pertenecer a varios equipos: este campo solo
+        // agrega el equipo seleccionado sin quitar los demas. Para retirar
+        // un equipo se usa el boton "Quitar" en la pantalla de ese equipo.
+        if ($equipoEnviado && $equipoId) {
+            $socio->equipos()->syncWithoutDetaching([$equipoId]);
         }
 
         return $socio;
@@ -58,6 +61,11 @@ class SocioService
         if ($estado !== $socio->estado) {
             $datos['fecha_cambio_estado'] = now()->toDateString();
         }
+
+        // Un cambio manual de estado desvincula al socio de la suspension
+        // automatica por inactividad del equipo, para que una futura
+        // reactivacion del equipo no sobreescriba esta decision manual.
+        $datos['suspendido_por_equipo'] = false;
 
         $socio->update($datos);
 

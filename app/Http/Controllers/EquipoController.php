@@ -47,6 +47,16 @@ class EquipoController extends Controller
     public function show(Equipo $equipo)
     {
         $equipo->load(['socios', 'torneo']);
+
+        // La deuda que se muestra en la planilla del equipo es la que genera
+        // ese equipo en particular (sus propios cargos y pagos), no la
+        // deuda global del socio en toda la corporacion.
+        $equipo->socios->each(function (Socio $socio) use ($equipo) {
+            $cargosEquipo = (float) $socio->cargos()->where('equipo_id', $equipo->id)->sum('monto');
+            $pagosEquipo = (float) $socio->pagos()->where('equipo_id', $equipo->id)->sum('valor');
+            $socio->deuda_equipo = $cargosEquipo - $pagosEquipo;
+        });
+
         $sociosDisponibles = Socio::with('equipos')
             ->whereDoesntHave('equipos', fn ($q) => $q->where('equipos.id', $equipo->id))
             ->orderBy('nombre_completo')
@@ -89,5 +99,18 @@ class EquipoController extends Controller
         $this->equipos->quitarSocio($equipo, $socio);
 
         return back()->with('status', 'Jugador retirado del equipo.');
+    }
+
+    public function cambiarEstado(Equipo $equipo)
+    {
+        request()->validate(['estado' => 'required|in:activo,inactivo']);
+
+        $this->equipos->cambiarEstado($equipo, request('estado'));
+
+        $mensaje = request('estado') === Equipo::ESTADO_INACTIVO
+            ? 'Equipo marcado como inactivo. Sus socios activos quedaron suspendidos.'
+            : 'Equipo marcado como activo. Los socios suspendidos por el equipo fueron reactivados.';
+
+        return back()->with('status', $mensaje);
     }
 }

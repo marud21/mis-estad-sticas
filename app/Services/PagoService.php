@@ -10,8 +10,17 @@ use Illuminate\Support\Facades\DB;
 
 class PagoService
 {
+    /**
+     * Crea un pago. Si trae equipo_id pero no torneo_id, toma el torneo
+     * del equipo en ese momento (foto del torneo actual: si el equipo
+     * cambia de torneo despues, este pago no se reasigna).
+     */
     public function crear(Socio $socio, array $datos): Pago
     {
+        if (! empty($datos['equipo_id']) && empty($datos['torneo_id'])) {
+            $datos['torneo_id'] = Equipo::find($datos['equipo_id'])?->torneo_id;
+        }
+
         return $socio->pagos()->create($datos);
     }
 
@@ -33,6 +42,7 @@ class PagoService
                     'tipo' => $fila['tipo'],
                     'fecha' => today(),
                     'equipo_id' => $equipo->id,
+                    'torneo_id' => $equipo->torneo_id,
                     'cargo_id' => null,
                 ]);
             });

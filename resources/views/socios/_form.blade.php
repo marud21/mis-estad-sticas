@@ -1,6 +1,5 @@
 @php
     $posiciones = ['Portero', 'Defensa', 'Mediocampista', 'Delantero'];
-    $equipoActualId = $socio?->equipos->first()->id ?? null;
 @endphp
 <div class="grid-2">
     <div>
@@ -36,13 +35,22 @@
         <input type="text" name="direccion_residencia" value="{{ old('direccion_residencia', $socio->direccion_residencia ?? '') }}">
     </div>
     <div>
-        <label>Equipo</label>
+        <label>Agregar a un equipo</label>
         <select name="equipo_id">
-            <option value="">-- Sin asignar --</option>
+            <option value="">-- No agregar --</option>
             @foreach ($equipos as $equipo)
-                <option value="{{ $equipo->id }}" @selected(old('equipo_id', $equipoActualId) == $equipo->id)>{{ $equipo->nombre }}</option>
+                <option value="{{ $equipo->id }}" @selected(old('equipo_id') == $equipo->id)>{{ $equipo->nombre }}</option>
             @endforeach
         </select>
+        <p style="font-size:12px; color:#666; margin-top:-10px;">
+            Un socio puede pertenecer a varios equipos. Esto suma el equipo seleccionado sin quitarlo de los demas
+            @if ($socio && $socio->equipos->isNotEmpty())
+                (actualmente en: {{ $socio->equipos->pluck('nombre')->join(', ') }}).
+            @else
+                .
+            @endif
+            Para retirarlo de un equipo, usa el boton "Quitar" en la pantalla de ese equipo.
+        </p>
     </div>
     <div>
         <label>Posicion de juego</label>

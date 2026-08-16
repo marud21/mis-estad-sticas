@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class AplicarCargoMasivoRequest extends FormRequest
+class ModificarCargoMasivoRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -16,7 +16,7 @@ class AplicarCargoMasivoRequest extends FormRequest
     {
         return [
             'fecha' => ['required', 'date'],
-            'monto' => ['nullable', 'numeric', 'min:0'],
+            'monto' => ['required', 'numeric', 'min:0'],
             'nivel' => ['required', Rule::in(['todos', 'equipo', 'categoria'])],
             'equipo_id' => ['required_if:nivel,equipo', 'nullable', 'exists:equipos,id'],
             'categoria' => ['required_if:nivel,categoria', 'nullable', 'string'],

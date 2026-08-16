@@ -47,11 +47,13 @@ Route::middleware('auth')->group(function () {
     Route::post('equipos/{equipo}/socios', [EquipoController::class, 'agregarSocio'])->name('equipos.socios.store');
     Route::delete('equipos/{equipo}/socios/{socio}', [EquipoController::class, 'quitarSocio'])->name('equipos.socios.destroy');
     Route::post('equipos/{equipo}/pagos-multiples', [PagoController::class, 'ejecutarMultiples'])->name('equipos.pagos.ejecutar');
+    Route::patch('equipos/{equipo}/estado', [EquipoController::class, 'cambiarEstado'])->name('equipos.estado');
     Route::get('equipos/{equipo}/reporte', [ReporteController::class, 'equipo'])->name('equipos.reporte');
     Route::get('equipos/{equipo}/planilla-pagos', [ReporteController::class, 'planillaPagos'])->name('equipos.planilla-pagos');
 
     Route::resource('tipos-cargo', TipoCargoController::class)->except(['show'])->parameters(['tipos-cargo' => 'tipoCargo']);
     Route::post('tipos-cargo/{tipoCargo}/aplicar-masivo', [TipoCargoController::class, 'aplicarMasivo'])->name('tipos-cargo.aplicar-masivo');
+    Route::post('tipos-cargo/{tipoCargo}/modificar-masivo', [TipoCargoController::class, 'modificarMasivo'])->name('tipos-cargo.modificar-masivo');
 
     Route::resource('torneos', TorneoController::class);
 

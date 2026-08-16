@@ -34,6 +34,7 @@ class Socio extends Model
         'nivel_jugador',
         'estado',
         'fecha_cambio_estado',
+        'suspendido_por_equipo',
     ];
 
     protected $casts = [
@@ -41,6 +42,7 @@ class Socio extends Model
         'fecha_ingreso' => 'date',
         'nivel_jugador' => 'integer',
         'fecha_cambio_estado' => 'date',
+        'suspendido_por_equipo' => 'boolean',
     ];
 
     public function equipos(): BelongsToMany

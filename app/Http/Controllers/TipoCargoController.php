@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AplicarCargoMasivoRequest;
+use App\Http\Requests\ModificarCargoMasivoRequest;
 use App\Http\Requests\TipoCargoRequest;
+use App\Models\Equipo;
 use App\Models\TipoCargo;
 use App\Services\CargoService;
 use App\Services\TipoCargoService;
@@ -28,7 +30,10 @@ class TipoCargoController extends Controller
                     ->exists();
         });
 
-        return view('tipos-cargo.index', compact('tiposCargo'));
+        $equipos = Equipo::orderBy('nombre')->get();
+        $categorias = Equipo::whereNotNull('categoria')->distinct()->orderBy('categoria')->pluck('categoria');
+
+        return view('tipos-cargo.index', compact('tiposCargo', 'equipos', 'categorias'));
     }
 
     public function create()
@@ -64,12 +69,31 @@ class TipoCargoController extends Controller
 
     public function aplicarMasivo(AplicarCargoMasivoRequest $request, TipoCargo $tipoCargo)
     {
-        $total = $this->cargos->aplicarATodosLosActivos(
+        $total = $this->cargos->aplicarMasivo(
             $tipoCargo,
             $request->validated('fecha'),
             $request->validated('monto'),
+            $request->validated('nivel'),
+            $request->validated('equipo_id'),
+            $request->validated('categoria'),
         );
 
-        return back()->with('status', "Cargo aplicado a {$total} socio(s) activo(s).");
+        return back()->with('status', "Cargo aplicado a {$total} socio(s).");
+    }
+
+    public function modificarMasivo(ModificarCargoMasivoRequest $request, TipoCargo $tipoCargo)
+    {
+        $total = $this->cargos->actualizarMasivo(
+            $tipoCargo,
+            $request->validated('fecha'),
+            $request->validated('monto'),
+            $request->validated('nivel'),
+            $request->validated('equipo_id'),
+            $request->validated('categoria'),
+        );
+
+        return back()->with('status', $total > 0
+            ? "Cargo modificado en {$total} socio(s)."
+            : 'No se encontraron cargos ya aplicados con esos filtros para modificar.');
     }
 }

@@ -13,7 +13,7 @@ class Pago extends Model
     public const TIPO_EFECTIVO = 'efectivo';
     public const TIPO_TRANSFERENCIA = 'transferencia';
 
-    protected $fillable = ['socio_id', 'cargo_id', 'equipo_id', 'valor', 'fecha', 'tipo'];
+    protected $fillable = ['socio_id', 'cargo_id', 'equipo_id', 'torneo_id', 'valor', 'fecha', 'tipo'];
 
     protected $casts = [
         'valor' => 'decimal:2',
@@ -33,5 +33,10 @@ class Pago extends Model
     public function equipo(): BelongsTo
     {
         return $this->belongsTo(Equipo::class);
+    }
+
+    public function torneo(): BelongsTo
+    {
+        return $this->belongsTo(Torneo::class);
     }
 }

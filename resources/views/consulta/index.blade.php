@@ -140,36 +140,48 @@
                     <h1>{{ $socio->nombre_completo }}</h1>
 
                     <h2 style="font-size:16px; color: var(--azul-oscuro);">Cargos</h2>
-                    <table>
-                        <thead><tr><th>Tipo</th><th>Monto</th><th>Fecha</th></tr></thead>
-                        <tbody>
-                            @forelse ($socio->cargos as $cargo)
-                                <tr>
-                                    <td>{{ $cargo->tipoCargo->nombre }}</td>
-                                    <td>${{ number_format($cargo->monto, 0, ',', '.') }}</td>
-                                    <td>{{ $cargo->fecha->format('d/m/Y') }}</td>
-                                </tr>
-                            @empty
-                                <tr><td colspan="3">Sin cargos registrados.</td></tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                    @forelse ($cargosPorAnio as $anio => $cargosPorTorneoDelAnio)
+                        <h3 style="font-size:15px; margin-bottom:4px;">{{ $anio }}</h3>
+                        @foreach ($cargosPorTorneoDelAnio as $nombreTorneo => $cargosDelTorneo)
+                            <p style="font-size:13px; color:#555; margin-bottom:4px;">{{ $nombreTorneo }}</p>
+                            <table style="margin-bottom:14px;">
+                                <thead><tr><th>Tipo</th><th>Monto</th><th>Fecha</th></tr></thead>
+                                <tbody>
+                                    @foreach ($cargosDelTorneo as $cargo)
+                                        <tr>
+                                            <td>{{ $cargo->tipoCargo->nombre }}</td>
+                                            <td>${{ number_format($cargo->monto, 0, ',', '.') }}</td>
+                                            <td>{{ $cargo->fecha->format('d/m/Y') }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        @endforeach
+                    @empty
+                        <p>Sin cargos registrados.</p>
+                    @endforelse
 
                     <h2 style="font-size:16px; color: var(--azul-oscuro); margin-top:20px;">Pagos</h2>
-                    <table>
-                        <thead><tr><th>Valor</th><th>Fecha</th><th>Tipo</th></tr></thead>
-                        <tbody>
-                            @forelse ($socio->pagos as $pago)
-                                <tr>
-                                    <td>${{ number_format($pago->valor, 0, ',', '.') }}</td>
-                                    <td>{{ $pago->fecha->format('d/m/Y') }}</td>
-                                    <td>{{ ucfirst($pago->tipo) }}</td>
-                                </tr>
-                            @empty
-                                <tr><td colspan="3">Sin pagos registrados.</td></tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                    @forelse ($pagosPorAnio as $anio => $pagosPorTorneoDelAnio)
+                        <h3 style="font-size:15px; margin-bottom:4px;">{{ $anio }}</h3>
+                        @foreach ($pagosPorTorneoDelAnio as $nombreTorneo => $pagosDelTorneo)
+                            <p style="font-size:13px; color:#555; margin-bottom:4px;">{{ $nombreTorneo }}</p>
+                            <table style="margin-bottom:14px;">
+                                <thead><tr><th>Valor</th><th>Fecha</th><th>Tipo</th></tr></thead>
+                                <tbody>
+                                    @foreach ($pagosDelTorneo as $pago)
+                                        <tr>
+                                            <td>${{ number_format($pago->valor, 0, ',', '.') }}</td>
+                                            <td>{{ $pago->fecha->format('d/m/Y') }}</td>
+                                            <td>{{ ucfirst($pago->tipo) }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        @endforeach
+                    @empty
+                        <p>Sin pagos registrados.</p>
+                    @endforelse
 
                     <p style="margin-top:20px;">
                         <strong>Deuda total:

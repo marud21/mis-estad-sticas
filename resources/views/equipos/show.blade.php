@@ -18,6 +18,24 @@
         <p><strong>Categoria:</strong> {{ $equipo->categoria ?? '-' }}</p>
         <p><strong>Torneo:</strong> {{ $equipo->torneo->nombre ?? 'Sin torneo asignado' }}</p>
         <p>{{ $equipo->descripcion }}</p>
+
+        <p>
+            <strong>Estado:</strong>
+            <span class="badge badge-{{ $equipo->estado }}">{{ ucfirst($equipo->estado) }}</span>
+            @if ($equipo->fecha_cambio_estado)
+                <span style="color:#666; font-size:13px;">(desde {{ $equipo->fecha_cambio_estado->format('d/m/Y') }})</span>
+            @endif
+        </p>
+        <form action="{{ route('equipos.estado', $equipo) }}" method="POST" style="display:flex; gap:8px; align-items:center; max-width:320px;"
+              onsubmit="return confirm(this.querySelector('select').value === 'inactivo' ? '¿Marcar el equipo como inactivo? Sus socios activos quedaran suspendidos automaticamente.' : '¿Marcar el equipo como activo? Los socios suspendidos por el equipo se reactivaran automaticamente.');">
+            @csrf
+            @method('PATCH')
+            <select name="estado" style="width:auto; margin-bottom:0;">
+                <option value="activo" @selected($equipo->estado === 'activo')>Activo</option>
+                <option value="inactivo" @selected($equipo->estado === 'inactivo')>Inactivo</option>
+            </select>
+            <button class="btn btn-sm" type="submit">Cambiar estado</button>
+        </form>
     </div>
 
     <div class="card">
@@ -36,7 +54,7 @@
                         <th>Posicion</th>
                         <th>Nivel</th>
                         <th>Estado</th>
-                        <th>Deuda</th>
+                        <th>Deuda con este equipo</th>
                         <th class="col-pago-multiple oculto">Valor a pagar</th>
                         <th class="col-pago-multiple oculto">Tipo</th>
                         <th></th>
@@ -44,13 +62,13 @@
                 </thead>
                 <tbody>
                     @forelse ($equipo->socios as $socio)
-                        <tr data-fila-socio="{{ $socio->id }}" data-deuda="{{ $socio->deuda_total }}">
+                        <tr data-fila-socio="{{ $socio->id }}" data-deuda="{{ $socio->deuda_equipo }}">
                             <td><a href="{{ route('socios.show', $socio) }}">{{ $socio->nombre_completo }}</a></td>
                             <td>{{ $socio->posicion_juego }}</td>
                             <td>{{ [1 => 'Bueno', 2 => 'Regular', 3 => 'Malo'][$socio->nivel_jugador] ?? 'Sin registrar' }}</td>
                             <td><span class="badge badge-{{ $socio->estado }}">{{ ucfirst($socio->estado) }}</span></td>
-                            <td class="celda-deuda {{ $socio->deuda_total > 0 ? 'deuda-positiva' : 'deuda-cero' }}">
-                                ${{ number_format($socio->deuda_total, 0, ',', '.') }}
+                            <td class="celda-deuda {{ $socio->deuda_equipo > 0 ? 'deuda-positiva' : 'deuda-cero' }}">
+                                ${{ number_format($socio->deuda_equipo, 0, ',', '.') }}
                             </td>
                             <td class="col-pago-multiple oculto">
                                 <input type="number" step="0.01" min="0.01" class="input-valor-pago" data-socio-id="{{ $socio->id }}" placeholder="Valor" style="width:110px; margin-bottom:0;">
@@ -84,8 +102,8 @@
                 @foreach ($sociosDisponibles as $socio)
                     <option value="{{ $socio->id }}">
                         {{ $socio->nombre_completo }}
-                        @if ($socio->equipoActual())
-                            (actualmente en {{ $socio->equipoActual()->nombre }})
+                        @if ($socio->equipos->isNotEmpty())
+                            (tambien en: {{ $socio->equipos->pluck('nombre')->join(', ') }})
                         @endif
                     </option>
                 @endforeach
@@ -93,7 +111,7 @@
             <button class="btn" type="submit">Agregar</button>
         </form>
         <p style="font-size:12px; color:#666; margin-top:6px;">
-            Un socio solo puede pertenecer a un equipo. Si seleccionas uno que ya esta en otro equipo, sera retirado de ese equipo automaticamente.
+            Un socio puede pertenecer a varios equipos a la vez. Si ya esta en otro equipo, se agregara a este tambien sin quitarlo del anterior.
         </p>
     </div>
 

@@ -142,6 +142,7 @@
         .badge-activo { background: var(--verde); }
         .badge-suspendido { background: var(--naranja); }
         .badge-retirado { background: var(--rojo); }
+        .badge-inactivo { background: #6b7280; }
         .alert {
             background: #e7f0fb;
             border: 1px solid var(--azul-claro);

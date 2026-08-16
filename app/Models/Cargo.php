@@ -11,7 +11,7 @@ class Cargo extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['socio_id', 'tipo_cargo_id', 'monto', 'fecha', 'descripcion'];
+    protected $fillable = ['socio_id', 'equipo_id', 'torneo_id', 'tipo_cargo_id', 'monto', 'fecha', 'descripcion'];
 
     protected $casts = [
         'monto' => 'decimal:2',
@@ -21,6 +21,16 @@ class Cargo extends Model
     public function socio(): BelongsTo
     {
         return $this->belongsTo(Socio::class);
+    }
+
+    public function equipo(): BelongsTo
+    {
+        return $this->belongsTo(Equipo::class);
+    }
+
+    public function torneo(): BelongsTo
+    {
+        return $this->belongsTo(Torneo::class);
     }
 
     public function tipoCargo(): BelongsTo

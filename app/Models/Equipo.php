@@ -12,7 +12,14 @@ class Equipo extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nombre', 'categoria', 'descripcion', 'torneo_id'];
+    public const ESTADO_ACTIVO = 'activo';
+    public const ESTADO_INACTIVO = 'inactivo';
+
+    protected $fillable = ['nombre', 'categoria', 'descripcion', 'torneo_id', 'estado', 'fecha_cambio_estado'];
+
+    protected $casts = [
+        'fecha_cambio_estado' => 'date',
+    ];
 
     public function torneo(): BelongsTo
     {

@@ -20,7 +20,7 @@
 
         <table>
             <thead>
-                <tr><th>Nombre</th><th>Categoria</th><th>Torneo</th><th>Jugadores</th><th></th></tr>
+                <tr><th>Nombre</th><th>Categoria</th><th>Torneo</th><th>Jugadores</th><th>Estado</th><th></th></tr>
             </thead>
             <tbody>
                 @forelse ($equipos as $equipo)
@@ -29,6 +29,7 @@
                         <td>{{ $equipo->categoria ?? '-' }}</td>
                         <td>{{ $equipo->torneo->nombre ?? '-' }}</td>
                         <td>{{ $equipo->socios_count }}</td>
+                        <td><span class="badge badge-{{ $equipo->estado }}">{{ ucfirst($equipo->estado) }}</span></td>
                         <td class="actions">
                             <a class="btn btn-sm btn-secondary" href="{{ route('equipos.edit', $equipo) }}">Editar</a>
                             <form action="{{ route('equipos.destroy', $equipo) }}" method="POST" onsubmit="return confirm('¿Eliminar este equipo?');">
@@ -39,7 +40,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="5">No hay equipos registrados.</td></tr>
+                    <tr><td colspan="6">No hay equipos registrados.</td></tr>
                 @endforelse
             </tbody>
         </table>

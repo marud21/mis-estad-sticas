@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Configuracion;
 use App\Models\CuentaBancaria;
 use App\Models\Socio;
+use App\Support\AgrupadorFinanciero;
 use Illuminate\Http\Request;
 
 class ConsultaPublicaController extends Controller
@@ -25,13 +26,18 @@ class ConsultaPublicaController extends Controller
             'numero_documento' => ['required', 'string', 'max:50'],
         ]);
 
-        $socio = Socio::with(['cargos.tipoCargo', 'pagos.cargo.tipoCargo'])
+        $socio = Socio::with(['cargos.tipoCargo', 'cargos.torneo', 'pagos.cargo.tipoCargo', 'pagos.torneo'])
             ->where('numero_documento', $request->input('numero_documento'))
             ->first();
+
+        $cargosPorAnio = $socio ? AgrupadorFinanciero::porAnioYTorneo($socio->cargos) : collect();
+        $pagosPorAnio = $socio ? AgrupadorFinanciero::porAnioYTorneo($socio->pagos) : collect();
 
         return view('consulta.index', [
             'socio' => $socio,
             'buscado' => true,
+            'cargosPorAnio' => $cargosPorAnio,
+            'pagosPorAnio' => $pagosPorAnio,
             'cuentasBancarias' => CuentaBancaria::orderBy('banco')->get(),
             'whatsappCorporacion' => Configuracion::obtener(Configuracion::WHATSAPP_CORPORACION),
         ]);

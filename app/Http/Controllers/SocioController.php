@@ -7,6 +7,7 @@ use App\Models\Equipo;
 use App\Models\Socio;
 use App\Models\TipoCargo;
 use App\Services\SocioService;
+use App\Support\AgrupadorFinanciero;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -59,9 +60,12 @@ class SocioController extends Controller
 
     public function show(Socio $socio)
     {
-        $socio->load(['equipos', 'cargos.tipoCargo', 'pagos.cargo']);
+        $socio->load(['equipos', 'cargos.tipoCargo', 'cargos.torneo', 'pagos.cargo', 'pagos.torneo']);
 
-        return view('socios.show', compact('socio'));
+        $cargosPorAnio = AgrupadorFinanciero::porAnioYTorneo($socio->cargos);
+        $pagosPorAnio = AgrupadorFinanciero::porAnioYTorneo($socio->pagos);
+
+        return view('socios.show', compact('socio', 'cargosPorAnio', 'pagosPorAnio'));
     }
 
     public function edit(Socio $socio)
