@@ -49,6 +49,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('equipos/{equipo}/socios/{socio}', [EquipoController::class, 'quitarSocio'])->name('equipos.socios.destroy');
     Route::post('equipos/{equipo}/pagos-multiples', [PagoController::class, 'ejecutarMultiples'])->name('equipos.pagos.ejecutar');
     Route::patch('equipos/{equipo}/estado', [EquipoController::class, 'cambiarEstado'])->name('equipos.estado');
+    Route::post('equipos/reportes-multiples', [ReporteController::class, 'equiposMultiples'])->name('equipos.reporte.multiples');
     Route::get('equipos/{equipo}/reporte', [ReporteController::class, 'equipo'])->name('equipos.reporte');
     Route::get('equipos/{equipo}/planilla-pagos', [ReporteController::class, 'planillaPagos'])->name('equipos.planilla-pagos');
 

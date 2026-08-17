@@ -18,6 +18,11 @@
         {{ $equipo->descripcion }}
     </p>
 
+    @php
+        $totalCargosEquipo = 0;
+        $totalPagosEquipo = 0;
+    @endphp
+
     <table>
         <thead>
             <tr>
@@ -31,6 +36,8 @@
                     $totalCargos = $socio->cargos->sum('monto');
                     $totalPagos = $socio->pagos->sum('valor');
                     $deuda = $totalCargos - $totalPagos;
+                    $totalCargosEquipo += $totalCargos;
+                    $totalPagosEquipo += $totalPagos;
                 @endphp
                 <tr>
                     <td>{{ $socio->nombre_completo }}</td>
@@ -42,6 +49,14 @@
                 </tr>
             @endforeach
         </tbody>
+        <tfoot>
+            <tr style="font-weight:bold; background:#eaf0f7;">
+                <td colspan="3">TOTAL GENERAL DEL EQUIPO</td>
+                <td>${{ number_format($totalCargosEquipo, 0, ',', '.') }}</td>
+                <td>${{ number_format($totalPagosEquipo, 0, ',', '.') }}</td>
+                <td class="deuda">${{ number_format($totalCargosEquipo - $totalPagosEquipo, 0, ',', '.') }}</td>
+            </tr>
+        </tfoot>
     </table>
 </body>
 </html>
