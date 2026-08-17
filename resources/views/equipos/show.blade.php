@@ -54,7 +54,7 @@
                         <th>Posicion</th>
                         <th>Nivel</th>
                         <th>Estado</th>
-                        <th>Deuda con este equipo</th>
+                        <th>Deuda</th>
                         <th class="col-pago-multiple oculto">Valor a pagar</th>
                         <th class="col-pago-multiple oculto">Tipo</th>
                         <th></th>
@@ -62,13 +62,13 @@
                 </thead>
                 <tbody>
                     @forelse ($equipo->socios as $socio)
-                        <tr data-fila-socio="{{ $socio->id }}" data-deuda="{{ $socio->deuda_equipo }}">
+                        <tr data-fila-socio="{{ $socio->id }}" data-deuda="{{ $socio->deuda_total }}">
                             <td><a href="{{ route('socios.show', $socio) }}">{{ $socio->nombre_completo }}</a></td>
                             <td>{{ $socio->posicion_juego }}</td>
                             <td>{{ [1 => 'Bueno', 2 => 'Regular', 3 => 'Malo'][$socio->nivel_jugador] ?? 'Sin registrar' }}</td>
                             <td><span class="badge badge-{{ $socio->estado }}">{{ ucfirst($socio->estado) }}</span></td>
-                            <td class="celda-deuda {{ $socio->deuda_equipo > 0 ? 'deuda-positiva' : 'deuda-cero' }}">
-                                ${{ number_format($socio->deuda_equipo, 0, ',', '.') }}
+                            <td class="celda-deuda {{ $socio->deuda_total > 0 ? 'deuda-positiva' : 'deuda-cero' }}">
+                                ${{ number_format($socio->deuda_total, 0, ',', '.') }}
                             </td>
                             <td class="col-pago-multiple oculto">
                                 <input type="number" step="0.01" min="0.01" class="input-valor-pago" data-socio-id="{{ $socio->id }}" placeholder="Valor" style="width:110px; margin-bottom:0;">

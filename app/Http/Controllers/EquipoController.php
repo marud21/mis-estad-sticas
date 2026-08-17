@@ -48,15 +48,6 @@ class EquipoController extends Controller
     {
         $equipo->load(['socios', 'torneo']);
 
-        // La deuda que se muestra en la planilla del equipo es la que genera
-        // ese equipo en particular (sus propios cargos y pagos), no la
-        // deuda global del socio en toda la corporacion.
-        $equipo->socios->each(function (Socio $socio) use ($equipo) {
-            $cargosEquipo = (float) $socio->cargos()->where('equipo_id', $equipo->id)->sum('monto');
-            $pagosEquipo = (float) $socio->pagos()->where('equipo_id', $equipo->id)->sum('valor');
-            $socio->deuda_equipo = $cargosEquipo - $pagosEquipo;
-        });
-
         $sociosDisponibles = Socio::with('equipos')
             ->whereDoesntHave('equipos', fn ($q) => $q->where('equipos.id', $equipo->id))
             ->orderBy('nombre_completo')

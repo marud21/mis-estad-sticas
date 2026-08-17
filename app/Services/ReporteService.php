@@ -21,20 +21,15 @@ class ReporteService
         return Pdf::loadView('reportes.socio', ['socio' => $socio, 'cargosPorAnio' => $cargosPorAnio, 'pagosPorAnio' => $pagosPorAnio]);
     }
 
-    /**
-     * Reporte de equipo: la deuda que se muestra es la que genera este
-     * equipo especificamente (sus propios cargos y pagos), no la deuda
-     * total del socio en toda la corporacion.
-     */
     public function equipoPdf(Equipo $equipo)
     {
         $equipo->load(['socios' => function ($query) {
             $query->withCount('cargos');
         }]);
 
-        $socios = $equipo->socios->map(function (Socio $socio) use ($equipo) {
-            $socio->setRelation('cargos', $socio->cargos()->where('equipo_id', $equipo->id)->get());
-            $socio->setRelation('pagos', $socio->pagos()->where('equipo_id', $equipo->id)->get());
+        $socios = $equipo->socios->map(function (Socio $socio) {
+            $socio->setRelation('cargos', $socio->cargos()->get());
+            $socio->setRelation('pagos', $socio->pagos()->get());
 
             return $socio;
         });
@@ -42,19 +37,15 @@ class ReporteService
         return Pdf::loadView('reportes.equipo', ['equipo' => $equipo, 'socios' => $socios]);
     }
 
-    /**
-     * Planilla de pagos: misma logica que el reporte de equipo, la deuda
-     * mostrada es especifica de este equipo.
-     */
     public function planillaPagosPdf(Equipo $equipo)
     {
         $equipo->load(['socios' => function ($query) {
             $query->orderBy('nombre_completo');
         }]);
 
-        $socios = $equipo->socios->map(function (Socio $socio) use ($equipo) {
-            $socio->setRelation('cargos', $socio->cargos()->where('equipo_id', $equipo->id)->get());
-            $socio->setRelation('pagos', $socio->pagos()->where('equipo_id', $equipo->id)->get());
+        $socios = $equipo->socios->map(function (Socio $socio) {
+            $socio->setRelation('cargos', $socio->cargos()->get());
+            $socio->setRelation('pagos', $socio->pagos()->get());
 
             return $socio;
         });
