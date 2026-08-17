@@ -7,7 +7,10 @@
     <div class="card">
         <div class="card-header" style="margin-bottom: 16px;">
             <h1 style="margin:0;">Tipos de cargo</h1>
-            <a href="{{ route('tipos-cargo.create') }}" class="btn">+ Nuevo tipo de cargo</a>
+            <div class="actions">
+                <a href="{{ route('cargos-duplicados.index') }}" class="btn btn-secondary">Ver cargos duplicados</a>
+                <a href="{{ route('tipos-cargo.create') }}" class="btn">+ Nuevo tipo de cargo</a>
+            </div>
         </div>
         <table>
             <thead>

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\CargoController;
+use App\Http\Controllers\CargoDuplicadoController;
 use App\Http\Controllers\CierreCajaController;
 use App\Http\Controllers\ConfiguracionController;
 use App\Http\Controllers\ConsultaPublicaController;
@@ -54,6 +55,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('tipos-cargo', TipoCargoController::class)->except(['show'])->parameters(['tipos-cargo' => 'tipoCargo']);
     Route::post('tipos-cargo/{tipoCargo}/aplicar-masivo', [TipoCargoController::class, 'aplicarMasivo'])->name('tipos-cargo.aplicar-masivo');
     Route::post('tipos-cargo/{tipoCargo}/modificar-masivo', [TipoCargoController::class, 'modificarMasivo'])->name('tipos-cargo.modificar-masivo');
+
+    Route::get('cargos-duplicados', [CargoDuplicadoController::class, 'index'])->name('cargos-duplicados.index');
+    Route::post('cargos-duplicados/eliminar', [CargoDuplicadoController::class, 'eliminar'])->name('cargos-duplicados.eliminar');
 
     Route::resource('torneos', TorneoController::class);
 

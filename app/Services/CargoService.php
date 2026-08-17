@@ -180,4 +180,81 @@ class CargoService
 
         return $contador;
     }
+
+    /**
+     * Detecta cargos duplicados en todo el sistema: mismo socio, tipo de
+     * cargo, fecha, monto y equipo. Devuelve un resumen por grupo con
+     * cuantos hay y cuantos se eliminarian si se ejecuta la limpieza.
+     */
+    public function detectarDuplicados(): \Illuminate\Support\Collection
+    {
+        $grupos = DB::table('cargos')
+            ->select('socio_id', 'tipo_cargo_id', 'fecha', 'monto', 'equipo_id', DB::raw('COUNT(*) as total'))
+            ->groupBy('socio_id', 'tipo_cargo_id', 'fecha', 'monto', 'equipo_id')
+            ->having('total', '>', 1)
+            ->orderByDesc('total')
+            ->get();
+
+        if ($grupos->isEmpty()) {
+            return $grupos;
+        }
+
+        $socios = Socio::whereIn('id', $grupos->pluck('socio_id')->unique())->pluck('nombre_completo', 'id');
+        $tipos = TipoCargo::whereIn('id', $grupos->pluck('tipo_cargo_id')->unique())->pluck('nombre', 'id');
+        $equipos = Equipo::whereIn('id', $grupos->pluck('equipo_id')->filter()->unique())->pluck('nombre', 'id');
+
+        return $grupos->map(fn ($grupo) => (object) [
+            'socio_id' => $grupo->socio_id,
+            'socio_nombre' => $socios[$grupo->socio_id] ?? 'Socio eliminado',
+            'tipo_cargo_nombre' => $tipos[$grupo->tipo_cargo_id] ?? 'Tipo eliminado',
+            'fecha' => $grupo->fecha,
+            'monto' => $grupo->monto,
+            'equipo_nombre' => $grupo->equipo_id ? ($equipos[$grupo->equipo_id] ?? '-') : 'General',
+            'total' => $grupo->total,
+            'a_eliminar' => $grupo->total - 1,
+        ]);
+    }
+
+    /**
+     * Elimina los cargos duplicados detectados por detectarDuplicados(),
+     * dejando uno por grupo. Nunca elimina un cargo que ya tenga pagos
+     * asociados (para no perder ese historial); si dentro de un grupo
+     * ninguno tiene pagos, conserva el mas antiguo.
+     */
+    public function eliminarDuplicados(): int
+    {
+        $grupos = DB::table('cargos')
+            ->select('socio_id', 'tipo_cargo_id', 'fecha', 'monto', 'equipo_id', DB::raw('COUNT(*) as total'))
+            ->groupBy('socio_id', 'tipo_cargo_id', 'fecha', 'monto', 'equipo_id')
+            ->having('total', '>', 1)
+            ->get();
+
+        $totalEliminados = 0;
+
+        DB::transaction(function () use ($grupos, &$totalEliminados) {
+            foreach ($grupos as $grupo) {
+                $cargos = Cargo::where('socio_id', $grupo->socio_id)
+                    ->where('tipo_cargo_id', $grupo->tipo_cargo_id)
+                    ->where('fecha', $grupo->fecha)
+                    ->where('monto', $grupo->monto)
+                    ->when($grupo->equipo_id === null, fn ($q) => $q->whereNull('equipo_id'))
+                    ->when($grupo->equipo_id !== null, fn ($q) => $q->where('equipo_id', $grupo->equipo_id))
+                    ->withCount('pagos')
+                    ->orderByDesc('pagos_count')
+                    ->orderBy('id')
+                    ->get();
+
+                foreach ($cargos->skip(1) as $cargo) {
+                    if ($cargo->pagos_count > 0) {
+                        continue;
+                    }
+
+                    $cargo->delete();
+                    $totalEliminados++;
+                }
+            }
+        });
+
+        return $totalEliminados;
+    }
 }
