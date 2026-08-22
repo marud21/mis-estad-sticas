@@ -24,8 +24,18 @@ class CargoService
         return $socio->cargos()->create($datos);
     }
 
+    /**
+     * Actualiza un cargo. Si el equipo_id enviado cambia respecto al que
+     * tenia el cargo, se recalcula el torneo tomando el torneo actual de
+     * ese equipo (foto del momento); si el equipo_id llega vacio, el
+     * cargo queda sin equipo ni torneo asociado.
+     */
     public function actualizar(Cargo $cargo, array $datos): Cargo
     {
+        if (array_key_exists('equipo_id', $datos) && $datos['equipo_id'] != $cargo->equipo_id) {
+            $datos['torneo_id'] = $datos['equipo_id'] ? Equipo::find($datos['equipo_id'])?->torneo_id : null;
+        }
+
         $cargo->update($datos);
 
         return $cargo;

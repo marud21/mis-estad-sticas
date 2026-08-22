@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Cargo;
+use App\Models\Equipo;
 use App\Models\Socio;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -18,9 +19,15 @@ class SocioService
                 $socio->equipos()->syncWithoutDetaching([$equipoId]);
             }
 
+            // Los cargos iniciales quedan asociados al mismo equipo (y su
+            // torneo actual) con el que se registro al socio, si se eligio uno.
+            $torneoId = $equipoId ? Equipo::find($equipoId)?->torneo_id : null;
+
             foreach ($cargosIniciales as $cargo) {
                 $socio->cargos()->create([
                     'tipo_cargo_id' => $cargo['tipo_cargo_id'],
+                    'equipo_id' => $equipoId,
+                    'torneo_id' => $torneoId,
                     'monto' => $cargo['monto'],
                     'fecha' => $cargo['fecha'],
                     'descripcion' => $cargo['descripcion'] ?? null,

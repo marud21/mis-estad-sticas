@@ -24,6 +24,7 @@ class CargoController extends Controller
     public function edit(Socio $socio, Cargo $cargo)
     {
         $tiposCargo = TipoCargo::orderBy('nombre')->get();
+        $socio->load('equipos');
 
         return view('socios.cargos.edit', compact('socio', 'cargo', 'tiposCargo'));
     }

@@ -27,6 +27,15 @@
                     <input type="date" name="fecha" value="{{ old('fecha', $cargo->fecha->format('Y-m-d')) }}" required>
                 </div>
                 <div>
+                    <label>Equipo (opcional)</label>
+                    <select name="equipo_id">
+                        <option value="">-- General, sin equipo --</option>
+                        @foreach ($socio->equipos as $equipo)
+                            <option value="{{ $equipo->id }}" @selected(old('equipo_id', $cargo->equipo_id) == $equipo->id)>{{ $equipo->nombre }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div style="grid-column: 1 / -1;">
                     <label>Descripcion</label>
                     <input type="text" name="descripcion" value="{{ old('descripcion', $cargo->descripcion) }}">
                 </div>
