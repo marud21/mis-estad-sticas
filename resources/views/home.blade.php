@@ -113,6 +113,7 @@
         <p>{{ $descripcionPortada }}</p>
         <div class="acciones">
             <a href="{{ route('consulta.index') }}" class="btn btn-primary">Consultar mi deuda</a>
+            <a href="{{ route('noticias-publicas.index') }}" class="btn btn-secondary">Noticias</a>
             @auth
                 <a href="{{ route('socios.index') }}" class="btn btn-secondary">Ir al panel</a>
             @else
@@ -136,6 +137,27 @@
                 <p>Cualquier socio puede consultar su deuda actual y las formas de pago disponibles, sin necesidad de una cuenta.</p>
             </div>
         </div>
+
+        @php
+            $ultimasNoticias = \App\Models\Noticia::where('publicado', true)->orderByDesc('fecha_publicacion')->orderByDesc('id')->limit(3)->get();
+        @endphp
+        @if ($ultimasNoticias->isNotEmpty())
+            <div style="margin-top:40px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                    <h2 style="color:var(--azul-oscuro); margin:0; font-size:20px;">Ultimas noticias</h2>
+                    <a href="{{ route('noticias-publicas.index') }}" style="color:var(--azul-claro); font-size:14px; font-weight:600; text-decoration:none;">Ver todas &rarr;</a>
+                </div>
+                <div class="caracteristicas">
+                    @foreach ($ultimasNoticias as $noticia)
+                        <a href="{{ route('noticias-publicas.show', $noticia) }}" class="caracteristica" style="display:block; text-decoration:none;">
+                            <h3>{{ $noticia->titulo }}</h3>
+                            <p style="font-size:12px; color:#888; margin-bottom:6px;">{{ $noticia->fecha_publicacion->format('d/m/Y') }}</p>
+                            <p>{{ Illuminate\Support\Str::limit(strip_tags($noticia->contenido), 100) }}</p>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        @endif
     </main>
 
     <footer>

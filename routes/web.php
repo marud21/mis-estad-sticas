@@ -9,6 +9,8 @@ use App\Http\Controllers\ConfiguracionController;
 use App\Http\Controllers\ConsultaPublicaController;
 use App\Http\Controllers\EquipoController;
 use App\Http\Controllers\ImportController;
+use App\Http\Controllers\NoticiaController;
+use App\Http\Controllers\NoticiaPublicaController;
 use App\Http\Controllers\PagoController;
 use App\Http\Controllers\PlanillaJuegoController;
 use App\Http\Controllers\ReporteContableController;
@@ -26,6 +28,9 @@ Route::post('logout', [LoginController::class, 'destroy'])->name('logout')->midd
 
 Route::get('consulta', [ConsultaPublicaController::class, 'index'])->name('consulta.index');
 Route::post('consulta', [ConsultaPublicaController::class, 'consultar'])->name('consulta.buscar');
+
+Route::get('noticias', [NoticiaPublicaController::class, 'index'])->name('noticias-publicas.index');
+Route::get('noticias/{noticia}', [NoticiaPublicaController::class, 'show'])->name('noticias-publicas.show');
 
 Route::middleware('auth')->group(function () {
     Route::redirect('/panel', '/socios');
@@ -59,6 +64,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('cargos-duplicados', [CargoDuplicadoController::class, 'index'])->name('cargos-duplicados.index');
     Route::post('cargos-duplicados/eliminar', [CargoDuplicadoController::class, 'eliminar'])->name('cargos-duplicados.eliminar');
+
+    Route::resource('noticias-admin', NoticiaController::class)->except(['show'])->parameters(['noticias-admin' => 'noticia']);
 
     Route::resource('torneos', TorneoController::class);
 

@@ -6,6 +6,7 @@ use App\Http\Requests\SocioRequest;
 use App\Models\Equipo;
 use App\Models\Socio;
 use App\Models\TipoCargo;
+use App\Services\ImagenService;
 use App\Services\SocioService;
 use App\Support\AgrupadorFinanciero;
 use Illuminate\Http\Request;
@@ -13,8 +14,10 @@ use Illuminate\Support\Facades\Storage;
 
 class SocioController extends Controller
 {
-    public function __construct(private readonly SocioService $socios)
-    {
+    public function __construct(
+        private readonly SocioService $socios,
+        private readonly ImagenService $imagenes,
+    ) {
     }
 
     public function index(Request $request)
@@ -50,7 +53,7 @@ class SocioController extends Controller
             ->all();
 
         if ($request->hasFile('foto')) {
-            $datos['foto_path'] = $request->file('foto')->store('socios', 'public');
+            $datos['foto_path'] = $this->imagenes->guardarComprimida($request->file('foto'), 'socios');
         }
 
         $socio = $this->socios->crear($datos, $cargos, $request->integer('equipo_id') ?: null);
@@ -85,7 +88,7 @@ class SocioController extends Controller
                 Storage::disk('public')->delete($socio->foto_path);
             }
 
-            $datos['foto_path'] = $request->file('foto')->store('socios', 'public');
+            $datos['foto_path'] = $this->imagenes->guardarComprimida($request->file('foto'), 'socios');
         }
 
         $this->socios->actualizar($socio, $datos, $request->integer('equipo_id') ?: null, $request->has('equipo_id'));

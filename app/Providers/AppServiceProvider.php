@@ -25,7 +25,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Paginator::useBootstrapFive();
 
-        View::composer(['layouts.app', 'home', 'auth.login', 'consulta.index', 'pagos.recibo'], function ($view) {
+        View::composer(['layouts.app', 'home', 'auth.login', 'consulta.index', 'pagos.recibo', 'noticias-publicas.index', 'noticias-publicas.show'], function ($view) {
             $logoPath = Configuracion::obtener(Configuracion::LOGO_PATH);
 
             $view->with([
