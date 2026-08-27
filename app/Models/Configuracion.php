@@ -14,9 +14,11 @@ class Configuracion extends Model
     public const NOMBRE_SISTEMA = 'nombre_sistema';
     public const LOGO_PATH = 'logo_path';
     public const DESCRIPCION_PORTADA = 'descripcion_portada';
+    public const PORCENTAJE_CUOTA_MODERADA = 'porcentaje_cuota_moderada';
 
     public const NOMBRE_SISTEMA_DEFECTO = 'Mis Estadisticas - Corvepatios';
     public const DESCRIPCION_PORTADA_DEFECTO = 'Sistema de administracion para la corporacion: registro de socios y equipos, control de cargos y pagos, y consulta de deuda en linea. Toda la gestion del club, en un solo lugar.';
+    public const PORCENTAJE_CUOTA_MODERADA_DEFECTO = '25';
 
     public static function obtener(string $clave, ?string $porDefecto = null): ?string
     {

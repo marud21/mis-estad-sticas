@@ -78,8 +78,9 @@
                 <th style="width:14%;">Documento</th>
                 <th style="width:26%;">Nombre</th>
                 <th style="width:14%;">Deuda total</th>
-                <th style="width:16%;">Abono minimo (25%)</th>
-                <th style="width:30%;">Firma</th>
+                <th style="width:16%;">Abono minimo</th>
+                <th style="width:12%;">Ultimo pago</th>
+                <th style="width:18%;">Firma</th>
             </tr>
         </thead>
         <tbody>
@@ -88,13 +89,20 @@
                     $totalCargos = $socio->cargos->sum('monto');
                     $totalPagos = $socio->pagos->sum('valor');
                     $deuda = $totalCargos - $totalPagos;
-                    $abonoMinimo = $deuda > 0 ? $deuda * 0.25 : 0;
+                    // La cuota moderada queda fija desde el ultimo recalculo manual
+                    // (pantalla "Cuota moderada"), para que no baje en cada pago del
+                    // socio dentro del mismo mes. Nunca sugiere pagar mas de lo que
+                    // realmente se debe.
+                    $baseCuota = $socio->cuota_moderada !== null ? (float) $socio->cuota_moderada : ($deuda > 0 ? $deuda * 0.25 : 0);
+                    $abonoMinimo = $deuda > 0 ? min($baseCuota, $deuda) : 0;
+                    $ultimoPago = $socio->pagos->max('fecha');
                 @endphp
                 <tr>
                     <td>{{ $socio->numero_documento }}</td>
                     <td>{{ $socio->nombre_completo }}</td>
                     <td class="deuda">${{ number_format($deuda, 0, ',', '.') }}</td>
                     <td class="abono">${{ number_format($abonoMinimo, 0, ',', '.') }}</td>
+                    <td>{{ $ultimoPago ? \Illuminate\Support\Carbon::parse($ultimoPago)->format('d/m/Y') : '-' }}</td>
                     <td><span class="firma-linea"></span></td>
                 </tr>
             @endforeach

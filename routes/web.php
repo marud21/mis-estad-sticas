@@ -6,6 +6,7 @@ use App\Http\Controllers\CargoController;
 use App\Http\Controllers\CargoDuplicadoController;
 use App\Http\Controllers\CierreCajaController;
 use App\Http\Controllers\ConfiguracionController;
+use App\Http\Controllers\CuotaModeradaController;
 use App\Http\Controllers\ConsultaPublicaController;
 use App\Http\Controllers\EquipoController;
 use App\Http\Controllers\ImportController;
@@ -65,6 +66,10 @@ Route::middleware('auth')->group(function () {
 
     Route::get('cargos-duplicados', [CargoDuplicadoController::class, 'index'])->name('cargos-duplicados.index');
     Route::post('cargos-duplicados/eliminar', [CargoDuplicadoController::class, 'eliminar'])->name('cargos-duplicados.eliminar');
+
+    Route::get('cuota-moderada', [CuotaModeradaController::class, 'index'])->name('cuota-moderada.index');
+    Route::put('cuota-moderada/porcentaje', [CuotaModeradaController::class, 'actualizarPorcentaje'])->name('cuota-moderada.porcentaje');
+    Route::post('cuota-moderada/recalcular', [CuotaModeradaController::class, 'recalcular'])->name('cuota-moderada.recalcular');
 
     Route::resource('noticias-admin', NoticiaController::class)->except(['show'])->parameters(['noticias-admin' => 'noticia']);
 

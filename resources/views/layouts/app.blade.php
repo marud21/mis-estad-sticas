@@ -276,6 +276,7 @@
         <a href="{{ route('torneos.index') }}" class="{{ request()->routeIs('torneos.*') ? 'active' : '' }}">Torneos</a>
         <a href="{{ route('planilla-juego.index') }}" class="{{ request()->routeIs('planilla-juego.*') ? 'active' : '' }}">Planilla de juego</a>
         <a href="{{ route('tipos-cargo.index') }}" class="{{ request()->routeIs('tipos-cargo.*') ? 'active' : '' }}">Tipos de cargo</a>
+        <a href="{{ route('cuota-moderada.index') }}" class="{{ request()->routeIs('cuota-moderada.*') ? 'active' : '' }}">Cuota moderada</a>
         <a href="{{ route('reportes-contables.index') }}" class="{{ request()->routeIs('reportes-contables.*') ? 'active' : '' }}">Reportes</a>
         <a href="{{ route('cierre-caja.index') }}" class="{{ request()->routeIs('cierre-caja.*') ? 'active' : '' }}">Cierre de caja</a>
         <a href="{{ route('noticias-admin.index') }}" class="{{ request()->routeIs('noticias-admin.*') ? 'active' : '' }}">Noticias</a>

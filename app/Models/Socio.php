@@ -35,6 +35,8 @@ class Socio extends Model
         'estado',
         'fecha_cambio_estado',
         'suspendido_por_equipo',
+        'cuota_moderada',
+        'cuota_moderada_fecha',
     ];
 
     protected $casts = [
@@ -43,6 +45,8 @@ class Socio extends Model
         'nivel_jugador' => 'integer',
         'fecha_cambio_estado' => 'date',
         'suspendido_por_equipo' => 'boolean',
+        'cuota_moderada' => 'decimal:2',
+        'cuota_moderada_fecha' => 'date',
     ];
 
     public function equipos(): BelongsToMany
@@ -78,5 +82,30 @@ class Socio extends Model
     public function getDeudaTotalAttribute(): float
     {
         return $this->total_cargos - $this->total_pagos;
+    }
+
+    /**
+     * Cuota moderada (abono minimo sugerido) vigente: usa el valor fijado
+     * en el ultimo recalculo manual (no se recalcula solo en cada pago),
+     * pero nunca sugiere pagar mas de lo que realmente se debe. Si aun no
+     * se ha calculado nunca, cae al porcentaje configurado (por defecto
+     * 25%) de la deuda actual.
+     */
+    public function getCuotaModeradaVigenteAttribute(): float
+    {
+        $deuda = $this->deuda_total;
+
+        if ($deuda <= 0) {
+            return 0;
+        }
+
+        if ($this->cuota_moderada !== null) {
+            $base = (float) $this->cuota_moderada;
+        } else {
+            $porcentaje = (float) Configuracion::obtener(Configuracion::PORCENTAJE_CUOTA_MODERADA, Configuracion::PORCENTAJE_CUOTA_MODERADA_DEFECTO);
+            $base = round($deuda * ($porcentaje / 100), 2);
+        }
+
+        return min($base, $deuda);
     }
 }
