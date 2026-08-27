@@ -26,7 +26,7 @@
                 <span style="color:#666; font-size:13px;">(desde {{ $equipo->fecha_cambio_estado->format('d/m/Y') }})</span>
             @endif
         </p>
-        <form action="{{ route('equipos.estado', $equipo) }}" method="POST" style="display:flex; gap:8px; align-items:center; max-width:320px;"
+        <form id="form-cambiar-estado" action="{{ route('equipos.estado', $equipo) }}" method="POST" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; max-width:320px;"
               onsubmit="return confirm(this.querySelector('select').value === 'inactivo' ? '¿Marcar el equipo como inactivo? Sus socios activos quedaran suspendidos automaticamente.' : '¿Marcar el equipo como activo? Los socios suspendidos por el equipo se reactivaran automaticamente.');">
             @csrf
             @method('PATCH')
@@ -95,9 +95,9 @@
         </div>
 
         <h3>Agregar jugador</h3>
-        <form action="{{ route('equipos.socios.store', $equipo) }}" method="POST" style="display:flex; gap:8px; align-items:center;">
+        <form id="form-agregar-jugador" action="{{ route('equipos.socios.store', $equipo) }}" method="POST" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
             @csrf
-            <select name="socio_id" style="width:auto; margin-bottom:0;" required>
+            <select name="socio_id" style="width:auto; max-width:100%; margin-bottom:0;" required>
                 <option value="">-- Seleccionar socio --</option>
                 @foreach ($sociosDisponibles as $socio)
                     <option value="{{ $socio->id }}">
@@ -115,7 +115,20 @@
         </p>
     </div>
 
-    <style>.oculto { display: none; }</style>
+    <style>
+        .oculto { display: none; }
+
+        @media (max-width: 600px) {
+            #form-cambiar-estado { max-width: 100%; }
+            #form-cambiar-estado select,
+            #form-agregar-jugador select {
+                width: 100%;
+                max-width: 100%;
+            }
+            #form-agregar-jugador { flex-direction: column; align-items: stretch; }
+            td.col-pago-multiple { min-width: 130px; }
+        }
+    </style>
     <script>
         const btnPagosMultiples = document.getElementById('btn-pagos-multiples');
         const btnEjecutarPagos = document.getElementById('btn-ejecutar-pagos');

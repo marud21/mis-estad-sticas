@@ -9,7 +9,13 @@
             <h1 style="margin:0;">{{ $socio->nombre_completo }}</h1>
             <div class="actions">
                 <a class="btn btn-secondary" href="{{ route('socios.reporte', $socio) }}">Exportar PDF</a>
-                <a class="btn btn-secondary" href="{{ route('socios.whatsapp', $socio) }}" target="_blank">Enviar por WhatsApp</a>
+                <button type="button" class="btn btn-secondary" id="btn-whatsapp-socio"
+                        data-pdf-url="{{ route('socios.reporte', $socio) }}"
+                        data-telefono="{{ app(\App\Services\WhatsAppService::class)->numeroParaSocio($socio) }}"
+                        data-nombre-archivo="socio-{{ $socio->numero_documento }}.pdf"
+                        data-mensaje="Hola {{ $socio->nombre_completo }}, aqui tienes tu estado de cuenta.">
+                    Enviar por WhatsApp
+                </button>
                 <a class="btn btn-secondary" href="{{ route('socios.edit', $socio) }}">Editar</a>
                 <a class="btn btn-secondary" href="{{ route('socios.index') }}">Volver</a>
             </div>
@@ -172,6 +178,13 @@
                                     <td>{{ $pago->cargo->tipoCargo->nombre ?? '-' }}</td>
                                     <td class="actions">
                                         <a class="btn btn-sm btn-secondary" href="{{ route('pagos.recibo', $pago) }}" target="_blank">Imprimir recibo</a>
+                                        <button type="button" class="btn btn-sm btn-secondary btn-whatsapp-recibo"
+                                                data-pdf-url="{{ route('pagos.recibo-pdf', $pago) }}"
+                                                data-telefono="{{ app(\App\Services\WhatsAppService::class)->numeroParaSocio($socio) }}"
+                                                data-nombre-archivo="recibo-{{ $pago->id }}.pdf"
+                                                data-mensaje="Hola {{ $socio->nombre_completo }}, aqui tienes tu recibo de pago.">
+                                            Enviar por WhatsApp
+                                        </button>
                                         <form action="{{ route('socios.pagos.destroy', [$socio, $pago]) }}" method="POST" onsubmit="return confirm('¿Eliminar pago?');">
                                             @csrf
                                             @method('DELETE')
@@ -265,4 +278,69 @@
             }
         </script>
     @endif
+
+    <script>
+        /**
+         * Intenta compartir el PDF directamente como archivo adjunto (abre el
+         * selector nativo de "compartir" del dispositivo, donde se elige
+         * WhatsApp y el contacto). Si el navegador no lo soporta (la mayoria
+         * de computadores de escritorio), descarga el PDF y abre WhatsApp
+         * con el numero del socio para adjuntarlo manualmente.
+         */
+        async function compartirPdfPorWhatsapp(boton) {
+            const pdfUrl = boton.dataset.pdfUrl;
+            const telefono = boton.dataset.telefono;
+            const nombreArchivo = boton.dataset.nombreArchivo;
+            const mensaje = boton.dataset.mensaje;
+
+            const textoOriginal = boton.textContent;
+            boton.disabled = true;
+            boton.textContent = 'Preparando...';
+
+            try {
+                const respuesta = await fetch(pdfUrl);
+                const blob = await respuesta.blob();
+                const archivo = new File([blob], nombreArchivo, { type: 'application/pdf' });
+
+                if (navigator.canShare && navigator.canShare({ files: [archivo] })) {
+                    await navigator.share({ files: [archivo], text: mensaje });
+                    return;
+                }
+
+                // Respaldo: descarga el PDF y abre WhatsApp para adjuntarlo a mano.
+                const urlDescarga = URL.createObjectURL(blob);
+                const enlace = document.createElement('a');
+                enlace.href = urlDescarga;
+                enlace.download = nombreArchivo;
+                document.body.appendChild(enlace);
+                enlace.click();
+                enlace.remove();
+                URL.revokeObjectURL(urlDescarga);
+
+                alert('Tu navegador no permite adjuntar el PDF automaticamente. Se descargo el archivo: adjuntalo manualmente en la conversacion de WhatsApp que se va a abrir.');
+
+                if (telefono) {
+                    window.open('https://wa.me/' + telefono + '?text=' + encodeURIComponent(mensaje), '_blank');
+                } else {
+                    alert('Este socio no tiene un numero de celular registrado.');
+                }
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    alert('No se pudo preparar el PDF para compartir.');
+                }
+            } finally {
+                boton.disabled = false;
+                boton.textContent = textoOriginal;
+            }
+        }
+
+        const botonWhatsappSocio = document.getElementById('btn-whatsapp-socio');
+        if (botonWhatsappSocio) {
+            botonWhatsappSocio.addEventListener('click', function () { compartirPdfPorWhatsapp(this); });
+        }
+
+        document.querySelectorAll('.btn-whatsapp-recibo').forEach(function (boton) {
+            boton.addEventListener('click', function () { compartirPdfPorWhatsapp(this); });
+        });
+    </script>
 @endsection

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Equipo;
+use App\Models\Pago;
 use App\Models\Socio;
 use App\Services\ReporteService;
 use App\Services\WhatsAppService;
@@ -80,5 +81,10 @@ class ReporteController extends Controller
         $socio->load(['cargos.tipoCargo', 'pagos']);
 
         return redirect()->away($this->whatsapp->enlaceParaSocio($socio));
+    }
+
+    public function recibo(Pago $pago)
+    {
+        return $this->reportes->reciboPdf($pago)->download("recibo-{$pago->id}.pdf");
     }
 }

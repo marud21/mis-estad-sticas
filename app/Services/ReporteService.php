@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Equipo;
+use App\Models\Pago;
 use App\Models\Socio;
 use App\Support\AgrupadorFinanciero;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -11,6 +12,17 @@ use Illuminate\Support\Facades\DB;
 
 class ReporteService
 {
+    /**
+     * Version en PDF (descargable/compartible) del recibo de pago, para
+     * poder adjuntarlo como archivo (ej. al compartir por WhatsApp).
+     */
+    public function reciboPdf(Pago $pago)
+    {
+        $pago->load(['socio', 'equipo', 'cargo.tipoCargo']);
+
+        return Pdf::loadView('reportes.recibo', ['pago' => $pago])->setPaper('letter', 'portrait');
+    }
+
     public function socioPdf(Socio $socio)
     {
         $socio->load(['cargos.tipoCargo', 'cargos.torneo', 'cargos.equipo', 'pagos.cargo.tipoCargo', 'pagos.torneo', 'pagos.equipo', 'equipos']);

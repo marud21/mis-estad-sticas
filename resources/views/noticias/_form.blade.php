@@ -22,7 +22,7 @@
         <label>Imagen (opcional)</label>
         @if (($noticia->imagen_path ?? null))
             <div style="margin-bottom:10px;">
-                <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($noticia->imagen_path) }}" alt="Imagen actual" style="max-height:160px; border:1px solid var(--gris-borde); border-radius:8px;">
+                <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($noticia->imagen_path) }}" alt="Imagen actual" style="max-width:100%; max-height:160px; height:auto; border:1px solid var(--gris-borde); border-radius:8px;">
             </div>
         @endif
         <input type="file" name="imagen" accept="image/*">

@@ -48,6 +48,7 @@ Route::middleware('auth')->group(function () {
     Route::post('socios/{socio}/pagos', [PagoController::class, 'store'])->name('socios.pagos.store');
     Route::delete('socios/{socio}/pagos/{pago}', [PagoController::class, 'destroy'])->name('socios.pagos.destroy');
     Route::get('pagos/{pago}/recibo', [PagoController::class, 'recibo'])->name('pagos.recibo');
+    Route::get('pagos/{pago}/recibo-pdf', [ReporteController::class, 'recibo'])->name('pagos.recibo-pdf');
 
     Route::resource('equipos', EquipoController::class);
     Route::post('equipos/{equipo}/socios', [EquipoController::class, 'agregarSocio'])->name('equipos.socios.store');

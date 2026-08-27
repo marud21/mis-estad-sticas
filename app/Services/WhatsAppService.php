@@ -16,7 +16,20 @@ class WhatsAppService
         return "https://wa.me/{$telefono}?text=" . rawurlencode($mensaje);
     }
 
-    private function normalizarTelefono(string $celular): string
+    /**
+     * Numero de WhatsApp del socio normalizado (con codigo de pais), sin el
+     * texto del mensaje. Util para armar enlaces wa.me desde el frontend.
+     */
+    public function numeroParaSocio(Socio $socio): ?string
+    {
+        if (! $socio->celular || preg_match('/\d{7,}/', $socio->celular) !== 1) {
+            return null;
+        }
+
+        return $this->normalizarTelefono($socio->celular);
+    }
+
+    public function normalizarTelefono(string $celular): string
     {
         $digitos = preg_replace('/\D/', '', $celular);
 
