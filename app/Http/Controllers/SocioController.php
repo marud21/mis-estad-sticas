@@ -6,6 +6,7 @@ use App\Http\Requests\SocioRequest;
 use App\Models\Equipo;
 use App\Models\Socio;
 use App\Models\TipoCargo;
+use App\Services\EquipoService;
 use App\Services\ImagenService;
 use App\Services\SocioService;
 use App\Support\AgrupadorFinanciero;
@@ -17,12 +18,14 @@ class SocioController extends Controller
     public function __construct(
         private readonly SocioService $socios,
         private readonly ImagenService $imagenes,
+        private readonly EquipoService $equipos,
     ) {
     }
 
     public function index(Request $request)
     {
         $q = $request->string('q')->trim()->toString();
+        $soloMultiEquipo = $request->boolean('multi_equipo');
 
         $socios = Socio::with('equipos')
             ->when($q !== '', function ($query) use ($q) {
@@ -31,6 +34,7 @@ class SocioController extends Controller
                         ->orWhere('numero_documento', 'like', "%{$q}%");
                 });
             })
+            ->when($soloMultiEquipo, fn ($query) => $query->has('equipos', '>', 1))
             ->orderBy('nombre_completo')
             ->paginate(15);
 
@@ -63,12 +67,16 @@ class SocioController extends Controller
 
     public function show(Socio $socio)
     {
-        $socio->load(['equipos', 'cargos.tipoCargo', 'cargos.torneo', 'pagos.cargo', 'pagos.torneo']);
+        $socio->load(['equipos', 'cargos.tipoCargo', 'cargos.torneo', 'cargos.equipo', 'pagos.cargo', 'pagos.torneo', 'pagos.equipo']);
 
         $cargosPorAnio = AgrupadorFinanciero::porAnioYTorneo($socio->cargos);
         $pagosPorAnio = AgrupadorFinanciero::porAnioYTorneo($socio->pagos);
 
-        return view('socios.show', compact('socio', 'cargosPorAnio', 'pagosPorAnio'));
+        $equiposDisponibles = Equipo::whereDoesntHave('socios', fn ($q) => $q->where('socios.id', $socio->id))
+            ->orderBy('nombre')
+            ->get();
+
+        return view('socios.show', compact('socio', 'cargosPorAnio', 'pagosPorAnio', 'equiposDisponibles'));
     }
 
     public function edit(Socio $socio)
@@ -110,5 +118,22 @@ class SocioController extends Controller
         $this->socios->cambiarEstado($socio, request('estado'));
 
         return back()->with('status', 'Estado del socio actualizado.');
+    }
+
+    public function agregarEquipo(Socio $socio)
+    {
+        request()->validate(['equipo_id' => 'required|exists:equipos,id']);
+
+        $equipo = Equipo::findOrFail(request('equipo_id'));
+        $this->equipos->agregarSocio($equipo, $socio);
+
+        return back()->with('status', 'Equipo agregado al socio.');
+    }
+
+    public function quitarEquipo(Socio $socio, Equipo $equipo)
+    {
+        $this->equipos->quitarSocio($equipo, $socio);
+
+        return back()->with('status', 'Equipo retirado del socio.');
     }
 }

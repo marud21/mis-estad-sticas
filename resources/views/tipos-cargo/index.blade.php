@@ -45,7 +45,7 @@
                             <td colspan="5">
                                 <div style="margin-bottom:18px;">
                                     <h4 style="margin:0 0 4px;">Aplicar cargo nuevo</h4>
-                                    <p style="font-size:12px; color:#666; margin:0 0 8px;">Crea el cargo para los socios que aun no lo tengan registrado en esa fecha.</p>
+                                    <p style="font-size:12px; color:#666; margin:0 0 8px;">Crea el cargo para los socios que aun no lo tengan registrado en esa fecha. Si eliges "Todos los socios", a quien tenga mas de un equipo se le aplica un cargo por cada equipo que tenga.</p>
                                     <form class="form-nivel" action="{{ route('tipos-cargo.aplicar-masivo', $tipo) }}" method="POST"
                                           onsubmit="return confirmarCargaMasiva(this, {{ ($tipo->ya_aplicado_este_mes ?? false) ? 'true' : 'false' }}, '{{ $tipo->nombre }}', '{{ $tipo->porcentaje_suspendido }}', 'aplicar');">
                                         @csrf

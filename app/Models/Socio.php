@@ -85,6 +85,43 @@ class Socio extends Model
     }
 
     /**
+     * Desglosa cargos, pagos y deuda por cada equipo, usando las relaciones
+     * cargos/pagos ya cargadas (no vuelve a consultar la BD). Se agrupa por
+     * el equipo_id que quedo grabado en cada cargo/pago (no por los equipos
+     * actuales del socio), para que un cargo de un equipo del que luego se
+     * lo quito siga apareciendo aqui y la suma de las filas siempre cuadre
+     * con el total general. Los cargos/pagos sin equipo asociado se agrupan
+     * en un renglon "General / sin equipo".
+     */
+    public function getDeudaPorEquipoAttribute(): \Illuminate\Support\Collection
+    {
+        $idsEquipo = $this->cargos->pluck('equipo_id')
+            ->merge($this->pagos->pluck('equipo_id'))
+            ->unique();
+
+        return $idsEquipo
+            ->map(function ($equipoId) {
+                $totalCargos = (float) $this->cargos->where('equipo_id', $equipoId)->sum('monto');
+                $totalPagos = (float) $this->pagos->where('equipo_id', $equipoId)->sum('valor');
+
+                $nombreEquipo = $equipoId
+                    ? ($this->cargos->firstWhere('equipo_id', $equipoId)?->equipo?->nombre
+                        ?? $this->pagos->firstWhere('equipo_id', $equipoId)?->equipo?->nombre
+                        ?? 'Equipo eliminado')
+                    : 'General / sin equipo';
+
+                return (object) [
+                    'equipo' => $nombreEquipo,
+                    'total_cargos' => $totalCargos,
+                    'total_pagos' => $totalPagos,
+                    'deuda' => $totalCargos - $totalPagos,
+                ];
+            })
+            ->sortBy(fn ($fila) => $fila->equipo === 'General / sin equipo' ? 1 : 0)
+            ->values();
+    }
+
+    /**
      * Cuota moderada (abono minimo sugerido) vigente: usa el valor fijado
      * en el ultimo recalculo manual (no se recalcula solo en cada pago),
      * pero nunca sugiere pagar mas de lo que realmente se debe. Si aun no

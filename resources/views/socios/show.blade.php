@@ -61,7 +61,36 @@
             <button class="btn btn-sm" type="submit">Cambiar estado</button>
         </form>
 
-        <p><strong>Equipos:</strong> {{ $socio->equipos->pluck('nombre')->join(', ') ?: 'Sin equipo asignado' }}</p>
+        <h3 style="margin-top:16px;">Equipos</h3>
+        @if ($socio->equipos->isEmpty())
+            <p style="color:#666;">Sin equipo asignado.</p>
+        @else
+            <ul style="margin:0 0 10px 18px; padding:0;">
+                @foreach ($socio->equipos as $equipo)
+                    <li style="margin-bottom:4px;">
+                        {{ $equipo->nombre }}
+                        <form action="{{ route('socios.equipos.destroy', [$socio, $equipo]) }}" method="POST" style="display:inline;" onsubmit="return confirm('¿Quitar a {{ $socio->nombre_completo }} del equipo {{ $equipo->nombre }}?');">
+                            @csrf
+                            @method('DELETE')
+                            <button class="btn btn-sm btn-danger" type="submit">Quitar</button>
+                        </form>
+                    </li>
+                @endforeach
+            </ul>
+        @endif
+
+        @if ($equiposDisponibles->isNotEmpty())
+            <form action="{{ route('socios.equipos.store', $socio) }}" method="POST" style="display:flex; gap:8px; align-items:center; max-width:360px;">
+                @csrf
+                <select name="equipo_id" required style="margin-bottom:0;">
+                    <option value="">-- Elegir equipo --</option>
+                    @foreach ($equiposDisponibles as $equipo)
+                        <option value="{{ $equipo->id }}">{{ $equipo->nombre }}</option>
+                    @endforeach
+                </select>
+                <button class="btn btn-sm btn-secondary" type="submit">Agregar equipo</button>
+            </form>
+        @endif
 
         <h2>Resumen financiero</h2>
         <p>Total cargos: ${{ number_format($socio->total_cargos, 0, ',', '.') }}</p>
@@ -69,6 +98,36 @@
         <p class="{{ $socio->deuda_total > 0 ? 'deuda-positiva' : 'deuda-cero' }}">
             Deuda total: ${{ number_format($socio->deuda_total, 0, ',', '.') }}
         </p>
+
+        @if ($socio->deuda_por_equipo->isNotEmpty())
+            <h3 style="margin-top:16px;">Deuda por equipo</h3>
+            <table style="margin-bottom:8px;">
+                <thead>
+                    <tr>
+                        <th>Equipo</th>
+                        <th class="text-right">Cargos</th>
+                        <th class="text-right">Pagos</th>
+                        <th class="text-right">Deuda</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($socio->deuda_por_equipo as $fila)
+                        <tr>
+                            <td>{{ $fila->equipo }}</td>
+                            <td class="text-right">${{ number_format($fila->total_cargos, 0, ',', '.') }}</td>
+                            <td class="text-right">${{ number_format($fila->total_pagos, 0, ',', '.') }}</td>
+                            <td class="text-right {{ $fila->deuda > 0 ? 'deuda-positiva' : 'deuda-cero' }}">${{ number_format($fila->deuda, 0, ',', '.') }}</td>
+                        </tr>
+                    @endforeach
+                    <tr style="font-weight:bold;">
+                        <td>Total</td>
+                        <td class="text-right">${{ number_format($socio->total_cargos, 0, ',', '.') }}</td>
+                        <td class="text-right">${{ number_format($socio->total_pagos, 0, ',', '.') }}</td>
+                        <td class="text-right {{ $socio->deuda_total > 0 ? 'deuda-positiva' : 'deuda-cero' }}">${{ number_format($socio->deuda_total, 0, ',', '.') }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        @endif
     </div>
 
     <div class="card">

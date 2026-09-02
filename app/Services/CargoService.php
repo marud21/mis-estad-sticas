@@ -53,7 +53,10 @@ class CargoService
      * de cargo (por defecto 25%) sobre el monto total.
      *
      * El alcance se puede limitar por nivel:
-     * - "todos": un cargo general por socio, sin equipo asociado.
+     * - "todos": un cargo POR CADA EQUIPO que tenga el socio (con el
+     *   torneo actual de ese equipo). Un socio con varios equipos recibe
+     *   una mensualidad por cada uno. Los socios sin ningun equipo
+     *   registrado reciben un unico cargo general, sin equipo asociado.
      * - "equipo"/"categoria": un cargo independiente POR CADA EQUIPO que
      *   coincida y por cada socio de ese equipo. Un socio que pertenece a
      *   varios equipos que califiquen (ej. dos equipos de la misma
@@ -74,13 +77,38 @@ class CargoService
         if ($nivel === 'todos') {
             DB::transaction(function () use ($tipoCargo, $fecha, $montoBase, $porcentajeSuspendido, &$contador) {
                 Socio::whereIn('estado', [Socio::ESTADO_ACTIVO, Socio::ESTADO_SUSPENDIDO])
-                    ->whereDoesntHave('cargos', function ($query) use ($tipoCargo, $fecha) {
-                        $query->where('tipo_cargo_id', $tipoCargo->id)->where('fecha', $fecha)->whereNull('equipo_id');
-                    })
+                    ->with('equipos')
                     ->chunkById(100, function ($socios) use ($tipoCargo, $fecha, $montoBase, $porcentajeSuspendido, &$contador) {
                         foreach ($socios as $socio) {
-                            $this->crearCargoIndividual($socio, $tipoCargo, $fecha, $montoBase, $porcentajeSuspendido, null, null);
-                            $contador++;
+                            if ($socio->equipos->isEmpty()) {
+                                $yaTiene = $socio->cargos()
+                                    ->where('tipo_cargo_id', $tipoCargo->id)
+                                    ->where('fecha', $fecha)
+                                    ->whereNull('equipo_id')
+                                    ->exists();
+
+                                if (! $yaTiene) {
+                                    $this->crearCargoIndividual($socio, $tipoCargo, $fecha, $montoBase, $porcentajeSuspendido, null, null);
+                                    $contador++;
+                                }
+
+                                continue;
+                            }
+
+                            foreach ($socio->equipos as $equipo) {
+                                $yaTiene = $socio->cargos()
+                                    ->where('tipo_cargo_id', $tipoCargo->id)
+                                    ->where('fecha', $fecha)
+                                    ->where('equipo_id', $equipo->id)
+                                    ->exists();
+
+                                if ($yaTiene) {
+                                    continue;
+                                }
+
+                                $this->crearCargoIndividual($socio, $tipoCargo, $fecha, $montoBase, $porcentajeSuspendido, $equipo->id, $equipo->torneo_id);
+                                $contador++;
+                            }
                         }
                     });
             });
@@ -146,9 +174,11 @@ class CargoService
      * fecha), por ejemplo cuando a un equipo se le monto la mensualidad
      * completa y luego se decide reducirsela. Respeta el porcentaje de
      * suspendido: los socios suspendidos quedan con el porcentaje del
-     * nuevo monto, no del monto original. El nivel "equipo"/"categoria"
-     * solo modifica los cargos que quedaron marcados con ese equipo (los
-     * cargos generales, sin equipo, se modifican con el nivel "todos").
+     * nuevo monto, no del monto original. El nivel "todos" modifica todos
+     * los cargos de esa fecha y tipo sin importar el equipo (ya que
+     * aplicarMasivo con nivel "todos" genera un cargo por cada equipo del
+     * socio); "equipo"/"categoria" solo modifica los cargos marcados con
+     * ese equipo puntual.
      */
     public function actualizarMasivo(
         TipoCargo $tipoCargo,
@@ -164,7 +194,6 @@ class CargoService
         DB::transaction(function () use ($tipoCargo, $fecha, $nuevoMonto, $porcentajeSuspendido, $nivel, $equipoId, $categoria, &$contador) {
             Cargo::where('tipo_cargo_id', $tipoCargo->id)
                 ->where('fecha', $fecha)
-                ->when($nivel === 'todos', fn ($q) => $q->whereNull('equipo_id'))
                 ->when($nivel === 'equipo', fn ($q) => $q->where('equipo_id', $equipoId))
                 ->when($nivel === 'categoria', function ($q) use ($categoria) {
                     $q->whereHas('equipo', fn ($qq) => $qq->where('categoria', $categoria));

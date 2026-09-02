@@ -46,6 +46,9 @@ Route::middleware('auth')->group(function () {
     Route::put('socios/{socio}/cargos/{cargo}', [CargoController::class, 'update'])->name('socios.cargos.update');
     Route::delete('socios/{socio}/cargos/{cargo}', [CargoController::class, 'destroy'])->name('socios.cargos.destroy');
 
+    Route::post('socios/{socio}/equipos', [SocioController::class, 'agregarEquipo'])->name('socios.equipos.store');
+    Route::delete('socios/{socio}/equipos/{equipo}', [SocioController::class, 'quitarEquipo'])->name('socios.equipos.destroy');
+
     Route::post('socios/{socio}/pagos', [PagoController::class, 'store'])->name('socios.pagos.store');
     Route::delete('socios/{socio}/pagos/{pago}', [PagoController::class, 'destroy'])->name('socios.pagos.destroy');
     Route::get('pagos/{pago}/recibo', [PagoController::class, 'recibo'])->name('pagos.recibo');
