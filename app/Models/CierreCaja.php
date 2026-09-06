@@ -19,6 +19,10 @@ class CierreCaja extends Model
         'total_neto_efectivo',
         'notas',
         'user_id',
+        'anulado',
+        'anulado_motivo',
+        'anulado_por',
+        'anulado_en',
     ];
 
     protected $casts = [
@@ -28,6 +32,8 @@ class CierreCaja extends Model
         'total_ingresos' => 'decimal:2',
         'total_gastos' => 'decimal:2',
         'total_neto_efectivo' => 'decimal:2',
+        'anulado' => 'boolean',
+        'anulado_en' => 'datetime',
     ];
 
     public function gastos(): HasMany
@@ -38,5 +44,10 @@ class CierreCaja extends Model
     public function usuario(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function anuladoPor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'anulado_por');
     }
 }

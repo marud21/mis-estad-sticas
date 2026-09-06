@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AnularCierreCajaRequest;
 use App\Http\Requests\CierreCajaRequest;
 use App\Models\CierreCaja;
 use App\Services\CierreCajaService;
@@ -25,7 +26,7 @@ class CierreCajaController extends Controller
     {
         $fecha = $request->filled('fecha') ? Carbon::parse($request->input('fecha')) : today();
         $ingresos = $this->cierres->calcularIngresos($fecha);
-        $yaExiste = CierreCaja::whereDate('fecha', $fecha)->exists();
+        $yaExiste = CierreCaja::whereDate('fecha', $fecha)->where('anulado', false)->exists();
 
         return view('cierre-caja.create', compact('fecha', 'ingresos', 'yaExiste'));
     }
@@ -45,8 +46,25 @@ class CierreCajaController extends Controller
 
     public function show(CierreCaja $cierreCaja)
     {
-        $cierreCaja->load('gastos', 'usuario');
+        $cierreCaja->load('gastos', 'usuario', 'anuladoPor');
 
         return view('cierre-caja.show', ['cierre' => $cierreCaja]);
+    }
+
+    public function anular(AnularCierreCajaRequest $request, CierreCaja $cierreCaja)
+    {
+        if ($cierreCaja->anulado) {
+            return back()->with('status', 'Este cierre ya estaba anulado.');
+        }
+
+        $cierreCaja->update([
+            'anulado' => true,
+            'anulado_motivo' => $request->validated('motivo'),
+            'anulado_por' => $request->user()?->id,
+            'anulado_en' => now(),
+        ]);
+
+        return redirect()->route('cierre-caja.show', $cierreCaja)
+            ->with('status', 'Cierre anulado. Ya puedes crear el cierre correcto para esa fecha desde "Nuevo cierre".');
     }
 }

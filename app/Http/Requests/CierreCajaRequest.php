@@ -15,7 +15,7 @@ class CierreCajaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'fecha' => ['required', 'date', Rule::unique('cierres_caja', 'fecha')],
+            'fecha' => ['required', 'date', Rule::unique('cierres_caja', 'fecha')->where(fn ($query) => $query->where('anulado', false))],
             'notas' => ['nullable', 'string', 'max:1000'],
             'gastos' => ['sometimes', 'array'],
             'gastos.*.descripcion' => ['required_with:gastos.*.monto', 'nullable', 'string', 'max:255'],

@@ -89,6 +89,7 @@ Route::middleware('auth')->group(function () {
     Route::get('cierre-caja/nuevo', [CierreCajaController::class, 'create'])->name('cierre-caja.create');
     Route::post('cierre-caja', [CierreCajaController::class, 'store'])->name('cierre-caja.store');
     Route::get('cierre-caja/{cierreCaja}', [CierreCajaController::class, 'show'])->name('cierre-caja.show');
+    Route::patch('cierre-caja/{cierreCaja}/anular', [CierreCajaController::class, 'anular'])->name('cierre-caja.anular');
 
     Route::get('password', [PasswordController::class, 'edit'])->name('password.edit');
     Route::put('password', [PasswordController::class, 'update'])->name('password.update');

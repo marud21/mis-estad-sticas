@@ -27,13 +27,18 @@
                 </thead>
                 <tbody>
                     @forelse ($cierres as $cierre)
-                        <tr>
-                            <td>{{ $cierre->fecha->format('d/m/Y') }}</td>
-                            <td class="text-right">${{ number_format($cierre->total_efectivo, 0, ',', '.') }}</td>
-                            <td class="text-right">${{ number_format($cierre->total_transferencia, 0, ',', '.') }}</td>
-                            <td class="text-right">${{ number_format($cierre->total_ingresos, 0, ',', '.') }}</td>
-                            <td class="text-right">${{ number_format($cierre->total_gastos, 0, ',', '.') }}</td>
-                            <td class="text-right"><strong>${{ number_format($cierre->total_neto_efectivo, 0, ',', '.') }}</strong></td>
+                        <tr style="{{ $cierre->anulado ? 'opacity:0.55;' : '' }}">
+                            <td>
+                                {{ $cierre->fecha->format('d/m/Y') }}
+                                @if ($cierre->anulado)
+                                    <span class="badge badge-retirado" style="margin-left:6px;">Anulado</span>
+                                @endif
+                            </td>
+                            <td class="text-right" style="{{ $cierre->anulado ? 'text-decoration:line-through;' : '' }}">${{ number_format($cierre->total_efectivo, 0, ',', '.') }}</td>
+                            <td class="text-right" style="{{ $cierre->anulado ? 'text-decoration:line-through;' : '' }}">${{ number_format($cierre->total_transferencia, 0, ',', '.') }}</td>
+                            <td class="text-right" style="{{ $cierre->anulado ? 'text-decoration:line-through;' : '' }}">${{ number_format($cierre->total_ingresos, 0, ',', '.') }}</td>
+                            <td class="text-right" style="{{ $cierre->anulado ? 'text-decoration:line-through;' : '' }}">${{ number_format($cierre->total_gastos, 0, ',', '.') }}</td>
+                            <td class="text-right" style="{{ $cierre->anulado ? 'text-decoration:line-through;' : '' }}"><strong>${{ number_format($cierre->total_neto_efectivo, 0, ',', '.') }}</strong></td>
                             <td class="actions">
                                 <a class="btn btn-sm btn-secondary" href="{{ route('cierre-caja.show', $cierre) }}">Ver</a>
                             </td>
