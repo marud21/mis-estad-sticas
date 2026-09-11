@@ -13,6 +13,7 @@
                 <a class="btn btn-secondary" href="{{ route('equipos.edit', $equipo) }}">Editar</a>
                 <a class="btn btn-secondary" href="{{ route('equipos.index') }}">Volver</a>
                 <button type="button" class="btn" id="btn-pagos-multiples">Pagos multiples</button>
+                <button type="button" class="btn" id="btn-cobro-tarjetas">Cobro de tarjetas</button>
             </div>
         </div>
         <p><strong>Categoria:</strong> {{ $equipo->categoria ?? '-' }}</p>
@@ -44,6 +45,7 @@
         <div class="card-header">
             <h2 style="margin:0;">Jugadores</h2>
             <button type="button" class="btn col-pago-multiple oculto" id="btn-ejecutar-pagos">Ejecutar pagos</button>
+            <button type="button" class="btn col-tarjeta oculto" id="btn-registrar-tarjetas">Registrar tarjetas</button>
         </div>
 
         <div class="table-scroll">
@@ -57,6 +59,8 @@
                         <th>Deuda</th>
                         <th class="col-pago-multiple oculto">Valor a pagar</th>
                         <th class="col-pago-multiple oculto">Tipo</th>
+                        <th class="col-tarjeta oculto">Tarjeta</th>
+                        <th class="col-tarjeta oculto">Fecha de la tarjeta</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -79,6 +83,19 @@
                                     <option value="transferencia">Transferencia</option>
                                 </select>
                             </td>
+                            <td class="col-tarjeta oculto">
+                                <select class="input-tipo-tarjeta" data-socio-id="{{ $socio->id }}" style="width:auto; margin-bottom:0;">
+                                    <option value="">-- Sin tarjeta --</option>
+                                    @foreach ($tiposTarjeta as $tipoTarjeta)
+                                        <option value="{{ $tipoTarjeta->id }}" data-monto="{{ $tipoTarjeta->monto_default }}">
+                                            {{ $tipoTarjeta->nombre }} (${{ number_format($tipoTarjeta->monto_default, 0, ',', '.') }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </td>
+                            <td class="col-tarjeta oculto">
+                                <input type="date" class="input-fecha-tarjeta" data-socio-id="{{ $socio->id }}" value="{{ date('Y-m-d') }}" max="{{ date('Y-m-d') }}" style="width:auto; margin-bottom:0;">
+                            </td>
                             <td>
                                 <form action="{{ route('equipos.socios.destroy', [$equipo, $socio]) }}" method="POST" onsubmit="return confirm('¿Quitar jugador del equipo?');">
                                     @csrf
@@ -88,7 +105,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="8">Sin jugadores asignados.</td></tr>
+                        <tr><td colspan="10">Sin jugadores asignados.</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -127,6 +144,7 @@
             }
             #form-agregar-jugador { flex-direction: column; align-items: stretch; }
             td.col-pago-multiple { min-width: 130px; }
+            td.col-tarjeta { min-width: 150px; }
         }
     </style>
     <script>
@@ -210,6 +228,86 @@
                 .finally(function () {
                     btnEjecutarPagos.disabled = false;
                     btnEjecutarPagos.textContent = 'Ejecutar pagos';
+                });
+        });
+
+        /**
+         * Cobro de tarjetas: muestra frente a cada jugador un desplegable
+         * con los tipos de tarjeta (Amarillas/Rojas) y la fecha en que se
+         * saco. Al registrar, cada tarjeta marcada se convierte en un cargo
+         * para ese socio, por el monto del tipo elegido.
+         */
+        const btnCobroTarjetas = document.getElementById('btn-cobro-tarjetas');
+        const btnRegistrarTarjetas = document.getElementById('btn-registrar-tarjetas');
+        const columnasTarjeta = document.querySelectorAll('.col-tarjeta');
+
+        btnCobroTarjetas.addEventListener('click', function () {
+            columnasTarjeta.forEach(function (col) { col.classList.toggle('oculto'); });
+        });
+
+        btnRegistrarTarjetas.addEventListener('click', function () {
+            const filasTarjeta = [];
+            document.querySelectorAll('.input-tipo-tarjeta').forEach(function (select) {
+                if (!select.value) return;
+                const socioId = select.dataset.socioId;
+                const fecha = document.querySelector('.input-fecha-tarjeta[data-socio-id="' + socioId + '"]').value;
+                if (!fecha) return;
+                filasTarjeta.push({ socio_id: socioId, tipo_cargo_id: select.value, fecha: fecha });
+            });
+
+            if (filasTarjeta.length === 0) {
+                mostrarAlerta('Selecciona al menos una tarjeta (y su fecha) antes de registrar.', true);
+                return;
+            }
+
+            if (!confirm('¿Registrar ' + filasTarjeta.length + ' tarjeta(s)? Se le sumara el cargo correspondiente a cada jugador seleccionado.')) {
+                return;
+            }
+
+            btnRegistrarTarjetas.disabled = true;
+            btnRegistrarTarjetas.textContent = 'Procesando...';
+
+            fetch('{{ route('equipos.tarjetas.ejecutar', $equipo) }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ tarjetas: filasTarjeta }),
+            })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (!data.cargos) {
+                        mostrarAlerta('No se pudieron registrar las tarjetas. Revisa los datos e intenta de nuevo.', true);
+                        return;
+                    }
+
+                    mostrarAlerta(data.mensaje, false);
+
+                    data.cargos.forEach(function (cargo) {
+                        const fila = document.querySelector('[data-fila-socio="' + cargo.socio_id + '"]');
+                        if (!fila) return;
+
+                        const nuevaDeuda = parseFloat(fila.dataset.deuda) + parseFloat(cargo.monto);
+                        fila.dataset.deuda = nuevaDeuda;
+                        const celdaDeuda = fila.querySelector('.celda-deuda');
+                        if (celdaDeuda) {
+                            celdaDeuda.textContent = '$' + new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 }).format(nuevaDeuda);
+                            celdaDeuda.classList.toggle('deuda-positiva', nuevaDeuda > 0);
+                            celdaDeuda.classList.toggle('deuda-cero', nuevaDeuda <= 0);
+                        }
+
+                        const selectTarjeta = fila.querySelector('.input-tipo-tarjeta');
+                        if (selectTarjeta) selectTarjeta.value = '';
+                    });
+                })
+                .catch(function () {
+                    mostrarAlerta('Ocurrio un error al registrar las tarjetas. Intenta de nuevo.', true);
+                })
+                .finally(function () {
+                    btnRegistrarTarjetas.disabled = false;
+                    btnRegistrarTarjetas.textContent = 'Registrar tarjetas';
                 });
         });
     </script>

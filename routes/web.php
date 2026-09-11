@@ -58,6 +58,7 @@ Route::middleware('auth')->group(function () {
     Route::post('equipos/{equipo}/socios', [EquipoController::class, 'agregarSocio'])->name('equipos.socios.store');
     Route::delete('equipos/{equipo}/socios/{socio}', [EquipoController::class, 'quitarSocio'])->name('equipos.socios.destroy');
     Route::post('equipos/{equipo}/pagos-multiples', [PagoController::class, 'ejecutarMultiples'])->name('equipos.pagos.ejecutar');
+    Route::post('equipos/{equipo}/tarjetas', [CargoController::class, 'ejecutarTarjetas'])->name('equipos.tarjetas.ejecutar');
     Route::patch('equipos/{equipo}/estado', [EquipoController::class, 'cambiarEstado'])->name('equipos.estado');
     Route::post('equipos/reportes-multiples', [ReporteController::class, 'equiposMultiples'])->name('equipos.reporte.multiples');
     Route::get('equipos/{equipo}/reporte', [ReporteController::class, 'equipo'])->name('equipos.reporte');

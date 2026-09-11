@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\EquipoRequest;
 use App\Models\Equipo;
 use App\Models\Socio;
+use App\Models\TipoCargo;
 use App\Services\EquipoService;
 use Illuminate\Http\Request;
 
@@ -53,7 +54,12 @@ class EquipoController extends Controller
             ->orderBy('nombre_completo')
             ->get();
 
-        return view('equipos.show', compact('equipo', 'sociosDisponibles'));
+        // Tipos de cargo usados para el cobro de tarjetas en esta pantalla.
+        $tiposTarjeta = TipoCargo::whereIn('nombre', ['Amarillas', 'Rojas'])
+            ->orderBy('nombre')
+            ->get();
+
+        return view('equipos.show', compact('equipo', 'sociosDisponibles', 'tiposTarjeta'));
     }
 
     public function edit(Equipo $equipo)

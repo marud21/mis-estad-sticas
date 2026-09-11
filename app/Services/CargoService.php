@@ -47,6 +47,35 @@ class CargoService
     }
 
     /**
+     * Registra en una sola transaccion las tarjetas (amarillas/rojas)
+     * marcadas a varios socios de un mismo equipo desde la pantalla del
+     * equipo. El monto sale del tipo de cargo y se cobra completo incluso
+     * a los socios suspendidos: una tarjeta es una sancion, no una cuota,
+     * asi que no se le aplica el porcentaje de suspendido.
+     *
+     * @param  array<int, array{socio_id:int, tipo_cargo_id:int, fecha:string}>  $filas
+     * @return \Illuminate\Support\Collection<int, Cargo>
+     */
+    public function crearTarjetasParaEquipo(Equipo $equipo, array $filas): \Illuminate\Support\Collection
+    {
+        return DB::transaction(function () use ($equipo, $filas) {
+            return collect($filas)->map(function (array $fila) use ($equipo) {
+                $socio = $equipo->socios()->findOrFail($fila['socio_id']);
+                $tipoCargo = TipoCargo::findOrFail($fila['tipo_cargo_id']);
+
+                return $socio->cargos()->create([
+                    'tipo_cargo_id' => $tipoCargo->id,
+                    'equipo_id' => $equipo->id,
+                    'torneo_id' => $equipo->torneo_id,
+                    'monto' => $tipoCargo->monto_default,
+                    'fecha' => $fila['fecha'],
+                    'descripcion' => $tipoCargo->nombre,
+                ]);
+            });
+        });
+    }
+
+    /**
      * Aplica un cargo recurrente (ej. mensualidad) a los socios activos y
      * suspendidos que aun no lo tengan registrado para la fecha indicada.
      * Los socios suspendidos pagan solo el porcentaje configurado en el tipo
