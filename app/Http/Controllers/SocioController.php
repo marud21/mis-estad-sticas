@@ -27,6 +27,11 @@ class SocioController extends Controller
         $q = $request->string('q')->trim()->toString();
         $soloMultiEquipo = $request->boolean('multi_equipo');
 
+        // Solo se acepta un estado conocido: cualquier otro valor se ignora
+        // y se listan todos los socios.
+        $estado = $request->string('estado')->trim()->toString();
+        $estado = in_array($estado, Socio::ESTADOS, true) ? $estado : '';
+
         $socios = Socio::with('equipos')
             ->when($q !== '', function ($query) use ($q) {
                 $query->where(function ($sub) use ($q) {
@@ -35,10 +40,11 @@ class SocioController extends Controller
                 });
             })
             ->when($soloMultiEquipo, fn ($query) => $query->has('equipos', '>', 1))
+            ->when($estado !== '', fn ($query) => $query->where('estado', $estado))
             ->orderBy('nombre_completo')
             ->paginate(15);
 
-        return view('socios.index', compact('socios'));
+        return view('socios.index', compact('socios', 'estado'));
     }
 
     public function create()

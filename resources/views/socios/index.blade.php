@@ -12,15 +12,28 @@
 
         <form action="{{ route('socios.index') }}" method="GET" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:16px;">
             <input type="text" name="q" placeholder="Buscar por nombre o documento..." value="{{ request('q') }}" style="margin-bottom:0;">
+            <select name="estado" style="width:auto; margin-bottom:0;" onchange="this.form.submit()">
+                <option value="">-- Todos los estados --</option>
+                @foreach (\App\Models\Socio::ESTADOS as $unEstado)
+                    <option value="{{ $unEstado }}" @selected($estado === $unEstado)>{{ ucfirst($unEstado) }}</option>
+                @endforeach
+            </select>
             <label style="display:flex; align-items:center; gap:4px; font-weight:normal; white-space:nowrap;">
                 <input type="checkbox" name="multi_equipo" value="1" @checked(request('multi_equipo')) onchange="this.form.submit()">
                 Solo con mas de un equipo
             </label>
             <button class="btn btn-secondary" type="submit">Buscar</button>
-            @if (request('q') || request('multi_equipo'))
+            @if (request('q') || request('multi_equipo') || $estado !== '')
                 <a class="btn btn-secondary" href="{{ route('socios.index') }}">Limpiar</a>
             @endif
         </form>
+
+        <p style="color:#666; font-size:13px; margin-top:-8px;">
+            {{ number_format($socios->total(), 0, ',', '.') }} socio(s)
+            @if ($estado !== '')
+                en estado <strong>{{ ucfirst($estado) }}</strong>
+            @endif
+        </p>
 
         <table>
             <thead>

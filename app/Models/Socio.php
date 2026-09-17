@@ -22,6 +22,14 @@ class Socio extends Model
      */
     public const ESTADO_EXCLUIDO = 'excluido';
 
+    /** Todos los estados posibles de un socio, para filtros y selectores. */
+    public const ESTADOS = [
+        self::ESTADO_ACTIVO,
+        self::ESTADO_SUSPENDIDO,
+        self::ESTADO_RETIRADO,
+        self::ESTADO_EXCLUIDO,
+    ];
+
     public const NIVEL_BUENO = 1;
     public const NIVEL_REGULAR = 2;
     public const NIVEL_MALO = 3;
