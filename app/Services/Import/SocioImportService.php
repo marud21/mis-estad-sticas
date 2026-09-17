@@ -15,6 +15,7 @@ class SocioImportService
         'ACTIVO' => Socio::ESTADO_ACTIVO,
         'SUSPENDIDO' => Socio::ESTADO_SUSPENDIDO,
         'RETIRADO' => Socio::ESTADO_RETIRADO,
+        'EXCLUIDO' => Socio::ESTADO_EXCLUIDO,
     ];
 
     private const EQUIPOS_PLACEHOLDER = ['PENDIENTE', 'SIN EQUIPO', 'N/A', 'NA', '-', 'NINGUNO'];

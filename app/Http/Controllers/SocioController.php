@@ -113,7 +113,7 @@ class SocioController extends Controller
 
     public function cambiarEstado(Socio $socio)
     {
-        request()->validate(['estado' => 'required|in:activo,suspendido,retirado']);
+        request()->validate(['estado' => 'required|in:activo,suspendido,retirado,excluido']);
 
         $this->socios->cambiarEstado($socio, request('estado'));
 

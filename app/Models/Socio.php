@@ -15,6 +15,13 @@ class Socio extends Model
     public const ESTADO_SUSPENDIDO = 'suspendido';
     public const ESTADO_RETIRADO = 'retirado';
 
+    /**
+     * Socio excluido: no se le generan cargos en los cobros masivos
+     * (mensualidad, inscripcion, afiliacion). Conserva la deuda que ya
+     * tuviera; simplemente deja de acumular cargos nuevos.
+     */
+    public const ESTADO_EXCLUIDO = 'excluido';
+
     public const NIVEL_BUENO = 1;
     public const NIVEL_REGULAR = 2;
     public const NIVEL_MALO = 3;

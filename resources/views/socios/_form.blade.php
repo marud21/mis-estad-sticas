@@ -91,7 +91,11 @@
                 <option value="activo" @selected($socio->estado === 'activo')>Activo</option>
                 <option value="suspendido" @selected($socio->estado === 'suspendido')>Suspendido</option>
                 <option value="retirado" @selected($socio->estado === 'retirado')>Retirado</option>
+                <option value="excluido" @selected($socio->estado === 'excluido')>Excluido</option>
             </select>
+            <p style="font-size:12px; color:#666; margin-top:-8px;">
+                A un socio excluido no se le generan cargos en los cobros masivos (mensualidad, inscripcion, afiliacion). Conserva la deuda que ya tenga.
+            </p>
         </div>
     @endif
 </div>

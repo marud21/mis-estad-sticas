@@ -30,7 +30,7 @@ class SocioRequest extends FormRequest
             'numero_camiseta' => ['nullable', 'integer', 'min:0', 'max:999'],
             'foto' => ['nullable', 'image', 'max:15360'],
             'nivel_jugador' => ['nullable', 'integer', 'in:1,2,3'],
-            'estado' => ['sometimes', Rule::in([Socio::ESTADO_ACTIVO, Socio::ESTADO_SUSPENDIDO, Socio::ESTADO_RETIRADO])],
+            'estado' => ['sometimes', Rule::in([Socio::ESTADO_ACTIVO, Socio::ESTADO_SUSPENDIDO, Socio::ESTADO_RETIRADO, Socio::ESTADO_EXCLUIDO])],
             'equipo_id' => ['nullable', 'exists:equipos,id'],
             'cargos' => ['sometimes', 'array'],
             'cargos.*.tipo_cargo_id' => ['nullable', 'exists:tipos_cargo,id'],

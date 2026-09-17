@@ -126,7 +126,7 @@
         <div class="caracteristicas">
             <div class="caracteristica">
                 <h3>Socios y equipos</h3>
-                <p>Registro completo de socios, sus equipos, posicion y estado (activo, suspendido o retirado).</p>
+                <p>Registro completo de socios, sus equipos, posicion y estado (activo, suspendido, retirado o excluido).</p>
             </div>
             <div class="caracteristica">
                 <h3>Cargos y pagos</h3>

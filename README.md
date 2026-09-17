@@ -6,7 +6,7 @@ Construido con **Laravel 11**, **Blade**, **MySQL** y **dompdf**.
 
 ## Funcionalidades principales
 
-- **Socios**: registro completo (documento, contacto, entidad de salud, foto tomada con camara o subida desde galeria, posicion de juego, numero de camiseta, nivel), estado (activo/suspendido/retirado) y su equipo.
+- **Socios**: registro completo (documento, contacto, entidad de salud, foto tomada con camara o subida desde galeria, posicion de juego, numero de camiseta, nivel), estado (activo/suspendido/retirado/excluido) y su equipo.
 - **Equipos y torneos**: administracion de equipos y torneos.
 - **Cargos y pagos**: tipos de cargo configurables (afiliacion, mensualidad, etc.), aplicacion masiva, historial de pagos con recibo imprimible.
 - **Consulta publica de deuda**: cualquier socio puede consultar su deuda actual sin necesidad de cuenta, con datos de cuentas bancarias y WhatsApp de la corporacion para enviar comprobantes.

@@ -57,6 +57,7 @@
                 <option value="activo" @selected($socio->estado === 'activo')>Activo</option>
                 <option value="suspendido" @selected($socio->estado === 'suspendido')>Suspendido</option>
                 <option value="retirado" @selected($socio->estado === 'retirado')>Retirado</option>
+                <option value="excluido" @selected($socio->estado === 'excluido')>Excluido</option>
             </select>
             <button class="btn btn-sm" type="submit">Cambiar estado</button>
         </form>
