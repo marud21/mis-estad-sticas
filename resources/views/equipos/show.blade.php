@@ -165,6 +165,30 @@
             if (esError) alerta.classList.add('alert-error');
         }
 
+        /**
+         * Si la sesion vencio, el servidor responde 419 con el aviso y la
+         * direccion del login. Se muestra con un enlace en vez de redirigir
+         * de golpe, para no borrarle al usuario lo que ya habia escrito.
+         * Devuelve true si la sesion estaba vencida.
+         */
+        function avisarSiSesionExpiro(respuesta, datos) {
+            if (respuesta.status !== 419) return false;
+
+            const texto = (datos && datos.mensaje) || 'Tu sesion expiro por seguridad.';
+            const url = (datos && datos.login_url) || '{{ route('login') }}';
+
+            alerta.textContent = texto + ' ';
+            alerta.classList.remove('oculto');
+            alerta.classList.add('alert-error');
+
+            const enlace = document.createElement('a');
+            enlace.href = url;
+            enlace.textContent = 'Iniciar sesion';
+            alerta.appendChild(enlace);
+
+            return true;
+        }
+
         btnEjecutarPagos.addEventListener('click', function () {
             const filas = [];
             document.querySelectorAll('.input-valor-pago').forEach(function (input) {
@@ -194,8 +218,11 @@
                 },
                 body: JSON.stringify({ pagos: filas }),
             })
-                .then(function (r) { return r.json(); })
-                .then(function (data) {
+                .then(function (r) { return r.json().then(function (d) { return { respuesta: r, datos: d }; }); })
+                .then(function (res) {
+                    if (avisarSiSesionExpiro(res.respuesta, res.datos)) return;
+
+                    const data = res.datos;
                     mostrarAlerta(data.mensaje, false);
 
                     data.pagos.forEach(function (pago) {
@@ -276,8 +303,11 @@
                 },
                 body: JSON.stringify({ tarjetas: filasTarjeta }),
             })
-                .then(function (r) { return r.json(); })
-                .then(function (data) {
+                .then(function (r) { return r.json().then(function (d) { return { respuesta: r, datos: d }; }); })
+                .then(function (res) {
+                    if (avisarSiSesionExpiro(res.respuesta, res.datos)) return;
+
+                    const data = res.datos;
                     if (!data.cargos) {
                         mostrarAlerta('No se pudieron registrar las tarjetas. Revisa los datos e intenta de nuevo.', true);
                         return;
