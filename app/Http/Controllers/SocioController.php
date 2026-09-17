@@ -125,15 +125,19 @@ class SocioController extends Controller
         request()->validate(['equipo_id' => 'required|exists:equipos,id']);
 
         $equipo = Equipo::findOrFail(request('equipo_id'));
-        $this->equipos->agregarSocio($equipo, $socio);
+        $reactivado = $this->equipos->agregarSocio($equipo, $socio);
 
-        return back()->with('status', 'Equipo agregado al socio.');
+        return back()->with('status', $reactivado
+            ? 'Equipo agregado al socio y se reactivo (estaba retirado).'
+            : 'Equipo agregado al socio.');
     }
 
     public function quitarEquipo(Socio $socio, Equipo $equipo)
     {
-        $this->equipos->quitarSocio($equipo, $socio);
+        $retirado = $this->equipos->quitarSocio($equipo, $socio);
 
-        return back()->with('status', 'Equipo retirado del socio.');
+        return back()->with('status', $retirado
+            ? 'Equipo retirado del socio. Como quedo sin equipo, se marco como retirado y deja de entrar en los cobros.'
+            : 'Equipo retirado del socio.');
     }
 }
