@@ -78,4 +78,16 @@ class SocioService
 
         return $socio;
     }
+
+    /**
+     * Actualiza el estado del carnet del socio (tiene / extraviado / no
+     * tiene). Es un dato de control independiente del estado del socio:
+     * no afecta sus cobros ni su pertenencia a un equipo.
+     */
+    public function cambiarCarnet(Socio $socio, string $carnet): Socio
+    {
+        $socio->update(['carnet' => $carnet]);
+
+        return $socio;
+    }
 }

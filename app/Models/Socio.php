@@ -30,6 +30,24 @@ class Socio extends Model
         self::ESTADO_EXCLUIDO,
     ];
 
+    public const CARNET_TIENE = 'tiene';
+    public const CARNET_EXTRAVIADO = 'extraviado';
+    public const CARNET_NO_TIENE = 'no_tiene';
+
+    /** Estados del carnet, con la etiqueta que se muestra en pantalla. */
+    public const CARNETS = [
+        self::CARNET_TIENE => 'Tiene',
+        self::CARNET_EXTRAVIADO => 'Extraviado',
+        self::CARNET_NO_TIENE => 'No tiene',
+    ];
+
+    /** Simbolo de cada estado, para leer la columna de un vistazo. */
+    public const CARNET_SIMBOLOS = [
+        self::CARNET_TIENE => '✅',
+        self::CARNET_EXTRAVIADO => '➖',
+        self::CARNET_NO_TIENE => '❌',
+    ];
+
     public const NIVEL_BUENO = 1;
     public const NIVEL_REGULAR = 2;
     public const NIVEL_MALO = 3;
@@ -48,6 +66,7 @@ class Socio extends Model
         'foto_path',
         'nivel_jugador',
         'estado',
+        'carnet',
         'fecha_cambio_estado',
         'suspendido_por_equipo',
         'cuota_moderada',
@@ -97,6 +116,18 @@ class Socio extends Model
     public function getDeudaTotalAttribute(): float
     {
         return $this->total_cargos - $this->total_pagos;
+    }
+
+    /** Etiqueta legible del estado del carnet ("Tiene", "Extraviado", ...). */
+    public function getCarnetEtiquetaAttribute(): string
+    {
+        return self::CARNETS[$this->carnet] ?? self::CARNETS[self::CARNET_NO_TIENE];
+    }
+
+    /** Simbolo del estado del carnet, para las listas. */
+    public function getCarnetSimboloAttribute(): string
+    {
+        return self::CARNET_SIMBOLOS[$this->carnet] ?? self::CARNET_SIMBOLOS[self::CARNET_NO_TIENE];
     }
 
     /**

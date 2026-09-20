@@ -144,6 +144,9 @@
         .badge-retirado { background: var(--rojo); }
         .badge-inactivo { background: #6b7280; }
         .badge-excluido { background: #4b5563; }
+        .badge-carnet-tiene { background: var(--verde); }
+        .badge-carnet-extraviado { background: var(--naranja); }
+        .badge-carnet-no_tiene { background: #6b7280; }
         .alert {
             background: #e7f0fb;
             border: 1px solid var(--azul-claro);

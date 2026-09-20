@@ -35,8 +35,10 @@ class ReporteService
 
     public function equipoPdf(Equipo $equipo)
     {
+        // Mismo orden alfabetico que la pantalla del equipo, para que el
+        // impreso se pueda ir siguiendo renglon por renglon.
         $equipo->load(['socios' => function ($query) {
-            $query->withCount('cargos');
+            $query->withCount('cargos')->orderBy('nombre_completo');
         }]);
 
         $socios = $equipo->socios->map(function (Socio $socio) {

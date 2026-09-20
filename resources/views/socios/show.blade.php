@@ -62,6 +62,21 @@
             <button class="btn btn-sm" type="submit">Cambiar estado</button>
         </form>
 
+        <p style="margin-top:14px;">
+            <strong>Carnet:</strong>
+            <span class="badge badge-carnet-{{ $socio->carnet }}">{{ $socio->carnet_etiqueta }}</span>
+        </p>
+        <form action="{{ route('socios.carnet', $socio) }}" method="POST" style="display:flex; gap:8px; align-items:center;">
+            @csrf
+            @method('PATCH')
+            <select name="carnet" style="width:auto; margin-bottom:0;">
+                @foreach (\App\Models\Socio::CARNETS as $valorCarnet => $etiquetaCarnet)
+                    <option value="{{ $valorCarnet }}" @selected($socio->carnet === $valorCarnet)>{{ $etiquetaCarnet }}</option>
+                @endforeach
+            </select>
+            <button class="btn btn-sm" type="submit">Cambiar carnet</button>
+        </form>
+
         <h3 style="margin-top:16px;">Equipos</h3>
         @if ($socio->equipos->isEmpty())
             <p style="color:#666;">Sin equipo asignado.</p>

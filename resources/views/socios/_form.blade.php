@@ -74,6 +74,15 @@
             <option value="3" @selected(old('nivel_jugador', $socio->nivel_jugador ?? '') == 3)>3 - Malo</option>
         </select>
     </div>
+    <div>
+        <label>Carnet</label>
+        @php($carnetActual = old('carnet', $socio->carnet ?? \App\Models\Socio::CARNET_NO_TIENE))
+        <select name="carnet">
+            @foreach (\App\Models\Socio::CARNETS as $valorCarnet => $etiquetaCarnet)
+                <option value="{{ $valorCarnet }}" @selected($carnetActual === $valorCarnet)>{{ $etiquetaCarnet }}</option>
+            @endforeach
+        </select>
+    </div>
     <div style="grid-column: 1 / -1;">
         <label>Foto del socio</label>
         @if (($socio->foto_path ?? null))

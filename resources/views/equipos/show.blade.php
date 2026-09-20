@@ -43,7 +43,12 @@
         <div id="alerta-pagos-multiples" class="alert oculto"></div>
 
         <div class="card-header">
-            <h2 style="margin:0;">Jugadores</h2>
+            <h2 style="margin:0;">
+                Jugadores
+                <span style="font-weight:normal; color:#666; font-size:12px; margin-left:6px;">
+                    (orden alfabetico) &middot; Carnet: ✅ Tiene &nbsp; ➖ Extraviado &nbsp; ❌ No tiene
+                </span>
+            </h2>
             <button type="button" class="btn col-pago-multiple oculto" id="btn-ejecutar-pagos">Ejecutar pagos</button>
             <button type="button" class="btn col-tarjeta oculto" id="btn-registrar-tarjetas">Registrar tarjetas</button>
         </div>
@@ -56,6 +61,7 @@
                         <th>Posicion</th>
                         <th>Nivel</th>
                         <th>Estado</th>
+                        <th style="text-align:center;">Carnet</th>
                         <th>Deuda</th>
                         <th class="col-pago-multiple oculto">Valor a pagar</th>
                         <th class="col-pago-multiple oculto">Tipo</th>
@@ -71,6 +77,7 @@
                             <td>{{ $socio->posicion_juego }}</td>
                             <td>{{ [1 => 'Bueno', 2 => 'Regular', 3 => 'Malo'][$socio->nivel_jugador] ?? 'Sin registrar' }}</td>
                             <td><span class="badge badge-{{ $socio->estado }}">{{ ucfirst($socio->estado) }}</span></td>
+                            <td style="text-align:center; font-size:16px;" title="Carnet: {{ $socio->carnet_etiqueta }}">{{ $socio->carnet_simbolo }}</td>
                             <td class="celda-deuda {{ $socio->deuda_total > 0 ? 'deuda-positiva' : 'deuda-cero' }}">
                                 ${{ number_format($socio->deuda_total, 0, ',', '.') }}
                             </td>
@@ -105,7 +112,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="10">Sin jugadores asignados.</td></tr>
+                        <tr><td colspan="11">Sin jugadores asignados.</td></tr>
                     @endforelse
                 </tbody>
             </table>

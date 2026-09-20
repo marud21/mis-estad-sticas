@@ -18,12 +18,18 @@
                     <option value="{{ $unEstado }}" @selected($estado === $unEstado)>{{ ucfirst($unEstado) }}</option>
                 @endforeach
             </select>
+            <select name="carnet" style="width:auto; margin-bottom:0;" onchange="this.form.submit()">
+                <option value="">-- Carnet: todos --</option>
+                @foreach (\App\Models\Socio::CARNETS as $valorCarnet => $etiquetaCarnet)
+                    <option value="{{ $valorCarnet }}" @selected($carnet === $valorCarnet)>Carnet: {{ $etiquetaCarnet }}</option>
+                @endforeach
+            </select>
             <label style="display:flex; align-items:center; gap:4px; font-weight:normal; white-space:nowrap;">
                 <input type="checkbox" name="multi_equipo" value="1" @checked(request('multi_equipo')) onchange="this.form.submit()">
                 Solo con mas de un equipo
             </label>
             <button class="btn btn-secondary" type="submit">Buscar</button>
-            @if (request('q') || request('multi_equipo') || $estado !== '')
+            @if (request('q') || request('multi_equipo') || $estado !== '' || $carnet !== '')
                 <a class="btn btn-secondary" href="{{ route('socios.index') }}">Limpiar</a>
             @endif
         </form>
@@ -33,6 +39,12 @@
             @if ($estado !== '')
                 en estado <strong>{{ ucfirst($estado) }}</strong>
             @endif
+            @if ($carnet !== '')
+                con carnet <strong>{{ \App\Models\Socio::CARNETS[$carnet] }}</strong>
+            @endif
+            <span style="margin-left:10px;">
+                &middot; Carnet: ✅ Tiene &nbsp; ➖ Extraviado &nbsp; ❌ No tiene
+            </span>
         </p>
 
         <table>
@@ -44,6 +56,7 @@
                     <th>Nivel</th>
                     <th>Equipo</th>
                     <th>Estado</th>
+                    <th style="text-align:center;">Carnet</th>
                     <th>Deuda</th>
                     <th></th>
                 </tr>
@@ -57,6 +70,7 @@
                         <td>{{ [1 => 'Bueno', 2 => 'Regular', 3 => 'Malo'][$socio->nivel_jugador] ?? 'Sin registrar' }}</td>
                         <td>{{ $socio->equipoActual()?->nombre ?? '-' }}</td>
                         <td><span class="badge badge-{{ $socio->estado }}">{{ ucfirst($socio->estado) }}</span></td>
+                        <td style="text-align:center; font-size:16px;" title="Carnet: {{ $socio->carnet_etiqueta }}">{{ $socio->carnet_simbolo }}</td>
                         <td class="{{ $socio->deuda_total > 0 ? 'deuda-positiva' : 'deuda-cero' }}">
                             ${{ number_format($socio->deuda_total, 0, ',', '.') }}
                         </td>
@@ -70,7 +84,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="8">No hay socios registrados.</td></tr>
+                    <tr><td colspan="9">No hay socios registrados.</td></tr>
                 @endforelse
             </tbody>
         </table>

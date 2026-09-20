@@ -12,6 +12,7 @@ use App\Services\SocioService;
 use App\Support\AgrupadorFinanciero;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class SocioController extends Controller
 {
@@ -32,6 +33,10 @@ class SocioController extends Controller
         $estado = $request->string('estado')->trim()->toString();
         $estado = in_array($estado, Socio::ESTADOS, true) ? $estado : '';
 
+        // Mismo criterio para el estado del carnet.
+        $carnet = $request->string('carnet')->trim()->toString();
+        $carnet = array_key_exists($carnet, Socio::CARNETS) ? $carnet : '';
+
         $socios = Socio::with('equipos')
             ->when($q !== '', function ($query) use ($q) {
                 $query->where(function ($sub) use ($q) {
@@ -41,10 +46,11 @@ class SocioController extends Controller
             })
             ->when($soloMultiEquipo, fn ($query) => $query->has('equipos', '>', 1))
             ->when($estado !== '', fn ($query) => $query->where('estado', $estado))
+            ->when($carnet !== '', fn ($query) => $query->where('carnet', $carnet))
             ->orderBy('nombre_completo')
             ->paginate(15);
 
-        return view('socios.index', compact('socios', 'estado'));
+        return view('socios.index', compact('socios', 'estado', 'carnet'));
     }
 
     public function create()
@@ -124,6 +130,17 @@ class SocioController extends Controller
         $this->socios->cambiarEstado($socio, request('estado'));
 
         return back()->with('status', 'Estado del socio actualizado.');
+    }
+
+    public function cambiarCarnet(Socio $socio)
+    {
+        $datos = request()->validate([
+            'carnet' => ['required', Rule::in(array_keys(Socio::CARNETS))],
+        ]);
+
+        $this->socios->cambiarCarnet($socio, $datos['carnet']);
+
+        return back()->with('status', "Carnet actualizado a \"{$socio->carnet_etiqueta}\".");
     }
 
     public function agregarEquipo(Socio $socio)

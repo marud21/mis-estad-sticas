@@ -47,7 +47,10 @@ class EquipoController extends Controller
 
     public function show(Equipo $equipo)
     {
-        $equipo->load(['socios', 'torneo']);
+        $equipo->load([
+            'socios' => fn ($query) => $query->orderBy('nombre_completo'),
+            'torneo',
+        ]);
 
         $sociosDisponibles = Socio::with('equipos')
             ->whereDoesntHave('equipos', fn ($q) => $q->where('equipos.id', $equipo->id))

@@ -38,6 +38,7 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('socios', SocioController::class);
     Route::patch('socios/{socio}/estado', [SocioController::class, 'cambiarEstado'])->name('socios.estado');
+    Route::patch('socios/{socio}/carnet', [SocioController::class, 'cambiarCarnet'])->name('socios.carnet');
     Route::get('socios/{socio}/reporte', [ReporteController::class, 'socio'])->name('socios.reporte');
     Route::get('socios/{socio}/whatsapp', [ReporteController::class, 'whatsappSocio'])->name('socios.whatsapp');
 
