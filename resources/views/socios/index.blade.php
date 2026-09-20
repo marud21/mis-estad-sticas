@@ -10,21 +10,21 @@
             <a href="{{ route('socios.create') }}" class="btn">+ Nuevo socio</a>
         </div>
 
-        <form action="{{ route('socios.index') }}" method="GET" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:16px;">
-            <input type="text" name="q" placeholder="Buscar por nombre o documento..." value="{{ request('q') }}" style="margin-bottom:0;">
-            <select name="estado" style="width:auto; margin-bottom:0;" onchange="this.form.submit()">
+        <form id="filtros-socios" action="{{ route('socios.index') }}" method="GET">
+            <input type="text" name="q" placeholder="Buscar por nombre o documento..." value="{{ request('q') }}">
+            <select name="estado" onchange="this.form.submit()">
                 <option value="">-- Todos los estados --</option>
                 @foreach (\App\Models\Socio::ESTADOS as $unEstado)
                     <option value="{{ $unEstado }}" @selected($estado === $unEstado)>{{ ucfirst($unEstado) }}</option>
                 @endforeach
             </select>
-            <select name="carnet" style="width:auto; margin-bottom:0;" onchange="this.form.submit()">
+            <select name="carnet" onchange="this.form.submit()">
                 <option value="">-- Carnet: todos --</option>
                 @foreach (\App\Models\Socio::CARNETS as $valorCarnet => $etiquetaCarnet)
                     <option value="{{ $valorCarnet }}" @selected($carnet === $valorCarnet)>Carnet: {{ $etiquetaCarnet }}</option>
                 @endforeach
             </select>
-            <label style="display:flex; align-items:center; gap:4px; font-weight:normal; white-space:nowrap;">
+            <label>
                 <input type="checkbox" name="multi_equipo" value="1" @checked(request('multi_equipo')) onchange="this.form.submit()">
                 Solo con mas de un equipo
             </label>
@@ -90,4 +90,41 @@
         </table>
     </div>
     {{ $socios->appends(request()->query())->links() }}
+
+    <style>
+        /*
+         * La maquetacion del filtro va aqui y no en atributos "style" para
+         * que la consulta de pantalla angosta pueda sobreescribirla: un
+         * estilo en linea le gana a la hoja de estilos y dejaba los
+         * controles centrados y apretados en el telefono.
+         */
+        #filtros-socios {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+        #filtros-socios > input,
+        #filtros-socios > select { margin-bottom: 0; }
+        #filtros-socios > select { width: auto; }
+        #filtros-socios > label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: normal;
+            white-space: nowrap;
+        }
+
+        /*
+         * En pantallas de telefono los filtros se apilan a lo ancho, para
+         * que ningun control quede apretado contra el de al lado sin
+         * depender de cuanto mida cada uno en el navegador del dispositivo.
+         */
+        @media (max-width: 560px) {
+            #filtros-socios { flex-direction: column; align-items: stretch; }
+            #filtros-socios > * { width: 100%; max-width: 100%; }
+            #filtros-socios > label { white-space: normal; }
+        }
+    </style>
 @endsection

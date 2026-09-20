@@ -129,6 +129,17 @@
             margin-bottom: 14px;
             font-size: 14px;
         }
+        /*
+         * Las casillas y radios no deben estirarse con la regla de arriba:
+         * Safari en iOS los agranda y terminan empujando el texto de su
+         * etiqueta encima del boton que sigue.
+         */
+        input[type="checkbox"], input[type="radio"] {
+            width: auto;
+            padding: 0;
+            margin: 0;
+            flex: none;
+        }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
         .grid-4 { display: grid; grid-template-columns: 2fr 1fr 1fr 2fr; gap: 0 16px; }
         .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0 16px; }
