@@ -77,6 +77,7 @@ Route::middleware('auth')->group(function () {
     Route::post('cuota-moderada/recalcular', [CuotaModeradaController::class, 'recalcular'])->name('cuota-moderada.recalcular');
 
     Route::resource('noticias-admin', NoticiaController::class)->except(['show'])->parameters(['noticias-admin' => 'noticia']);
+    Route::delete('noticias-admin/{noticia}/adjuntos/{adjunto}', [NoticiaController::class, 'eliminarAdjunto'])->name('noticias-admin.adjuntos.destroy');
 
     Route::resource('torneos', TorneoController::class);
 

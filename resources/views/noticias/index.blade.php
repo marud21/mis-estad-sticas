@@ -12,7 +12,7 @@
         <div class="table-scroll">
             <table>
                 <thead>
-                    <tr><th>Titulo</th><th>Fecha</th><th>Estado</th><th>Autor</th><th></th></tr>
+                    <tr><th>Titulo</th><th>Fecha</th><th>Estado</th><th>Adjuntos</th><th>Autor</th><th></th></tr>
                 </thead>
                 <tbody>
                     @forelse ($noticias as $noticia)
@@ -26,6 +26,7 @@
                                     <span class="badge badge-suspendido">Borrador</span>
                                 @endif
                             </td>
+                            <td>{{ $noticia->adjuntos_count > 0 ? '📎 '.$noticia->adjuntos_count : '-' }}</td>
                             <td>{{ $noticia->autor->name ?? '-' }}</td>
                             <td class="actions">
                                 @if ($noticia->publicado)
@@ -40,7 +41,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="5">No hay noticias registradas.</td></tr>
+                        <tr><td colspan="6">No hay noticias registradas.</td></tr>
                     @endforelse
                 </tbody>
             </table>

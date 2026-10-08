@@ -9,6 +9,7 @@ class NoticiaPublicaController extends Controller
     public function index()
     {
         $noticias = Noticia::where('publicado', true)
+            ->withCount('adjuntos')
             ->orderByDesc('fecha_publicacion')
             ->orderByDesc('id')
             ->paginate(9);
@@ -19,6 +20,8 @@ class NoticiaPublicaController extends Controller
     public function show(Noticia $noticia)
     {
         abort_unless($noticia->publicado, 404);
+
+        $noticia->load('adjuntos');
 
         return view('noticias-publicas.show', compact('noticia'));
     }

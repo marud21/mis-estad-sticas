@@ -171,7 +171,12 @@
                         @endif
                         <div class="contenido">
                             <h2>{{ $noticia->titulo }}</h2>
-                            <div class="fecha">{{ $noticia->fecha_publicacion->format('d/m/Y') }}</div>
+                            <div class="fecha">
+                                {{ $noticia->fecha_publicacion->format('d/m/Y') }}
+                                @if ($noticia->adjuntos_count > 0)
+                                    &middot; 📎 {{ $noticia->adjuntos_count }} archivo(s)
+                                @endif
+                            </div>
                             <p>{{ Illuminate\Support\Str::limit(strip_tags($noticia->contenido), 140) }}</p>
                             <a class="leer-mas" href="{{ route('noticias-publicas.show', $noticia) }}">Leer mas &rarr;</a>
                         </div>

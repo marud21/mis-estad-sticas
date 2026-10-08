@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Exceptions\PostTooLargeException;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
@@ -26,6 +27,17 @@ return Application::configure(basePath: dirname(__DIR__))
          * cobro de tarjetas) reciben el aviso como dato, para que la pantalla
          * pueda mostrarlo sin perder lo que el usuario ya habia escrito.
          */
+        /**
+         * Si lo que se sube pasa el tope del servidor (post_max_size), PHP
+         * descarta la peticion y Laravel responde 413 con una pantalla de
+         * error que no explica nada. Se devuelve al formulario con el aviso.
+         */
+        $exceptions->render(function (PostTooLargeException $e, Request $request) {
+            return back()
+                ->withInput($request->except('adjuntos', 'imagen'))
+                ->withErrors(['adjuntos' => 'Los archivos pesan demasiado para subirlos de una vez. Intenta con archivos mas livianos o subelos en varias veces.']);
+        });
+
         $exceptions->render(function (HttpException $e, Request $request) {
             // Laravel convierte el token vencido (TokenMismatchException) en
             // un HttpException 419 antes de llegar aqui, asi que se reconoce
