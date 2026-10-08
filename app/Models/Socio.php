@@ -30,6 +30,18 @@ class Socio extends Model
         self::ESTADO_EXCLUIDO,
     ];
 
+    /**
+     * Estados que siguen apareciendo en la planilla de juego: un socio
+     * suspendido o excluido lo esta por su situacion de pagos, pero sigue
+     * siendo jugador del equipo y debe poder ser anotado en el partido.
+     * Solo queda fuera el retirado, que ya no pertenece al club.
+     */
+    public const ESTADOS_EN_PLANILLA = [
+        self::ESTADO_ACTIVO,
+        self::ESTADO_SUSPENDIDO,
+        self::ESTADO_EXCLUIDO,
+    ];
+
     public const CARNET_TIENE = 'tiene';
     public const CARNET_EXTRAVIADO = 'extraviado';
     public const CARNET_NO_TIENE = 'no_tiene';

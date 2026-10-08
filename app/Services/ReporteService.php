@@ -69,14 +69,17 @@ class ReporteService
 
     public function planillaJuegoPdf(Equipo $equipoLocal, Equipo $equipoVisitante, array $datosPartido)
     {
+        // Suspendidos y excluidos siguen siendo jugadores del equipo: su
+        // situacion es de pagos, no deportiva, asi que deben poder anotarse
+        // en el partido junto a los activos.
         $jugadoresLocal = $equipoLocal->socios()
-            ->where('estado', Socio::ESTADO_ACTIVO)
+            ->whereIn('estado', Socio::ESTADOS_EN_PLANILLA)
             ->orderByRaw('numero_camiseta IS NULL, numero_camiseta')
             ->orderBy('nombre_completo')
             ->get();
 
         $jugadoresVisitante = $equipoVisitante->socios()
-            ->where('estado', Socio::ESTADO_ACTIVO)
+            ->whereIn('estado', Socio::ESTADOS_EN_PLANILLA)
             ->orderByRaw('numero_camiseta IS NULL, numero_camiseta')
             ->orderBy('nombre_completo')
             ->get();
