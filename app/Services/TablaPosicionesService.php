@@ -18,9 +18,9 @@ class TablaPosicionesService
     /**
      * Arma la tabla de posiciones de un torneo con los partidos ya jugados.
      *
-     * Se incluyen todos los equipos del torneo, incluso los inactivos: si
-     * un equipo se desactiva a mitad de temporada sus resultados ya
-     * ocurrieron y sacarlo dejaria la tabla sin cuadrar con los partidos.
+     * Solo se listan los equipos activos. Los partidos de un equipo que ya
+     * se desactivo si se siguen contando: el rival los jugo de verdad y
+     * descontarlos le cambiaria los puntos a quien no tiene la culpa.
      */
     public function calcular(Torneo $torneo): Collection
     {
@@ -36,6 +36,7 @@ class TablaPosicionesService
             ->map(fn (Collection $delEquipo) => $delEquipo->sum('puntos'));
 
         $tabla = Equipo::where('torneo_id', $torneo->id)
+            ->where('estado', Equipo::ESTADO_ACTIVO)
             ->orderBy('nombre')
             ->get()
             ->map(fn (Equipo $equipo) => $this->estadisticasDelEquipo(

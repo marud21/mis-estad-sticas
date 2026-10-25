@@ -99,6 +99,40 @@ class EstadisticasPublicasTest extends TestCase
         DB::rollBack();
     }
 
+    public function test_la_tabla_solo_lista_equipos_activos(): void
+    {
+        DB::beginTransaction();
+        [$t, $e] = $this->escenario();
+        $this->partidoJugado($t, $e['EA'], $e['EB'], 2, 0);
+
+        $e['EB']->update(['estado' => Equipo::ESTADO_INACTIVO]);
+
+        $porCategoria = app(EstadisticasTorneoService::class)->posicionesPorCategoria($t);
+        $nombres = $porCategoria['Categoria 50']->pluck('equipo')->all();
+
+        $this->assertEquals([$e['EA']->nombre], $nombres, 'El equipo inactivo no se lista.');
+
+        // Pero el partido que ya se jugo le sigue contando al rival.
+        $fila = $porCategoria['Categoria 50']->first();
+        $this->assertEquals(1, $fila['pj'], 'El partido contra el inactivo sigue contando.');
+        $this->assertEquals(3, $fila['pts']);
+        $this->assertEquals(2, $fila['gf']);
+        DB::rollBack();
+    }
+
+    public function test_la_valla_tampoco_muestra_equipos_inactivos(): void
+    {
+        DB::beginTransaction();
+        [$t, $e] = $this->escenario();
+        $this->partidoJugado($t, $e['EA'], $e['EB'], 2, 0);
+        $e['EA']->update(['estado' => Equipo::ESTADO_INACTIVO]);
+
+        $valla = app(EstadisticasTorneoService::class)->vallaPorCategoria($t);
+
+        $this->assertEquals([$e['EB']->nombre], $valla['Categoria 50']->pluck('equipo')->all());
+        DB::rollBack();
+    }
+
     // ---------- Goleadores ----------
 
     public function test_cuenta_los_goles_y_no_los_autogoles(): void
