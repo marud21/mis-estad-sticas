@@ -54,8 +54,10 @@
             display: flex;
             gap: 4px;
             padding: 0 16px;
+            flex-wrap: wrap;
+            position: relative;
         }
-        nav.mainnav a {
+        nav.mainnav > a, nav.mainnav .grupo-boton {
             color: var(--blanco);
             text-decoration: none;
             padding: 12px 16px;
@@ -63,9 +65,56 @@
             opacity: 0.85;
             border-bottom: 3px solid transparent;
         }
-        nav.mainnav a:hover, nav.mainnav a.active {
+        nav.mainnav > a:hover, nav.mainnav > a.active,
+        nav.mainnav .grupo-boton:hover, nav.mainnav .nav-grupo.activo .grupo-boton {
             opacity: 1;
             border-bottom: 3px solid var(--blanco);
+        }
+
+        /* Menus agrupados: el sistema crecio y 14 enlaces sueltos ya no
+           entraban en una linea. Se abren al hacer clic (no al pasar el
+           mouse) para que tambien funcionen en pantallas tactiles. */
+        .nav-grupo { position: relative; }
+        .grupo-boton {
+            background: none;
+            border: 0;
+            border-radius: 0;
+            width: auto;
+            margin: 0;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        .grupo-boton .flecha { font-size: 10px; transition: transform .15s ease; }
+        .nav-grupo.abierto .grupo-boton .flecha { transform: rotate(180deg); }
+        .grupo-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            min-width: 210px;
+            background: var(--azul-oscuro);
+            border-radius: 0 0 6px 6px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, .3);
+            z-index: 60;
+            padding: 4px 0;
+        }
+        .nav-grupo.abierto .grupo-menu { display: block; }
+        .grupo-menu a {
+            display: block;
+            color: var(--blanco);
+            text-decoration: none;
+            padding: 10px 16px;
+            font-size: 14px;
+            opacity: .85;
+            white-space: nowrap;
+        }
+        .grupo-menu a:hover, .grupo-menu a.active {
+            opacity: 1;
+            background: var(--azul-claro);
         }
         main.container {
             max-width: 1100px;
@@ -158,6 +207,12 @@
         .badge-carnet-tiene { background: var(--verde); }
         .badge-carnet-extraviado { background: var(--naranja); }
         .badge-carnet-no_tiene { background: #6b7280; }
+        .badge-partido-programado { background: var(--azul-claro); }
+        .badge-partido-jugado { background: var(--verde); }
+        .badge-partido-aplazado { background: var(--naranja); }
+        .badge-partido-suspendido { background: var(--naranja); }
+        .badge-partido-cancelado { background: var(--rojo); }
+        .text-center { text-align: center; }
         .alert {
             background: #e7f0fb;
             border: 1px solid var(--azul-claro);
@@ -242,14 +297,15 @@
                 padding: 12px 16px;
                 gap: 10px;
             }
-            nav.mainnav {
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-                white-space: nowrap;
-                flex-wrap: nowrap;
-                padding: 0 8px;
-            }
-            nav.mainnav a { padding: 12px 10px; font-size: 13px; }
+            /* Con el menu agrupado ya caben pocos elementos: se deja que
+               bajen de linea en vez de desplazarse de lado. El scroll
+               horizontal ademas recortaba los desplegables. */
+            nav.mainnav { padding: 0 8px; }
+            nav.mainnav > a, nav.mainnav .grupo-boton { padding: 12px 10px; font-size: 13px; }
+            /* El desplegable se ancla al menu completo para que nunca se
+               salga por el borde derecho de la pantalla. */
+            .nav-grupo { position: static; }
+            .grupo-menu { left: 8px; right: 8px; min-width: 0; }
             main.container { padding: 0 10px 32px; margin: 16px auto; }
             .card { padding: 14px; }
             .grid-2, .grid-4, .grid-5 { grid-template-columns: 1fr; }
@@ -285,20 +341,83 @@
             </form>
         </div>
     </header>
+    @php
+        // El menu se arma aqui para no repetir markup: cada grupo es un
+        // desplegable y los enlaces sueltos son los de uso diario.
+        $grupos = [
+            'Competencia' => [
+                ['titulo' => 'Torneos', 'url' => route('torneos.index'), 'activo' => request()->routeIs('torneos.*')],
+                ['titulo' => 'Partidos', 'url' => route('partidos.index'), 'activo' => request()->routeIs('partidos.*') && ! request()->routeIs('partidos.posiciones')],
+                ['titulo' => 'Tabla de posiciones', 'url' => route('partidos.posiciones'), 'activo' => request()->routeIs('partidos.posiciones')],
+                ['titulo' => 'Sanciones', 'url' => route('sanciones.index'), 'activo' => request()->routeIs('sanciones.*')],
+                ['titulo' => 'Planilla de juego', 'url' => route('planilla-juego.index'), 'activo' => request()->routeIs('planilla-juego.*')],
+            ],
+            'Finanzas' => [
+                ['titulo' => 'Tipos de cargo', 'url' => route('tipos-cargo.index'), 'activo' => request()->routeIs('tipos-cargo.*')],
+                ['titulo' => 'Cuota moderada', 'url' => route('cuota-moderada.index'), 'activo' => request()->routeIs('cuota-moderada.*')],
+                ['titulo' => 'Cierre de caja', 'url' => route('cierre-caja.index'), 'activo' => request()->routeIs('cierre-caja.*')],
+                ['titulo' => 'Reportes contables', 'url' => route('reportes-contables.index'), 'activo' => request()->routeIs('reportes-contables.*')],
+            ],
+            'Sistema' => [
+                ['titulo' => 'Importar datos', 'url' => route('importar.index'), 'activo' => request()->routeIs('importar.*')],
+                ['titulo' => 'Configuracion', 'url' => route('configuracion.index'), 'activo' => request()->routeIs('configuracion.*')],
+                ['titulo' => 'Cambiar contrasena', 'url' => route('password.edit'), 'activo' => request()->routeIs('password.*')],
+            ],
+        ];
+    @endphp
     <nav class="mainnav">
         <a href="{{ route('socios.index') }}" class="{{ request()->routeIs('socios.*') ? 'active' : '' }}">Socios</a>
         <a href="{{ route('equipos.index') }}" class="{{ request()->routeIs('equipos.*') ? 'active' : '' }}">Equipos</a>
-        <a href="{{ route('torneos.index') }}" class="{{ request()->routeIs('torneos.*') ? 'active' : '' }}">Torneos</a>
-        <a href="{{ route('planilla-juego.index') }}" class="{{ request()->routeIs('planilla-juego.*') ? 'active' : '' }}">Planilla de juego</a>
-        <a href="{{ route('tipos-cargo.index') }}" class="{{ request()->routeIs('tipos-cargo.*') ? 'active' : '' }}">Tipos de cargo</a>
-        <a href="{{ route('cuota-moderada.index') }}" class="{{ request()->routeIs('cuota-moderada.*') ? 'active' : '' }}">Cuota moderada</a>
-        <a href="{{ route('reportes-contables.index') }}" class="{{ request()->routeIs('reportes-contables.*') ? 'active' : '' }}">Reportes</a>
-        <a href="{{ route('cierre-caja.index') }}" class="{{ request()->routeIs('cierre-caja.*') ? 'active' : '' }}">Cierre de caja</a>
+
+        @foreach ($grupos as $nombreGrupo => $enlaces)
+            @php($grupoActivo = collect($enlaces)->contains('activo', true))
+            <div class="nav-grupo {{ $grupoActivo ? 'activo' : '' }}">
+                <button type="button" class="grupo-boton" aria-expanded="false">
+                    {{ $nombreGrupo }} <span class="flecha">&#9660;</span>
+                </button>
+                <div class="grupo-menu">
+                    @foreach ($enlaces as $enlace)
+                        <a href="{{ $enlace['url'] }}" class="{{ $enlace['activo'] ? 'active' : '' }}">{{ $enlace['titulo'] }}</a>
+                    @endforeach
+                </div>
+            </div>
+        @endforeach
+
         <a href="{{ route('noticias-admin.index') }}" class="{{ request()->routeIs('noticias-admin.*') ? 'active' : '' }}">Noticias</a>
-        <a href="{{ route('importar.index') }}" class="{{ request()->routeIs('importar.*') ? 'active' : '' }}">Importar</a>
-        <a href="{{ route('configuracion.index') }}" class="{{ request()->routeIs('configuracion.*') ? 'active' : '' }}">Configuracion</a>
-        <a href="{{ route('password.edit') }}" class="{{ request()->routeIs('password.*') ? 'active' : '' }}">Cambiar contrasena</a>
     </nav>
+    <script>
+        /**
+         * Los grupos del menu se abren con clic (no con el mouse encima)
+         * para que funcionen igual en telefono. Solo uno abierto a la vez.
+         */
+        (function () {
+            const grupos = Array.prototype.slice.call(document.querySelectorAll('.nav-grupo'));
+
+            function cerrarTodos(excepto) {
+                grupos.forEach(function (grupo) {
+                    if (grupo === excepto) return;
+                    grupo.classList.remove('abierto');
+                    grupo.querySelector('.grupo-boton').setAttribute('aria-expanded', 'false');
+                });
+            }
+
+            grupos.forEach(function (grupo) {
+                const boton = grupo.querySelector('.grupo-boton');
+                boton.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    const seAbre = !grupo.classList.contains('abierto');
+                    cerrarTodos(grupo);
+                    grupo.classList.toggle('abierto', seAbre);
+                    boton.setAttribute('aria-expanded', seAbre ? 'true' : 'false');
+                });
+            });
+
+            document.addEventListener('click', function () { cerrarTodos(null); });
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') cerrarTodos(null);
+            });
+        })();
+    </script>
     <main class="container">
         @if (session('status'))
             <div class="alert">{{ session('status') }}</div>

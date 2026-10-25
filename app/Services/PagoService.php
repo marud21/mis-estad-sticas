@@ -26,21 +26,25 @@ class PagoService
 
     /**
      * Registra en una sola transaccion los pagos de varios socios de un
-     * mismo equipo, todos con fecha de hoy y sin cargo asociado.
+     * mismo equipo, sin cargo asociado. La fecha es la que se elija en la
+     * pantalla (por defecto hoy), para poder cargar una recaudacion de un
+     * dia anterior sin que quede con la fecha equivocada.
      *
      * @param  array<int, array{socio_id:int, valor:float, tipo:string}>  $filas
      * @return Collection<int, Pago>
      */
-    public function crearVariosParaEquipo(Equipo $equipo, array $filas): Collection
+    public function crearVariosParaEquipo(Equipo $equipo, array $filas, ?string $fecha = null): Collection
     {
-        return DB::transaction(function () use ($equipo, $filas) {
-            return collect($filas)->map(function (array $fila) use ($equipo) {
+        $fechaPago = $fecha ?: today()->toDateString();
+
+        return DB::transaction(function () use ($equipo, $filas, $fechaPago) {
+            return collect($filas)->map(function (array $fila) use ($equipo, $fechaPago) {
                 $socio = $equipo->socios()->findOrFail($fila['socio_id']);
 
                 return $socio->pagos()->create([
                     'valor' => $fila['valor'],
                     'tipo' => $fila['tipo'],
-                    'fecha' => today(),
+                    'fecha' => $fechaPago,
                     'equipo_id' => $equipo->id,
                     'torneo_id' => $equipo->torneo_id,
                     'cargo_id' => null,

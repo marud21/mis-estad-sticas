@@ -49,8 +49,14 @@
                     (orden alfabetico) &middot; Carnet: ✅ Tiene &nbsp; ➖ Extraviado &nbsp; ❌ No tiene
                 </span>
             </h2>
-            <button type="button" class="btn col-pago-multiple oculto" id="btn-ejecutar-pagos">Ejecutar pagos</button>
-            <button type="button" class="btn col-tarjeta oculto" id="btn-registrar-tarjetas">Registrar tarjetas</button>
+            {{-- Una sola fecha para pagos y tarjetas: ambas operaciones se
+                 registran el mismo dia, no tiene sentido pedirla dos veces. --}}
+            <div id="bloque-acciones" class="oculto">
+                <label for="fecha-operacion">Fecha</label>
+                <input type="date" id="fecha-operacion" value="{{ date('Y-m-d') }}" max="{{ date('Y-m-d') }}">
+                <button type="button" class="btn col-pago-multiple oculto" id="btn-ejecutar-pagos">Ejecutar pagos</button>
+                <button type="button" class="btn col-tarjeta oculto" id="btn-registrar-tarjetas">Registrar tarjetas</button>
+            </div>
         </div>
 
         <div class="table-scroll">
@@ -66,7 +72,6 @@
                         <th class="col-pago-multiple oculto">Valor a pagar</th>
                         <th class="col-pago-multiple oculto">Tipo</th>
                         <th class="col-tarjeta oculto">Tarjeta</th>
-                        <th class="col-tarjeta oculto">Fecha de la tarjeta</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -100,9 +105,6 @@
                                     @endforeach
                                 </select>
                             </td>
-                            <td class="col-tarjeta oculto">
-                                <input type="date" class="input-fecha-tarjeta" data-socio-id="{{ $socio->id }}" value="{{ date('Y-m-d') }}" max="{{ date('Y-m-d') }}" style="width:auto; margin-bottom:0;">
-                            </td>
                             <td>
                                 <form action="{{ route('equipos.socios.destroy', [$equipo, $socio]) }}" method="POST" onsubmit="return confirm('¿Quitar jugador del equipo?');">
                                     @csrf
@@ -112,7 +114,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="11">Sin jugadores asignados.</td></tr>
+                        <tr><td colspan="10">Sin jugadores asignados.</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -142,6 +144,16 @@
     <style>
         .oculto { display: none; }
 
+        #bloque-acciones {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        #bloque-acciones.oculto { display: none; }
+        #bloque-acciones label { margin: 0; white-space: nowrap; }
+        #bloque-acciones input[type="date"] { width: auto; margin-bottom: 0; }
+
         @media (max-width: 600px) {
             #form-cambiar-estado { max-width: 100%; }
             #form-cambiar-estado select,
@@ -160,8 +172,23 @@
         const columnasPago = document.querySelectorAll('.col-pago-multiple');
         const alerta = document.getElementById('alerta-pagos-multiples');
 
+        const bloqueAcciones = document.getElementById('bloque-acciones');
+        const columnasTarjetaRef = document.querySelectorAll('.col-tarjeta');
+
+        /**
+         * La fecha es compartida por pagos y tarjetas, asi que el bloque se
+         * muestra mientras cualquiera de los dos modos este activo y se
+         * esconde cuando se cierran los dos.
+         */
+        function actualizarBloqueAcciones() {
+            const hayPagos = columnasPago.length > 0 && !columnasPago[0].classList.contains('oculto');
+            const hayTarjetas = columnasTarjetaRef.length > 0 && !columnasTarjetaRef[0].classList.contains('oculto');
+            bloqueAcciones.classList.toggle('oculto', !hayPagos && !hayTarjetas);
+        }
+
         function alternarPagosMultiples() {
             columnasPago.forEach(function (col) { col.classList.toggle('oculto'); });
+            actualizarBloqueAcciones();
         }
 
         btnPagosMultiples.addEventListener('click', alternarPagosMultiples);
@@ -211,6 +238,12 @@
                 return;
             }
 
+            const fechaPagos = document.getElementById('fecha-operacion').value;
+            if (!fechaPagos) {
+                mostrarAlerta('Elige la fecha de los pagos antes de ejecutarlos.', true);
+                return;
+            }
+
             const conRecibo = confirm('¿Deseas imprimir automaticamente el recibo de cada pago que se registre?\n\nAceptar = con recibo. Cancelar = sin recibo.');
 
             btnEjecutarPagos.disabled = true;
@@ -223,13 +256,22 @@
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                     'Accept': 'application/json',
                 },
-                body: JSON.stringify({ pagos: filas }),
+                body: JSON.stringify({ fecha: fechaPagos, pagos: filas }),
             })
                 .then(function (r) { return r.json().then(function (d) { return { respuesta: r, datos: d }; }); })
                 .then(function (res) {
                     if (avisarSiSesionExpiro(res.respuesta, res.datos)) return;
 
                     const data = res.datos;
+
+                    // Si la validacion rechaza algo (por ejemplo una fecha
+                    // futura), se muestra el motivo en vez de fallar mudo.
+                    if (!data.pagos) {
+                        const motivo = data.message || 'No se pudieron registrar los pagos. Revisa los datos e intenta de nuevo.';
+                        mostrarAlerta(motivo, true);
+                        return;
+                    }
+
                     mostrarAlerta(data.mensaje, false);
 
                     data.pagos.forEach(function (pago) {
@@ -277,16 +319,21 @@
 
         btnCobroTarjetas.addEventListener('click', function () {
             columnasTarjeta.forEach(function (col) { col.classList.toggle('oculto'); });
+            actualizarBloqueAcciones();
         });
 
         btnRegistrarTarjetas.addEventListener('click', function () {
+            const fechaTarjetas = document.getElementById('fecha-operacion').value;
+            if (!fechaTarjetas) {
+                mostrarAlerta('Elige la fecha antes de registrar las tarjetas.', true);
+                return;
+            }
+
             const filasTarjeta = [];
             document.querySelectorAll('.input-tipo-tarjeta').forEach(function (select) {
                 if (!select.value) return;
                 const socioId = select.dataset.socioId;
-                const fecha = document.querySelector('.input-fecha-tarjeta[data-socio-id="' + socioId + '"]').value;
-                if (!fecha) return;
-                filasTarjeta.push({ socio_id: socioId, tipo_cargo_id: select.value, fecha: fecha });
+                filasTarjeta.push({ socio_id: socioId, tipo_cargo_id: select.value, fecha: fechaTarjetas });
             });
 
             if (filasTarjeta.length === 0) {

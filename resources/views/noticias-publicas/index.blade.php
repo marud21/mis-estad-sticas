@@ -156,6 +156,7 @@
         </div>
         <a class="volver" href="{{ route('home') }}">&larr; Volver al inicio</a>
     </header>
+    @include('partials.nav-publico')
     <main class="container">
         <h1>Noticias e informes</h1>
 

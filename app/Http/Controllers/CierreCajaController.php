@@ -53,16 +53,11 @@ class CierreCajaController extends Controller
 
     public function anular(AnularCierreCajaRequest $request, CierreCaja $cierreCaja)
     {
-        if ($cierreCaja->anulado) {
+        $anulado = $this->cierres->anular($cierreCaja, $request->validated('motivo'), $request->user()?->id);
+
+        if (! $anulado) {
             return back()->with('status', 'Este cierre ya estaba anulado.');
         }
-
-        $cierreCaja->update([
-            'anulado' => true,
-            'anulado_motivo' => $request->validated('motivo'),
-            'anulado_por' => $request->user()?->id,
-            'anulado_en' => now(),
-        ]);
 
         return redirect()->route('cierre-caja.show', $cierreCaja)
             ->with('status', 'Cierre anulado. Ya puedes crear el cierre correcto para esa fecha desde "Nuevo cierre".');

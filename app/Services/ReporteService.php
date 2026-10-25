@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Models\Equipo;
+use App\Models\IncidenciaPartido;
 use App\Models\Pago;
+use App\Models\Partido;
 use App\Models\Socio;
 use App\Support\AgrupadorFinanciero;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -51,6 +53,37 @@ class ReporteService
         return Pdf::loadView('reportes.equipo', ['equipo' => $equipo, 'socios' => $socios]);
     }
 
+    /**
+     * Tarjetas que recibio cada socio del equipo en su ultimo partido
+     * jugado, para resaltarlos en la planilla de cobro: son los que llegan
+     * con una deuda nueva por amonestacion o expulsion.
+     *
+     * @return array{partido: ?Partido, tarjetas: \Illuminate\Support\Collection}
+     */
+    public function tarjetasDelUltimoPartido(Equipo $equipo): array
+    {
+        $ultimo = Partido::computables()
+            ->where(fn ($q) => $q->where('equipo_local_id', $equipo->id)->orWhere('equipo_visitante_id', $equipo->id))
+            ->orderByDesc('fecha_hora')
+            ->first();
+
+        if (! $ultimo) {
+            return ['partido' => null, 'tarjetas' => collect()];
+        }
+
+        $tarjetas = IncidenciaPartido::where('partido_id', $ultimo->id)
+            ->where('equipo_id', $equipo->id)
+            ->whereIn('tipo', array_keys(IncidenciaPartido::TARJETAS))
+            ->get()
+            ->groupBy('socio_id')
+            ->map(fn ($incidencias) => [
+                'amarillas' => $incidencias->where('tipo', IncidenciaPartido::TIPO_AMARILLA)->count(),
+                'rojas' => $incidencias->where('tipo', IncidenciaPartido::TIPO_ROJA)->count(),
+            ]);
+
+        return ['partido' => $ultimo, 'tarjetas' => $tarjetas];
+    }
+
     public function planillaPagosPdf(Equipo $equipo)
     {
         $equipo->load(['socios' => function ($query) {
@@ -64,7 +97,14 @@ class ReporteService
             return $socio;
         });
 
-        return Pdf::loadView('reportes.planilla-pagos', ['equipo' => $equipo, 'socios' => $socios]);
+        $ultimoPartido = $this->tarjetasDelUltimoPartido($equipo);
+
+        return Pdf::loadView('reportes.planilla-pagos', [
+            'equipo' => $equipo,
+            'socios' => $socios,
+            'partidoTarjetas' => $ultimoPartido['partido'],
+            'tarjetasPorSocio' => $ultimoPartido['tarjetas'],
+        ]);
     }
 
     public function planillaJuegoPdf(Equipo $equipoLocal, Equipo $equipoVisitante, array $datosPartido)

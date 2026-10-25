@@ -186,6 +186,7 @@
         </div>
         <a class="volver" href="{{ route('noticias-publicas.index') }}">&larr; Volver a noticias</a>
     </header>
+    @include('partials.nav-publico')
     <main class="container">
         <div class="card">
             @if ($noticia->imagen_path)

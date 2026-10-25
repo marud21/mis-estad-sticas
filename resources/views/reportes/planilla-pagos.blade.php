@@ -44,6 +44,17 @@
         tr:nth-child(even) td { background: #eaf6e0; }
         .deuda { font-weight: bold; color: #b3261e; }
         .abono { font-weight: bold; color: #0b2545; }
+        /* Jugadores que recibieron tarjeta en el ultimo partido: llegan con
+           una deuda nueva, por eso se resaltan al cobrar. */
+        tr.con-tarjeta td { background: #fff4d6 !important; }
+        .marca-tarjeta { font-size: 9px; font-weight: bold; color: #8a6100; white-space: nowrap; }
+        .aviso-tarjetas {
+            margin-bottom: 8px;
+            padding: 6px 8px;
+            background: #fff4d6;
+            border: 0.75px solid #e0c070;
+            font-size: 9.5px;
+        }
         .firma-linea { display: inline-block; width: 100%; border-bottom: 1px solid #333; height: 18px; }
         .fecha-generacion { color: #888; font-size: 10px; margin-top: 16px; }
     </style>
@@ -72,6 +83,14 @@
     </tr>
 </table>
 
+    @if (($partidoTarjetas ?? null) && ($tarjetasPorSocio ?? collect())->isNotEmpty())
+        <div class="aviso-tarjetas">
+            <strong>Resaltados:</strong> jugadores con tarjeta en el ultimo partido
+            ({{ $partidoTarjetas->equipoLocal->nombre ?? '' }} vs {{ $partidoTarjetas->equipoVisitante->nombre ?? '' }},
+            {{ $partidoTarjetas->fecha_hora->format('d/m/Y') }}). Su valor ya esta incluido en la deuda.
+        </div>
+    @endif
+
     <table class="principal">
         <thead>
             <tr>
@@ -96,10 +115,19 @@
                     $baseCuota = $socio->cuota_moderada !== null ? (float) $socio->cuota_moderada : ($deuda > 0 ? $deuda * 0.25 : 0);
                     $abonoMinimo = $deuda > 0 ? min($baseCuota, $deuda) : 0;
                     $ultimoPago = $socio->pagos->max('fecha');
+                    $tarjetas = ($tarjetasPorSocio ?? collect())->get($socio->id);
                 @endphp
-                <tr>
+                <tr class="{{ $tarjetas ? 'con-tarjeta' : '' }}">
                     <td>{{ $socio->numero_documento }}</td>
-                    <td>{{ $socio->nombre_completo }}</td>
+                    <td>
+                        {{ $socio->nombre_completo }}
+                        @if ($tarjetas)
+                            <span class="marca-tarjeta">
+                                @if ($tarjetas['rojas']) &#9632; {{ $tarjetas['rojas'] }}R @endif
+                                @if ($tarjetas['amarillas']) &#9632; {{ $tarjetas['amarillas'] }}A @endif
+                            </span>
+                        @endif
+                    </td>
                     <td class="deuda">${{ number_format($deuda, 0, ',', '.') }}</td>
                     <td class="abono">${{ number_format($abonoMinimo, 0, ',', '.') }}</td>
                     <td>{{ $ultimoPago ? \Illuminate\Support\Carbon::parse($ultimoPago)->format('d/m/Y') : '-' }}</td>

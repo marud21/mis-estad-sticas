@@ -31,10 +31,14 @@ class PagoController extends Controller
      */
     public function ejecutarMultiples(PagosMultiplesEquipoRequest $request, Equipo $equipo)
     {
-        $pagos = $this->pagos->crearVariosParaEquipo($equipo, $request->validated('pagos'));
+        $pagos = $this->pagos->crearVariosParaEquipo(
+            $equipo,
+            $request->validated('pagos'),
+            $request->validated('fecha'),
+        );
 
         return response()->json([
-            'mensaje' => $pagos->count().' pago(s) registrado(s) correctamente.',
+            'mensaje' => $pagos->count().' pago(s) registrado(s) con fecha '.$pagos->first()?->fecha->format('d/m/Y').'.',
             'pagos' => $pagos->map(fn (Pago $pago) => [
                 'id' => $pago->id,
                 'socio_id' => $pago->socio_id,

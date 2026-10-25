@@ -32,6 +32,28 @@ class CierreCajaService
     }
 
     /**
+     * Marca el cierre como anulado dejando constancia de quien y por que.
+     * No se borra: el historial del error tambien es informacion.
+     *
+     * @return bool false si ya estaba anulado (no hace nada).
+     */
+    public function anular(CierreCaja $cierre, string $motivo, ?int $userId): bool
+    {
+        if ($cierre->anulado) {
+            return false;
+        }
+
+        $cierre->update([
+            'anulado' => true,
+            'anulado_motivo' => $motivo,
+            'anulado_por' => $userId,
+            'anulado_en' => now(),
+        ]);
+
+        return true;
+    }
+
+    /**
      * Crea el cierre de caja del dia, recalculando los ingresos desde los
      * pagos guardados (no confia en lo que llegue del formulario) y
      * guardando los gastos asociados.

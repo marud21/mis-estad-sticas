@@ -9,19 +9,22 @@ use App\Http\Controllers\ConfiguracionController;
 use App\Http\Controllers\CuotaModeradaController;
 use App\Http\Controllers\ConsultaPublicaController;
 use App\Http\Controllers\EquipoController;
+use App\Http\Controllers\EstadisticasPublicasController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\NoticiaController;
 use App\Http\Controllers\NoticiaPublicaController;
 use App\Http\Controllers\PagoController;
+use App\Http\Controllers\PartidoController;
 use App\Http\Controllers\PlanillaJuegoController;
 use App\Http\Controllers\ReporteContableController;
 use App\Http\Controllers\ReporteController;
+use App\Http\Controllers\SancionController;
 use App\Http\Controllers\SocioController;
 use App\Http\Controllers\TipoCargoController;
 use App\Http\Controllers\TorneoController;
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'home')->name('home');
+Route::get('/', [EstadisticasPublicasController::class, 'index'])->name('home');
 
 Route::get('login', [LoginController::class, 'create'])->name('login')->middleware('guest');
 Route::post('login', [LoginController::class, 'store'])->name('login.store')->middleware('guest');
@@ -29,6 +32,9 @@ Route::post('logout', [LoginController::class, 'destroy'])->name('logout')->midd
 
 Route::get('consulta', [ConsultaPublicaController::class, 'index'])->name('consulta.index');
 Route::post('consulta', [ConsultaPublicaController::class, 'consultar'])->name('consulta.buscar');
+
+// Se conserva para que los enlaces ya compartidos sigan funcionando.
+Route::redirect('estadisticas', '/')->name('estadisticas-publicas.index');
 
 Route::get('noticias', [NoticiaPublicaController::class, 'index'])->name('noticias-publicas.index');
 Route::get('noticias/{noticia}', [NoticiaPublicaController::class, 'show'])->name('noticias-publicas.show');
@@ -80,6 +86,17 @@ Route::middleware('auth')->group(function () {
     Route::delete('noticias-admin/{noticia}/adjuntos/{adjunto}', [NoticiaController::class, 'eliminarAdjunto'])->name('noticias-admin.adjuntos.destroy');
 
     Route::resource('torneos', TorneoController::class);
+
+    Route::get('posiciones', [PartidoController::class, 'posiciones'])->name('partidos.posiciones');
+    Route::get('sanciones', [SancionController::class, 'index'])->name('sanciones.index');
+    Route::post('sanciones', [SancionController::class, 'store'])->name('sanciones.store');
+    Route::delete('sanciones/{sancion}', [SancionController::class, 'destroy'])->name('sanciones.destroy');
+    Route::post('posiciones/ajustes', [PartidoController::class, 'guardarAjuste'])->name('partidos.ajustes.store');
+    Route::delete('posiciones/ajustes/{ajuste}', [PartidoController::class, 'eliminarAjuste'])->name('partidos.ajustes.destroy');
+    Route::get('partidos/{partido}/planilla', [PartidoController::class, 'planilla'])->name('partidos.planilla');
+    Route::get('partidos/{partido}/registro', [PartidoController::class, 'registro'])->name('partidos.registro');
+    Route::post('partidos/{partido}/registro', [PartidoController::class, 'guardarRegistro'])->name('partidos.registro.guardar');
+    Route::resource('partidos', PartidoController::class)->except(['show']);
 
     Route::get('planilla-juego', [PlanillaJuegoController::class, 'index'])->name('planilla-juego.index');
     Route::post('planilla-juego', [PlanillaJuegoController::class, 'generar'])->name('planilla-juego.generar');

@@ -121,6 +121,7 @@
         @endif
         {{ $nombreSistema }} &mdash; Consulta de socio
     </header>
+    @include('partials.nav-publico')
     <main class="container">
         <div class="card">
             <h1>Consultar mis cargos y pagos</h1>

@@ -21,4 +21,9 @@ class Torneo extends Model
     {
         return $this->hasMany(Equipo::class);
     }
+
+    public function partidos(): HasMany
+    {
+        return $this->hasMany(Partido::class);
+    }
 }
