@@ -7,6 +7,43 @@
 --}}
 @php($tope = 10)
 
+{{-- ---------- Programacion de partidos ---------- --}}
+<div class="card">
+    <h2>&#9200; Programacion</h2>
+    @forelse ($programacionPorCategoria as $categoria => $partidos)
+        @php($lista = 'programacion-'.\Illuminate\Support\Str::slug($categoria))
+        <h3>{{ $categoria }}</h3>
+        <div class="tabla-scroll">
+            <table data-lista="{{ $lista }}">
+                <thead>
+                    <tr><th>Fecha</th><th>Hora</th><th>Fase</th><th>Local</th><th class="c"></th><th>Visitante</th><th>Lugar</th></tr>
+                </thead>
+                <tbody>
+                    @foreach ($partidos as $i => $p)
+                        <tr class="{{ $i >= $tope ? 'extra oculto' : '' }}">
+                            <td style="white-space:nowrap;">{{ $p->fecha_hora->format('d/m/Y') }}</td>
+                            <td style="white-space:nowrap;">{{ $p->fecha_hora->format('h:i a') }}</td>
+                            <td>{{ $p->fase ?? '-' }}</td>
+                            <td>{{ $p->equipoLocal->nombre ?? '-' }}</td>
+                            <td class="c marcador">vs</td>
+                            <td>{{ $p->equipoVisitante->nombre ?? '-' }}</td>
+                            <td>
+                                {{ $p->lugar ?? '-' }}
+                                @if ($p->estado === \App\Models\Partido::ESTADO_APLAZADO)
+                                    <span class="roja">({{ $p->estado_etiqueta }})</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        @include('partials.ver-mas', ['lista' => $lista, 'total' => $partidos->count(), 'tope' => $tope])
+    @empty
+        <p class="vacio">No hay partidos programados por ahora.</p>
+    @endforelse
+</div>
+
 {{-- ---------- Posiciones por categoria ---------- --}}
 <div class="card">
     <h2>&#127942; Tabla de posiciones</h2>

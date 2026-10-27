@@ -145,6 +145,24 @@ class EstadisticasTorneoService
     }
 
     /**
+     * Partidos que todavia se van a jugar, agrupados por categoria y del
+     * mas proximo al mas lejano. Entran los programados y los aplazados:
+     * un aplazado sigue pendiente y los jugadores necesitan verlo.
+     *
+     * @return Collection<string, Collection>
+     */
+    public function programacionPorCategoria(Torneo $torneo): Collection
+    {
+        return Partido::with(['equipoLocal:id,nombre,categoria', 'equipoVisitante:id,nombre,categoria'])
+            ->where('torneo_id', $torneo->id)
+            ->whereIn('estado', [Partido::ESTADO_PROGRAMADO, Partido::ESTADO_APLAZADO])
+            ->orderBy('fecha_hora')
+            ->get()
+            ->groupBy(fn (Partido $p) => $this->categoriaDelPartido($p))
+            ->sortKeys();
+    }
+
+    /**
      * Partidos ya jugados agrupados por categoria, del mas reciente al mas
      * viejo. Si los dos equipos son de categorias distintas el partido se
      * muestra aparte, para no atribuirselo a una categoria que no es.
@@ -158,17 +176,25 @@ class EstadisticasTorneoService
             ->computables()
             ->orderByDesc('fecha_hora')
             ->get()
-            ->groupBy(function (Partido $p) {
-                $local = $p->equipoLocal?->categoria;
-                $visitante = $p->equipoVisitante?->categoria;
-
-                if (filled($local) && filled($visitante) && $local !== $visitante) {
-                    return 'Intercategorias';
-                }
-
-                return $this->nombreCategoria($local ?: $visitante);
-            })
+            ->groupBy(fn (Partido $p) => $this->categoriaDelPartido($p))
             ->sortKeys();
+    }
+
+    /**
+     * Categoria bajo la que se muestra un partido. Si los dos equipos son
+     * de categorias distintas va aparte, para no atribuirselo a una que
+     * no es.
+     */
+    private function categoriaDelPartido(Partido $partido): string
+    {
+        $local = $partido->equipoLocal?->categoria;
+        $visitante = $partido->equipoVisitante?->categoria;
+
+        if (filled($local) && filled($visitante) && $local !== $visitante) {
+            return 'Intercategorias';
+        }
+
+        return $this->nombreCategoria($local ?: $visitante);
     }
 
     /**

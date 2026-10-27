@@ -24,6 +24,7 @@ class EstadisticasPublicasController extends Controller
             return view('home', [
                 'torneos' => $torneos,
                 'torneo' => null,
+                'programacionPorCategoria' => collect(),
                 'posicionesPorCategoria' => collect(),
                 'goleadoresPorCategoria' => collect(),
                 'sancionados' => collect(),
@@ -36,6 +37,7 @@ class EstadisticasPublicasController extends Controller
         return view('home', [
             'torneos' => $torneos,
             'torneo' => $torneo,
+            'programacionPorCategoria' => $this->estadisticas->programacionPorCategoria($torneo),
             'posicionesPorCategoria' => $this->estadisticas->posicionesPorCategoria($torneo),
             'goleadoresPorCategoria' => $this->estadisticas->goleadoresPorCategoria($torneo),
             'sancionados' => $this->estadisticas->sancionados($torneo),

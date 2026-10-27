@@ -51,6 +51,70 @@ class EstadisticasPublicasTest extends TestCase
         ]);
     }
 
+    // ---------- Programacion ----------
+
+    public function test_la_programacion_muestra_lo_pendiente_y_no_lo_jugado(): void
+    {
+        DB::beginTransaction();
+        [$t, $e] = $this->escenario();
+        $this->partidoJugado($t, $e['EA'], $e['EB'], 1, 0, '2030-02-01 10:00');
+        Partido::create([
+            'torneo_id' => $t->id, 'equipo_local_id' => $e['EA']->id, 'equipo_visitante_id' => $e['EB']->id,
+            'fecha_hora' => '2030-03-01 15:00', 'estado' => Partido::ESTADO_PROGRAMADO,
+        ]);
+        Partido::create([
+            'torneo_id' => $t->id, 'equipo_local_id' => $e['EC']->id, 'equipo_visitante_id' => $e['ED']->id,
+            'fecha_hora' => '2030-03-05 09:00', 'estado' => Partido::ESTADO_APLAZADO,
+        ]);
+        Partido::create([
+            'torneo_id' => $t->id, 'equipo_local_id' => $e['EC']->id, 'equipo_visitante_id' => $e['ED']->id,
+            'fecha_hora' => '2030-03-09 09:00', 'estado' => Partido::ESTADO_CANCELADO,
+        ]);
+
+        $programacion = app(EstadisticasTorneoService::class)->programacionPorCategoria($t);
+
+        $this->assertCount(2, $programacion->flatten(), 'Van el programado y el aplazado, no el jugado ni el cancelado.');
+        $this->assertEqualsCanonicalizing(['Categoria 50', 'Categoria 60'], $programacion->keys()->all());
+        $this->assertEquals(Partido::ESTADO_APLAZADO, $programacion['Categoria 60']->first()->estado);
+        DB::rollBack();
+    }
+
+    public function test_la_programacion_va_del_partido_mas_proximo_al_mas_lejano(): void
+    {
+        DB::beginTransaction();
+        [$t, $e] = $this->escenario();
+        foreach (['2030-05-10 10:00', '2030-03-02 10:00', '2030-04-07 10:00'] as $fecha) {
+            Partido::create([
+                'torneo_id' => $t->id, 'equipo_local_id' => $e['EA']->id, 'equipo_visitante_id' => $e['EB']->id,
+                'fecha_hora' => $fecha, 'estado' => Partido::ESTADO_PROGRAMADO,
+            ]);
+        }
+
+        $dela50 = app(EstadisticasTorneoService::class)->programacionPorCategoria($t)['Categoria 50'];
+
+        $this->assertEquals(
+            ['2030-03-02', '2030-04-07', '2030-05-10'],
+            $dela50->map(fn (Partido $p) => $p->fecha_hora->toDateString())->all(),
+            'Primero el mas proximo.'
+        );
+        DB::rollBack();
+    }
+
+    public function test_la_programacion_separa_los_partidos_entre_categorias(): void
+    {
+        DB::beginTransaction();
+        [$t, $e] = $this->escenario();
+        Partido::create([
+            'torneo_id' => $t->id, 'equipo_local_id' => $e['EA']->id, 'equipo_visitante_id' => $e['EC']->id,
+            'fecha_hora' => '2030-03-01 10:00', 'estado' => Partido::ESTADO_PROGRAMADO,
+        ]);
+
+        $programacion = app(EstadisticasTorneoService::class)->programacionPorCategoria($t);
+
+        $this->assertEquals(['Intercategorias'], $programacion->keys()->all());
+        DB::rollBack();
+    }
+
     // ---------- Posiciones por categoria ----------
 
     public function test_arma_una_tabla_por_cada_categoria(): void
@@ -357,6 +421,7 @@ class EstadisticasPublicasTest extends TestCase
         $html = view('home', [
             'torneos' => collect(),
             'torneo' => null,
+            'programacionPorCategoria' => collect(),
             'posicionesPorCategoria' => collect(),
             'goleadoresPorCategoria' => collect(),
             'sancionados' => collect(),
