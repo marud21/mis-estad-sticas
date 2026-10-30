@@ -321,6 +321,7 @@
             .btn-sm { padding: 5px 8px; font-size: 11px; }
         }
     </style>
+    @include('partials.desliz-tabla')
 </head>
 <body>
     <header class="topbar">

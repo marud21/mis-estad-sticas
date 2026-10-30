@@ -89,6 +89,7 @@
         }
     </style>
     @include('partials.estadisticas-estilos')
+    @include('partials.desliz-tabla')
 </head>
 <body>
     <header class="portada">
