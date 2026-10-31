@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Jobs\EnviarAvisoPush;
 use App\Models\Cargo;
 use App\Models\IncidenciaPartido;
 use App\Models\Partido;
@@ -9,6 +10,8 @@ use App\Models\Socio;
 use App\Models\TipoCargo;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class RegistroPartidoService
 {
@@ -28,7 +31,7 @@ class RegistroPartidoService
      */
     public function registrar(Partido $partido, array $incidencias): Partido
     {
-        return DB::transaction(function () use ($partido, $incidencias) {
+        $guardado = DB::transaction(function () use ($partido, $incidencias) {
             $this->limpiarRegistroAnterior($partido);
 
             $tiposCargo = $this->tiposDeCargoDeTarjetas();
@@ -57,6 +60,42 @@ class RegistroPartidoService
 
             return $partido;
         });
+
+        $this->avisarDelResultado($guardado);
+
+        return $guardado;
+    }
+
+    /**
+     * Avisa a los navegadores suscritos que ya hay un resultado nuevo.
+     *
+     * Se encola despues de cerrar la transaccion, no dentro: si se hiciera
+     * adentro, un aviso podria salir por un resultado que al final no se
+     * guardo. Y si encolar falla, se deja anotado pero no se interrumpe:
+     * el resultado ya esta guardado y eso es lo que importa.
+     */
+    private function avisarDelResultado(Partido $partido): void
+    {
+        $partido->loadMissing(['equipoLocal', 'equipoVisitante']);
+
+        try {
+            EnviarAvisoPush::dispatch(
+                'Nuevo resultado',
+                sprintf(
+                    '%s %d - %d %s',
+                    $partido->equipoLocal->nombre ?? 'Local',
+                    $partido->goles_local,
+                    $partido->goles_visitante,
+                    $partido->equipoVisitante->nombre ?? 'Visitante',
+                ),
+                route('home', ['torneo_id' => $partido->torneo_id]),
+            );
+        } catch (Throwable $e) {
+            Log::error('No se pudo encolar el aviso del resultado.', [
+                'partido_id' => $partido->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**

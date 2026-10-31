@@ -3,7 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $nombreSistema }}</title>
+    {{-- Permite agregar el sitio a la pantalla de inicio, unico modo de
+         recibir avisos en iPhone. --}}
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <meta name="theme-color" content="#0b2545">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Corvepatios">
     @include('partials.favicon')
     <style>
         :root {
@@ -105,6 +112,8 @@
     @include('partials.nav-publico')
 
     <main class="container">
+        @include('partials.avisos-push')
+
         @if (! $torneo)
             <div class="card">
                 <h2>&#127942; Estadisticas del torneo</h2>

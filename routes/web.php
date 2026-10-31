@@ -11,6 +11,7 @@ use App\Http\Controllers\ConsultaPublicaController;
 use App\Http\Controllers\EquipoController;
 use App\Http\Controllers\EstadisticasPublicasController;
 use App\Http\Controllers\ImportController;
+use App\Http\Controllers\NotificacionPushController;
 use App\Http\Controllers\NoticiaController;
 use App\Http\Controllers\NoticiaPublicaController;
 use App\Http\Controllers\PagoController;
@@ -35,6 +36,11 @@ Route::post('consulta', [ConsultaPublicaController::class, 'consultar'])->name('
 
 // Se conserva para que los enlaces ya compartidos sigan funcionando.
 Route::redirect('estadisticas', '/')->name('estadisticas-publicas.index');
+
+// Avisos de resultados. Son publicos a proposito: cualquiera que entre a
+// la pagina puede pedir que le avisen, sin crear ninguna cuenta.
+Route::post('avisos/suscribir', [NotificacionPushController::class, 'suscribir'])->name('avisos.suscribir');
+Route::post('avisos/desuscribir', [NotificacionPushController::class, 'desuscribir'])->name('avisos.desuscribir');
 
 Route::get('noticias', [NoticiaPublicaController::class, 'index'])->name('noticias-publicas.index');
 Route::get('noticias/{noticia}', [NoticiaPublicaController::class, 'show'])->name('noticias-publicas.show');
