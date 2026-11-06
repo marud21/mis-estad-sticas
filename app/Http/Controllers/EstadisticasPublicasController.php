@@ -3,13 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\Torneo;
+use App\Services\CumpleanosService;
 use App\Services\EstadisticasTorneoService;
 use Illuminate\Http\Request;
 
 class EstadisticasPublicasController extends Controller
 {
-    public function __construct(private readonly EstadisticasTorneoService $estadisticas)
-    {
+    public function __construct(
+        private readonly EstadisticasTorneoService $estadisticas,
+        private readonly CumpleanosService $cumpleanos,
+    ) {
     }
 
     /** La portada publica: lo primero que se ve son las estadisticas. */
@@ -20,10 +23,15 @@ class EstadisticasPublicasController extends Controller
         // Solo se acepta un torneo existente: por defecto, el mas reciente.
         $torneo = $torneos->firstWhere('id', $request->integer('torneo_id')) ?? $torneos->first();
 
+        // El saludo de cumpleaños no depende del torneo: se muestra igual
+        // aunque todavia no haya ninguno publicado.
+        $cumpleaneros = $this->cumpleanos->deHoy();
+
         if (! $torneo) {
             return view('home', [
                 'torneos' => $torneos,
                 'torneo' => null,
+                'cumpleaneros' => $cumpleaneros,
                 'programacionPorCategoria' => collect(),
                 'posicionesPorCategoria' => collect(),
                 'goleadoresPorCategoria' => collect(),
@@ -37,6 +45,7 @@ class EstadisticasPublicasController extends Controller
         return view('home', [
             'torneos' => $torneos,
             'torneo' => $torneo,
+            'cumpleaneros' => $cumpleaneros,
             'programacionPorCategoria' => $this->estadisticas->programacionPorCategoria($torneo),
             'posicionesPorCategoria' => $this->estadisticas->posicionesPorCategoria($torneo),
             'goleadoresPorCategoria' => $this->estadisticas->goleadoresPorCategoria($torneo),

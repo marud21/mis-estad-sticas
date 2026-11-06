@@ -421,6 +421,7 @@ class EstadisticasPublicasTest extends TestCase
         $html = view('home', [
             'torneos' => collect(),
             'torneo' => null,
+            'cumpleaneros' => collect(),
             'programacionPorCategoria' => collect(),
             'posicionesPorCategoria' => collect(),
             'goleadoresPorCategoria' => collect(),

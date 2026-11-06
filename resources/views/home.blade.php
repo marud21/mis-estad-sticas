@@ -68,7 +68,12 @@
         .selector select {
             padding: 8px 10px; border: 1px solid var(--gris-borde);
             border-radius: 6px; font-size: 14px; background: var(--blanco);
+            /* Un torneo con nombre muy largo estiraba el selector de lado a
+               lado y se montaba sobre el dibujo del fondo. La lista
+               desplegada si muestra el nombre completo. */
+            max-width: 100%;
         }
+        .franja-superior.con-cumple .selector select { max-width: 260px; }
 
         .noticias { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
         .noticias > * { min-width: 0; }
@@ -87,12 +92,130 @@
             color: #8a94a0; font-size: 13px;
         }
 
+        /* Primera franja: el encabezado del torneo y, a su derecha, el
+           saludo de cumpleaños. Sin cumpleañeros no hay segunda columna y
+           el encabezado ocupa todo el ancho. */
+        .franja-superior.con-cumple {
+            display: grid;
+            grid-template-columns: 1fr minmax(240px, 320px);
+            gap: 18px;
+            /* Las dos tarjetas quedan de la misma altura, la del contenido
+               mas alto. Con "start" cada una tomaba la suya y la mas corta
+               dejaba un hueco al lado. */
+            align-items: stretch;
+        }
+        .franja-superior.con-cumple > * { min-width: 0; }
+
+        /* Dibujo de una cancha al fondo, a la derecha, en azul muy tenue.
+           Va como SVG dentro del mismo CSS y no como imagen aparte: no hay
+           archivo que cargar ni que se pueda perder, y se ve nitido en
+           cualquier pantalla. */
+        .cabecera-torneo {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 130'%3E%3Cg fill='none' stroke='%231d4e89' stroke-opacity='0.16' stroke-width='3'%3E%3Crect x='5' y='5' width='190' height='120' rx='3'/%3E%3Cline x1='100' y1='5' x2='100' y2='125'/%3E%3Ccircle cx='100' cy='65' r='26'/%3E%3Crect x='5' y='35' width='28' height='60'/%3E%3Crect x='167' y='35' width='28' height='60'/%3E%3C/g%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            background-size: auto 78%;
+            transition: background-position .35s ease, box-shadow .25s ease, border-color .25s ease;
+        }
+
+        /* Al pasar el mouse la cancha entra un poco y la tarjeta se levanta.
+           En telefono no hay mouse, asi que alli queda el fondo quieto: el
+           efecto es un adorno, nada depende de el. */
+        .cabecera-torneo:hover {
+            background-position: right 24px center;
+            box-shadow: 0 6px 18px rgba(11, 37, 69, .12);
+            border-color: var(--azul-claro);
+        }
+
+        /* Por debajo de ~1000px la tarjeta ya no es lo bastante ancha para
+           que la cancha quepa al lado del texto, asi que se achica a la
+           esquina de arriba. Es el ancho donde el selector de torneo
+           empezaba a quedar encima del dibujo. */
+        @media (max-width: 1000px) {
+            .cabecera-torneo {
+                background-position: right 12px top 12px;
+                background-size: auto 34%;
+            }
+            .cabecera-torneo:hover { background-position: right 12px top 12px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .cabecera-torneo { transition: none; }
+        }
+
+        /* Al estirarse, el sobrante se reparte arriba y abajo en vez de
+           quedar todo al pie de la tarjeta. */
+        .franja-superior.con-cumple > .cabecera-torneo {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .franja-superior.con-cumple > .cabecera-torneo > :first-child { margin-top: 0; }
+        .franja-superior.con-cumple > .cabecera-torneo > :last-child { margin-bottom: 0; }
+
+        /* Columna, para que si la tarjeta de al lado es la mas alta el
+           sobrante se vaya al mensaje del final y no quede un hueco. */
+        .cumple {
+            border-top: 3px solid var(--amarillo);
+            display: flex;
+            flex-direction: column;
+        }
+        .cumple-titulo { font-size: 16px; margin: 0 0 10px; }
+        .cumple-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+        .cumple-socio { display: flex; align-items: center; gap: 10px; }
+        .cumple-foto {
+            width: 52px; height: 52px; flex: none;
+            object-fit: cover; border-radius: 50%;
+            border: 2px solid var(--amarillo);
+        }
+        .cumple-iniciales {
+            display: flex; align-items: center; justify-content: center;
+            background: var(--gris-claro); color: var(--azul-oscuro);
+            font-weight: 700; font-size: 17px;
+        }
+        .cumple-datos { display: flex; flex-direction: column; min-width: 0; }
+        .cumple-datos strong { color: var(--azul-oscuro); font-size: 14px; line-height: 1.3; }
+        .cumple-datos span { color: #666; font-size: 12px; }
+        .cumple-mensaje { margin: 12px 0 0; font-size: 12px; color: #666; }
+        .franja-superior.con-cumple .cumple-mensaje { margin-top: auto; padding-top: 12px; }
+
+        /* Carrusel: solo se activa cuando el guion marca la lista. Sin el,
+           la lista sigue siendo una lista normal con todos a la vista. */
+        .cumple-lista.carrusel > .cumple-socio { display: none; }
+        .cumple-lista.carrusel > .cumple-socio.activo {
+            display: flex;
+            animation: aparecer .35s ease;
+        }
+        @keyframes aparecer {
+            from { opacity: 0; transform: translateX(8px); }
+            to { opacity: 1; transform: none; }
+        }
+
+        .cumple-puntos { display: none; gap: 6px; margin-top: 12px; }
+        .cumple-lista.carrusel ~ .cumple-puntos { display: flex; }
+        .cumple-punto {
+            width: 8px; height: 8px; padding: 0;
+            border: 0; border-radius: 50%;
+            background: var(--gris-borde);
+            cursor: pointer;
+            transition: background .2s;
+        }
+        .cumple-punto.activo { background: var(--amarillo); }
+
+        /* A quien pidio menos movimiento se le cambia igual, pero sin la
+           animacion de entrada. */
+        @media (prefers-reduced-motion: reduce) {
+            .cumple-lista.carrusel > .cumple-socio.activo { animation: none; }
+        }
+
         @media (max-width: 760px) {
             main.container { padding: 0 10px 32px; margin: 16px auto; }
             .card { padding: 14px; }
             header.portada { padding: 16px; }
             header.portada h1 { font-size: 20px; }
             .noticias { grid-template-columns: 1fr; }
+            /* En telefono el saludo pasa a ocupar todo el ancho, debajo. */
+            .franja-superior.con-cumple { grid-template-columns: 1fr; }
         }
     </style>
     @include('partials.estadisticas-estilos')
@@ -114,13 +237,16 @@
     <main class="container">
         @include('partials.avisos-push')
 
+        {{-- El encabezado y el saludo de cumpleaños comparten la primera
+             franja: el saludo a la derecha, y debajo en telefono. --}}
+        <div class="franja-superior {{ $cumpleaneros->isNotEmpty() ? 'con-cumple' : '' }}">
         @if (! $torneo)
-            <div class="card">
+            <div class="card cabecera-torneo">
                 <h2>&#127942; Estadisticas del torneo</h2>
                 <p class="vacio">Todavia no hay torneos publicados.</p>
             </div>
         @else
-            <div class="card">
+            <div class="card cabecera-torneo">
                 <h2 style="font-size:20px;">{{ $torneo->nombre }}</h2>
                 <p class="sub" style="margin-bottom:0;">
                     @if ($torneo->fecha_inicio)
@@ -141,7 +267,11 @@
                     </form>
                 @endif
             </div>
+        @endif
+            @include('partials.cumpleanos')
+        </div>
 
+        @if ($torneo)
             @include('partials.estadisticas-torneo')
         @endif
 
