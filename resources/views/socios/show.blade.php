@@ -45,7 +45,7 @@
 
         <p>
             <strong>Estado:</strong>
-            <span class="badge badge-{{ $socio->estado }}">{{ ucfirst($socio->estado) }}</span>
+            <span class="badge badge-{{ $socio->estado }}">{{ $socio->estado_etiqueta }}</span>
             @if ($socio->fecha_cambio_estado)
                 <span style="color:#666; font-size:13px;">(desde {{ $socio->fecha_cambio_estado->format('d/m/Y') }})</span>
             @endif
@@ -54,10 +54,9 @@
             @csrf
             @method('PATCH')
             <select name="estado" style="width:auto; margin-bottom:0;">
-                <option value="activo" @selected($socio->estado === 'activo')>Activo</option>
-                <option value="suspendido" @selected($socio->estado === 'suspendido')>Suspendido</option>
-                <option value="retirado" @selected($socio->estado === 'retirado')>Retirado</option>
-                <option value="excluido" @selected($socio->estado === 'excluido')>Excluido</option>
+                @foreach (\App\Models\Socio::ESTADOS_ETIQUETAS as $valor => $etiqueta)
+                    <option value="{{ $valor }}" @selected($socio->estado === $valor)>{{ $etiqueta }}</option>
+                @endforeach
             </select>
             <button class="btn btn-sm" type="submit">Cambiar estado</button>
         </form>

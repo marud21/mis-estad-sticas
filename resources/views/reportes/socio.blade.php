@@ -24,7 +24,7 @@
         <p><strong>Direccion:</strong> {{ $socio->direccion_residencia }}</p>
         <p><strong>Posicion:</strong> {{ $socio->posicion_juego }}</p>
         <p><strong>Nivel:</strong> {{ [1 => 'Bueno', 2 => 'Regular', 3 => 'Malo'][$socio->nivel_jugador] ?? 'Sin registrar' }}</p>
-        <p><strong>Estado:</strong> {{ ucfirst($socio->estado) }}</p>
+        <p><strong>Estado:</strong> {{ $socio->estado_etiqueta }}</p>
         <p><strong>Equipos:</strong> {{ $socio->equipos->pluck('nombre')->join(', ') ?: '-' }}</p>
     </div>
 

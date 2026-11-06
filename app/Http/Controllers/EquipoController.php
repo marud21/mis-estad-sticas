@@ -112,8 +112,8 @@ class EquipoController extends Controller
         $this->equipos->cambiarEstado($equipo, request('estado'));
 
         $mensaje = request('estado') === Equipo::ESTADO_INACTIVO
-            ? 'Equipo marcado como inactivo. Sus socios activos quedaron suspendidos.'
-            : 'Equipo marcado como activo. Los socios suspendidos por el equipo fueron reactivados.';
+            ? 'Equipo marcado como inactivo. Sus socios activos quedaron en sostenimiento.'
+            : 'Equipo marcado como activo. Los socios que quedaron en sostenimiento por el equipo fueron reactivados.';
 
         return back()->with('status', $mensaje);
     }

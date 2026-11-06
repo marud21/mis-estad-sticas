@@ -31,6 +31,22 @@ class Socio extends Model
     ];
 
     /**
+     * Nombre con el que se muestra cada estado en pantalla.
+     *
+     * "suspendido" se guarda asi en la base y se llama asi en todo el
+     * codigo, pero la corporacion lo llama "sostenimiento", que es lo que
+     * ve el usuario. Se cambia solo la etiqueta y no el valor guardado
+     * para no tener que reescribir los datos historicos ni las reglas de
+     * cobro que dependen de el.
+     */
+    public const ESTADOS_ETIQUETAS = [
+        self::ESTADO_ACTIVO => 'Activo',
+        self::ESTADO_SUSPENDIDO => 'Sostenimiento',
+        self::ESTADO_RETIRADO => 'Retirado',
+        self::ESTADO_EXCLUIDO => 'Excluido',
+    ];
+
+    /**
      * Estados que siguen apareciendo en la planilla de juego: un socio
      * suspendido o excluido lo esta por su situacion de pagos, pero sigue
      * siendo jugador del equipo y debe poder ser anotado en el partido.
@@ -128,6 +144,12 @@ class Socio extends Model
     public function getDeudaTotalAttribute(): float
     {
         return $this->total_cargos - $this->total_pagos;
+    }
+
+    /** Nombre del estado tal como se muestra en pantalla. */
+    public function getEstadoEtiquetaAttribute(): string
+    {
+        return self::ESTADOS_ETIQUETAS[$this->estado] ?? ucfirst((string) $this->estado);
     }
 
     /** Etiqueta legible del estado del carnet ("Tiene", "Extraviado", ...). */

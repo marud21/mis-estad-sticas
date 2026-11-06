@@ -28,7 +28,7 @@
             @endif
         </p>
         <form id="form-cambiar-estado" action="{{ route('equipos.estado', $equipo) }}" method="POST" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; max-width:320px;"
-              onsubmit="return confirm(this.querySelector('select').value === 'inactivo' ? '¿Marcar el equipo como inactivo? Sus socios activos quedaran suspendidos automaticamente.' : '¿Marcar el equipo como activo? Los socios suspendidos por el equipo se reactivaran automaticamente.');">
+              onsubmit="return confirm(this.querySelector('select').value === 'inactivo' ? '¿Marcar el equipo como inactivo? Sus socios activos quedaran en sostenimiento automaticamente.' : '¿Marcar el equipo como activo? Los socios que quedaron en sostenimiento por el equipo se reactivaran automaticamente.');">
             @csrf
             @method('PATCH')
             <select name="estado" style="width:auto; margin-bottom:0;">
@@ -81,7 +81,7 @@
                             <td><a href="{{ route('socios.show', $socio) }}">{{ $socio->nombre_completo }}</a></td>
                             <td>{{ $socio->posicion_juego }}</td>
                             <td>{{ [1 => 'Bueno', 2 => 'Regular', 3 => 'Malo'][$socio->nivel_jugador] ?? 'Sin registrar' }}</td>
-                            <td><span class="badge badge-{{ $socio->estado }}">{{ ucfirst($socio->estado) }}</span></td>
+                            <td><span class="badge badge-{{ $socio->estado }}">{{ $socio->estado_etiqueta }}</span></td>
                             <td style="text-align:center; font-size:16px;" title="Carnet: {{ $socio->carnet_etiqueta }}">{{ $socio->carnet_simbolo }}</td>
                             <td class="celda-deuda {{ $socio->deuda_total > 0 ? 'deuda-positiva' : 'deuda-cero' }}">
                                 ${{ number_format($socio->deuda_total, 0, ',', '.') }}

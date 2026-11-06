@@ -20,25 +20,29 @@ use Tests\TestCase;
 class AvisosPushTest extends TestCase
 {
     /**
-     * Datos como los que entrega un navegador de verdad: la clave publica
-     * es un punto de curva real de 65 bytes, porque una inventada no se
-     * puede cifrar y el sistema la rechaza a proposito.
+     * Punto de curva P-256 de verdad, de 65 bytes, igual al que entrega un
+     * navegador. Va fijo y no generado al vuelo porque openssl necesita su
+     * archivo de configuracion para crear claves EC, y en Windows no
+     * siempre lo encuentra: la prueba no deberia depender de eso.
      */
+    private const CLAVE_P256DH = 'BDg4iN9Hn48DCB3YcaFYC6P4qu0A58yRQfQDz2FWLciLePLR_3FyKqgkRWxiV6zJF6Yq7SMN-tkwjSqFQ-b69HY';
+
+    /** Datos como los que entrega un navegador de verdad. */
     private function datosDeSuscripcion(string $sufijo = 'a'): array
     {
-        $par = openssl_pkey_new([
-            'curve_name' => 'prime256v1',
-            'private_key_type' => OPENSSL_KEYTYPE_EC,
-        ]);
-        $detalle = openssl_pkey_get_details($par);
-        $punto = "\x04".str_pad($detalle['ec']['x'], 32, "\0", STR_PAD_LEFT)
-            .str_pad($detalle['ec']['y'], 32, "\0", STR_PAD_LEFT);
-
         return [
             'endpoint' => 'https://fcm.googleapis.com/fcm/send/prueba-'.$sufijo.'-'.uniqid(),
-            'clave_p256dh' => $this->base64Url($punto),
+            'clave_p256dh' => self::CLAVE_P256DH,
             'clave_auth' => $this->base64Url(random_bytes(16)),
         ];
+    }
+
+    public function test_la_clave_de_prueba_es_un_punto_de_curva_valido(): void
+    {
+        $crudo = base64_decode(strtr(self::CLAVE_P256DH, '-_', '+/'), true);
+
+        $this->assertEquals(65, strlen($crudo), 'Un punto P-256 sin comprimir pesa 65 bytes.');
+        $this->assertEquals("\x04", $crudo[0], 'Debe empezar con el marcador de punto sin comprimir.');
     }
 
     private function base64Url(string $crudo): string

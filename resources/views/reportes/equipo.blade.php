@@ -42,7 +42,7 @@
                 <tr>
                     <td>{{ $socio->nombre_completo }}</td>
                     <td>{{ $socio->numero_documento }}</td>
-                    <td>{{ ucfirst($socio->estado) }}</td>
+                    <td>{{ $socio->estado_etiqueta }}</td>
                     <td>${{ number_format($totalCargos, 0, ',', '.') }}</td>
                     <td>${{ number_format($totalPagos, 0, ',', '.') }}</td>
                     <td class="deuda">${{ number_format($deuda, 0, ',', '.') }}</td>

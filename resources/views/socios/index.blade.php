@@ -14,8 +14,8 @@
             <input type="text" name="q" placeholder="Buscar por nombre o documento..." value="{{ request('q') }}">
             <select name="estado" onchange="this.form.submit()">
                 <option value="">-- Todos los estados --</option>
-                @foreach (\App\Models\Socio::ESTADOS as $unEstado)
-                    <option value="{{ $unEstado }}" @selected($estado === $unEstado)>{{ ucfirst($unEstado) }}</option>
+                @foreach (\App\Models\Socio::ESTADOS_ETIQUETAS as $unEstado => $etiqueta)
+                    <option value="{{ $unEstado }}" @selected($estado === $unEstado)>{{ $etiqueta }}</option>
                 @endforeach
             </select>
             <select name="carnet" onchange="this.form.submit()">
@@ -37,7 +37,7 @@
         <p style="color:#666; font-size:13px; margin-top:-8px;">
             {{ number_format($socios->total(), 0, ',', '.') }} socio(s)
             @if ($estado !== '')
-                en estado <strong>{{ ucfirst($estado) }}</strong>
+                en estado <strong>{{ \App\Models\Socio::ESTADOS_ETIQUETAS[$estado] ?? ucfirst($estado) }}</strong>
             @endif
             @if ($carnet !== '')
                 con carnet <strong>{{ \App\Models\Socio::CARNETS[$carnet] }}</strong>
@@ -69,7 +69,7 @@
                         <td>{{ $socio->posicion_juego }}</td>
                         <td>{{ [1 => 'Bueno', 2 => 'Regular', 3 => 'Malo'][$socio->nivel_jugador] ?? 'Sin registrar' }}</td>
                         <td>{{ $socio->equipoActual()?->nombre ?? '-' }}</td>
-                        <td><span class="badge badge-{{ $socio->estado }}">{{ ucfirst($socio->estado) }}</span></td>
+                        <td><span class="badge badge-{{ $socio->estado }}">{{ $socio->estado_etiqueta }}</span></td>
                         <td style="text-align:center; font-size:16px;" title="Carnet: {{ $socio->carnet_etiqueta }}">{{ $socio->carnet_simbolo }}</td>
                         <td class="{{ $socio->deuda_total > 0 ? 'deuda-positiva' : 'deuda-cero' }}">
                             ${{ number_format($socio->deuda_total, 0, ',', '.') }}

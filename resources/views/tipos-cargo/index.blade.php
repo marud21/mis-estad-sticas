@@ -14,7 +14,7 @@
         </div>
         <table>
             <thead>
-                <tr><th>Nombre</th><th>Monto por defecto</th><th>Recurrente</th><th>% suspendido</th><th></th></tr>
+                <tr><th>Nombre</th><th>Monto por defecto</th><th>Recurrente</th><th>% sostenimiento</th><th></th></tr>
             </thead>
             <tbody>
                 @forelse ($tiposCargo as $tipo)
@@ -155,12 +155,12 @@
             const nivel = form.querySelector('select[name="nivel"]').value;
             const alcance = nivel === 'equipo'
                 ? 'al equipo seleccionado'
-                : (nivel === 'categoria' ? 'a la categoria seleccionada' : 'a todos los socios activos y suspendidos');
+                : (nivel === 'categoria' ? 'a la categoria seleccionada' : 'a todos los socios activos y en sostenimiento');
 
             if (modo === 'modificar') {
                 return confirm(
                     '¿Modificar el monto del cargo "' + nombre + '" ' + alcance + ' para la fecha indicada ' +
-                    '(los suspendidos quedaran al ' + porcentaje + '% del nuevo monto)?'
+                    '(los de sostenimiento quedaran al ' + porcentaje + '% del nuevo monto)?'
                 );
             }
 
@@ -171,7 +171,7 @@
                 );
             }
             return confirm(
-                '¿Aplicar "' + nombre + '" ' + alcance + ' (los suspendidos pagan el ' + porcentaje + '%)?'
+                '¿Aplicar "' + nombre + '" ' + alcance + ' (los de sostenimiento pagan el ' + porcentaje + '%)?'
             );
         }
 
