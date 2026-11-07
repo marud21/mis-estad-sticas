@@ -28,10 +28,11 @@ class RegistroPartidoService
      * pagos aplicados (esos se conservan para no perder ese historial).
      *
      * @param  array<int, array{socio_id:int, equipo_id:int, tipo:string}>  $incidencias
+     * @param  int|null  $jugadorPartidoId  la figura del partido, si se eligio
      */
-    public function registrar(Partido $partido, array $incidencias): Partido
+    public function registrar(Partido $partido, array $incidencias, ?int $jugadorPartidoId = null): Partido
     {
-        $guardado = DB::transaction(function () use ($partido, $incidencias) {
+        $guardado = DB::transaction(function () use ($partido, $incidencias, $jugadorPartidoId) {
             $this->limpiarRegistroAnterior($partido);
 
             $tiposCargo = $this->tiposDeCargoDeTarjetas();
@@ -56,6 +57,12 @@ class RegistroPartidoService
                 'goles_local' => $golesLocal,
                 'goles_visitante' => $golesVisitante,
                 'estado' => Partido::ESTADO_JUGADO,
+                // Registrar de nuevo sin elegir figura la quita, igual que
+                // pasa con las incidencias: manda lo ultimo que se guardo.
+                'jugador_partido_id' => $jugadorPartidoId,
+                // Si antes estaba marcado como walkover y ahora se carga
+                // un resultado normal, deja de serlo.
+                'equipo_ausente_id' => null,
             ]);
 
             return $partido;
@@ -96,6 +103,40 @@ class RegistroPartidoService
                 'error' => $e->getMessage(),
             ]);
         }
+    }
+
+    /**
+     * Registra un partido ganado por walkover: uno de los equipos no se
+     * presento y el marcador lo pone quien registra, porque no hay goles
+     * que contar.
+     *
+     * Va aparte de registrar() y no como una variante suya porque es otra
+     * operacion: aqui no hay incidencias, no hay figura y el marcador no
+     * se deriva de nada. Si el partido traia un registro anterior, se
+     * limpia igual que siempre (sin tocar cargos que ya tengan pagos):
+     * si no se jugo, nadie pudo haber hecho un gol ni recibido una
+     * tarjeta.
+     */
+    public function registrarWalkover(Partido $partido, int $equipoAusenteId, int $golesLocal, int $golesVisitante): Partido
+    {
+        $guardado = DB::transaction(function () use ($partido, $equipoAusenteId, $golesLocal, $golesVisitante) {
+            $this->limpiarRegistroAnterior($partido);
+
+            $partido->update([
+                'goles_local' => $golesLocal,
+                'goles_visitante' => $golesVisitante,
+                'estado' => Partido::ESTADO_JUGADO,
+                'equipo_ausente_id' => $equipoAusenteId,
+                // Nadie jugo, asi que no puede haber figura del partido.
+                'jugador_partido_id' => null,
+            ]);
+
+            return $partido;
+        });
+
+        $this->avisarDelResultado($guardado);
+
+        return $guardado;
     }
 
     /**

@@ -35,6 +35,8 @@ class Partido extends Model
         'fecha_hora',
         'lugar',
         'arbitro',
+        'jugador_partido_id',
+        'equipo_ausente_id',
         'fase',
         'estado',
         'observaciones',
@@ -64,6 +66,23 @@ class Partido extends Model
     public function incidencias(): HasMany
     {
         return $this->hasMany(IncidenciaPartido::class);
+    }
+
+    /** La figura del partido, si se eligio alguna. */
+    public function jugadorPartido(): BelongsTo
+    {
+        return $this->belongsTo(Socio::class, 'jugador_partido_id');
+    }
+
+    /** El equipo que no se presento, cuando el partido fue walkover. */
+    public function equipoAusente(): BelongsTo
+    {
+        return $this->belongsTo(Equipo::class, 'equipo_ausente_id');
+    }
+
+    public function getEsWalkoverAttribute(): bool
+    {
+        return $this->equipo_ausente_id !== null;
     }
 
     /** Goles y tarjetas de un equipo en este partido, por socio. */

@@ -23,6 +23,20 @@
         .roja { color: var(--rojo); }
         .vacio { color: #999; font-size: 14px; padding: 6px 0; }
 
+        /* Marca de walkover junto al marcador. */
+        .wo {
+            display: inline-block;
+            margin-left: 4px;
+            padding: 1px 5px;
+            border-radius: 4px;
+            background: var(--rojo);
+            color: var(--blanco);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .3px;
+            vertical-align: middle;
+        }
+
         .rejilla { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
         /* Sin esto los elementos del grid no se encogen por debajo de su
            contenido y las tablas empujan la pagina a lo ancho en telefonos. */
@@ -42,6 +56,40 @@
             cursor: pointer;
         }
         .ver-mas:hover { background: var(--azul-claro); color: var(--blanco); }
+
+        /* Mejores de la jornada: listado con la foto de cada figura. */
+        .figuras { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 10px; }
+        /* Aire entre una categoria y el encabezado de la siguiente. */
+        .figuras:not(:last-child) { margin-bottom: 18px; }
+        .figura-fila {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border: 1px solid var(--gris-borde);
+            border-radius: 8px;
+            border-left: 3px solid var(--amarillo);
+        }
+        .figura-foto {
+            width: 46px; height: 46px; flex: none;
+            object-fit: cover; border-radius: 50%;
+            border: 2px solid var(--amarillo);
+        }
+        .figura-iniciales {
+            display: flex; align-items: center; justify-content: center;
+            background: var(--gris-claro); color: var(--azul-oscuro);
+            font-weight: 700; font-size: 15px;
+        }
+        .figura-datos { display: flex; flex-direction: column; min-width: 0; }
+        .figura-datos strong { color: var(--azul-oscuro); font-size: 14px; line-height: 1.3; }
+        .figura-datos span { color: #666; font-size: 12px; }
+        /* El partido se va a la derecha y, si no cabe, baja de renglon. */
+        .figura-partido { margin-left: auto; color: #888; font-size: 12px; text-align: right; }
+
+        @media (max-width: 560px) {
+            .figura-partido { margin-left: 58px; text-align: left; width: 100%; }
+            .figura-fila { flex-wrap: wrap; }
+        }
 
         /* En telefonos dos tablas lado a lado quedan ilegibles: una debajo de otra. */
         @media (max-width: 700px) {

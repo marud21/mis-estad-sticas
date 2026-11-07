@@ -145,6 +145,95 @@ class EstadisticasTorneoService
     }
 
     /**
+     * Las figuras de la ultima jornada jugada: el jugador que eligio quien
+     * registro cada resultado.
+     *
+     * La jornada se toma del partido jugado mas reciente, no del nombre de
+     * la fase: "Jornada 10" y "Jornada 2" no se ordenan bien como texto, y
+     * la fecha no se equivoca. Los partidos sin fase se agrupan por su dia,
+     * para que el sistema siga funcionando si alguien no la llena.
+     *
+     * Cada categoria trae su propia ultima jornada, no una sola para todo
+     * el torneo: si la 40 va en la fecha 15 y la 50 en la 12, cada una
+     * muestra la suya en vez de que la mas adelantada tape a la otra.
+     *
+     * @return Collection<string, array{jornada: string, figuras: Collection<int, object>}>
+     */
+    public function mejoresPorCategoria(Torneo $torneo): Collection
+    {
+        $jugados = Partido::with([
+            'jugadorPartido:id,nombre_completo,foto_path',
+            'jugadorPartido.equipos:id,nombre',
+            'equipoLocal:id,nombre,categoria',
+            'equipoVisitante:id,nombre,categoria',
+        ])
+            ->where('torneo_id', $torneo->id)
+            ->computables()
+            ->orderByDesc('fecha_hora')
+            ->get();
+
+        return $jugados
+            ->groupBy(fn (Partido $p) => $this->categoriaDelPartido($p))
+            ->map(fn (Collection $deLaCategoria) => $this->ultimaJornadaDe($deLaCategoria))
+            // Una categoria donde no se eligio a nadie no se muestra: una
+            // lista vacia no le dice nada a quien la lee.
+            ->filter(fn (array $datos) => $datos['figuras']->isNotEmpty())
+            ->sortKeys();
+    }
+
+    /**
+     * De los partidos de una categoria (ya ordenados del mas reciente al
+     * mas viejo), se queda con los de la ultima jornada y arma sus figuras.
+     *
+     * @param  Collection<int, Partido>  $partidos
+     * @return array{jornada: string, figuras: Collection<int, object>}
+     */
+    private function ultimaJornadaDe(Collection $partidos): array
+    {
+        $ultimo = $partidos->first();
+
+        // Los partidos sin fase se agrupan por su dia, para que el sistema
+        // siga funcionando si alguien no la llena.
+        $mismaJornada = filled($ultimo->fase)
+            ? fn (Partido $p) => $p->fase === $ultimo->fase
+            : fn (Partido $p) => blank($p->fase)
+                && $p->fecha_hora->toDateString() === $ultimo->fecha_hora->toDateString();
+
+        return [
+            'jornada' => $ultimo->fase ?: $ultimo->fecha_hora->format('d/m/Y'),
+            'figuras' => $partidos
+                ->filter($mismaJornada)
+                ->filter(fn (Partido $p) => $p->jugadorPartido !== null)
+                ->sortBy(fn (Partido $p) => $p->fecha_hora)
+                ->map(fn (Partido $p) => (object) [
+                    'jugador' => $p->jugadorPartido->nombre_completo,
+                    'foto' => $p->jugadorPartido->foto_path,
+                    'equipo' => $this->equipoDeLaFigura($p),
+                    'partido' => sprintf(
+                        '%s vs %s',
+                        $p->equipoLocal->nombre ?? 'Local',
+                        $p->equipoVisitante->nombre ?? 'Visitante',
+                    ),
+                ])
+                ->values(),
+        ];
+    }
+
+    /**
+     * El equipo con el que jugo la figura: de los equipos a los que
+     * pertenece, el que disputo ese partido. Si pertenece a varios, se
+     * queda el que corresponde y no el primero de la lista.
+     */
+    private function equipoDeLaFigura(Partido $partido): string
+    {
+        $suyos = $partido->jugadorPartido->equipos;
+
+        $delPartido = $suyos->whereIn('id', [$partido->equipo_local_id, $partido->equipo_visitante_id])->first();
+
+        return $delPartido->nombre ?? $suyos->first()->nombre ?? 'Sin equipo';
+    }
+
+    /**
      * Partidos que todavia se van a jugar, agrupados por categoria y del
      * mas proximo al mas lejano. Entran los programados y los aplazados:
      * un aplazado sigue pendiente y los jugadores necesitan verlo.
@@ -171,7 +260,11 @@ class EstadisticasTorneoService
      */
     public function resultadosPorCategoria(Torneo $torneo): Collection
     {
-        return Partido::with(['equipoLocal:id,nombre,categoria', 'equipoVisitante:id,nombre,categoria'])
+        return Partido::with([
+            'equipoLocal:id,nombre,categoria',
+            'equipoVisitante:id,nombre,categoria',
+            'equipoAusente:id,nombre',
+        ])
             ->where('torneo_id', $torneo->id)
             ->computables()
             ->orderByDesc('fecha_hora')

@@ -106,6 +106,20 @@ class PartidoController extends Controller
 
     public function guardarRegistro(RegistroPartidoRequest $request, Partido $partido)
     {
+        // El walkover es otro camino: nadie jugo, asi que no hay goles ni
+        // tarjetas que cargar y el marcador lo escribe quien registra.
+        if ($request->esWalkover()) {
+            $guardado = $this->registros->registrarWalkover(
+                $partido,
+                (int) $request->input('equipo_ausente_id'),
+                (int) $request->input('goles_local'),
+                (int) $request->input('goles_visitante'),
+            );
+
+            return redirect()->route('partidos.index', ['torneo_id' => $partido->torneo_id])
+                ->with('status', "Partido registrado por walkover: {$guardado->marcador}. No se genero ningun cargo.");
+        }
+
         $incidencias = $request->incidencias();
 
         // Aviso de doble cobro: si algun socio ya tiene una tarjeta cobrada
@@ -120,7 +134,11 @@ class PartidoController extends Controller
             }
         }
 
-        $this->registros->registrar($partido, $incidencias);
+        $this->registros->registrar(
+            $partido,
+            $incidencias,
+            $request->filled('jugador_partido_id') ? (int) $request->input('jugador_partido_id') : null,
+        );
 
         return redirect()->route('partidos.index', ['torneo_id' => $partido->torneo_id])
             ->with('status', "Resultado registrado: {$partido->fresh()->marcador}. Las tarjetas se cargaron a los socios.");

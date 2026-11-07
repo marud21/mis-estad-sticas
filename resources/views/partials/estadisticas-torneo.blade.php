@@ -7,6 +7,8 @@
 --}}
 @php($tope = 10)
 
+@include('partials.mejores-jornada')
+
 {{-- ---------- Programacion de partidos ---------- --}}
 <div class="card">
     <h2>&#9200; Programacion</h2>
@@ -227,7 +229,12 @@
                             <td style="white-space:nowrap;">{{ $p->fecha_hora->format('d/m/Y') }}</td>
                             <td>{{ $p->fase ?? '-' }}</td>
                             <td class="{{ $p->goles_local > $p->goles_visitante ? 'destacado' : '' }}">{{ $p->equipoLocal->nombre ?? '-' }}</td>
-                            <td class="c marcador">{{ $p->goles_local }} - {{ $p->goles_visitante }}</td>
+                            <td class="c marcador">
+                                {{ $p->goles_local }} - {{ $p->goles_visitante }}
+                                @if ($p->es_walkover)
+                                    <span class="wo" title="{{ $p->equipoAusente->nombre ?? 'Un equipo' }} no se presento">W.O.</span>
+                                @endif
+                            </td>
                             <td class="{{ $p->goles_visitante > $p->goles_local ? 'destacado' : '' }}">{{ $p->equipoVisitante->nombre ?? '-' }}</td>
                         </tr>
                     @endforeach

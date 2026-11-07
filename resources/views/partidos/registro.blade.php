@@ -49,7 +49,9 @@
             </div>
         @endif
 
-        <div class="alert">
+        {{-- Este aviso no aplica al walkover, donde el marcador se escribe
+             a mano, asi que se oculta junto con las tablas de jugadores. --}}
+        <div class="alert" id="aviso-normal">
             El marcador se calcula solo con los goles que cargues (un autogol suma al rival).
             Cada tarjeta le genera al socio su cargo correspondiente, con el mismo monto del cobro de tarjetas.
             Si vuelves a registrar este partido, se reemplaza lo anterior.
@@ -58,6 +60,55 @@
         <form action="{{ route('partidos.registro.guardar', $partido) }}" method="POST">
             @csrf
 
+            @php($esWalkover = (bool) old('walkover', $partido->es_walkover))
+
+            {{-- Walkover: al marcarlo se ocultan las tablas de jugadores,
+                 porque no se jugo, y se pide quien falto y el marcador. --}}
+            <label class="walkover-interruptor">
+                <input type="checkbox" name="walkover" value="1" id="campo-walkover" @checked($esWalkover)>
+                <span>Este partido fue por <strong>walkover</strong> (un equipo no se presento)</span>
+            </label>
+
+            <div class="walkover-datos" id="bloque-walkover" @if (! $esWalkover) hidden @endif>
+                <div class="grid-2">
+                    <div>
+                        <label for="equipo_ausente_id">Equipo que no se presento</label>
+                        <select name="equipo_ausente_id" id="equipo_ausente_id">
+                            <option value="">-- Selecciona --</option>
+                            @foreach ([$partido->equipoLocal, $partido->equipoVisitante] as $equipo)
+                                @if ($equipo)
+                                    <option value="{{ $equipo->id }}"
+                                            @selected((int) old('equipo_ausente_id', $partido->equipo_ausente_id) === $equipo->id)>
+                                        {{ $equipo->nombre }}
+                                    </option>
+                                @endif
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label>Marcador final</label>
+                        <div class="walkover-marcador">
+                            <input type="number" name="goles_local" min="0" max="99"
+                                   value="{{ old('goles_local', $esWalkover ? $partido->goles_local : null) }}"
+                                   aria-label="Goles de {{ $partido->equipoLocal->nombre ?? 'local' }}">
+                            <span>-</span>
+                            <input type="number" name="goles_visitante" min="0" max="99"
+                                   value="{{ old('goles_visitante', $esWalkover ? $partido->goles_visitante : null) }}"
+                                   aria-label="Goles de {{ $partido->equipoVisitante->nombre ?? 'visitante' }}">
+                        </div>
+                        <p class="walkover-nota">
+                            Izquierda: {{ $partido->equipoLocal->nombre ?? 'local' }} &middot;
+                            derecha: {{ $partido->equipoVisitante->nombre ?? 'visitante' }}.
+                        </p>
+                    </div>
+                </div>
+                <p class="walkover-nota">
+                    No se registran goles ni tarjetas, asi que no se le genera ningun cargo a nadie.
+                    El partido cuenta en la tabla de posiciones con el marcador que escribas.
+                </p>
+            </div>
+
+            <div id="bloque-normal" @if ($esWalkover) hidden @endif>
             @foreach ([['equipo' => $partido->equipoLocal, 'jugadores' => $jugadoresLocal], ['equipo' => $partido->equipoVisitante, 'jugadores' => $jugadoresVisitante]] as $lado)
                 @php($equipo = $lado['equipo'])
                 <h2 style="margin-top:22px;">{{ $equipo->nombre ?? 'Equipo' }}</h2>
@@ -107,6 +158,27 @@
                 Marcador: <span id="marcador">0 - 0</span>
             </div>
 
+            {{-- La figura del partido. Es opcional: si se deja sin elegir,
+                 el partido simplemente no aporta nadie a la jornada. --}}
+            <div class="figura">
+                <label for="jugador_partido_id">&#11088; Jugador del partido</label>
+                <select name="jugador_partido_id" id="jugador_partido_id">
+                    <option value="">-- Sin eleccion --</option>
+                    @foreach ([['equipo' => $partido->equipoLocal, 'jugadores' => $jugadoresLocal], ['equipo' => $partido->equipoVisitante, 'jugadores' => $jugadoresVisitante]] as $lado)
+                        <optgroup label="{{ $lado['equipo']->nombre ?? 'Equipo' }}">
+                            @foreach ($lado['jugadores'] as $jugador)
+                                <option value="{{ $jugador->id }}"
+                                        @selected((int) old('jugador_partido_id', $partido->jugador_partido_id) === $jugador->id)>
+                                    {{ $jugador->nombre_completo }}
+                                </option>
+                            @endforeach
+                        </optgroup>
+                    @endforeach
+                </select>
+                <p class="figura-nota">Aparecera en la pagina publica entre los mejores de la jornada.</p>
+            </div>
+            </div>{{-- fin de bloque-normal --}}
+
             @if (session('aviso_doble_cobro'))
                 <label style="display:flex; align-items:center; gap:6px; font-weight:normal; margin:14px 0;">
                     <input type="checkbox" name="confirmado" value="1" required>
@@ -127,6 +199,42 @@
             margin-bottom: 0;
             text-align: center;
         }
+        .walkover-interruptor {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: normal;
+            padding: 10px 12px;
+            border: 1px solid var(--gris-borde);
+            border-radius: 6px;
+            background: var(--gris-claro);
+            cursor: pointer;
+        }
+        .walkover-datos {
+            margin-top: 12px;
+            padding: 14px 16px;
+            border: 1px solid var(--gris-borde);
+            border-left: 3px solid var(--rojo);
+            border-radius: 6px;
+            background: #fdf6f5;
+        }
+        .walkover-marcador { display: flex; align-items: center; gap: 8px; }
+        .walkover-marcador input { width: 80px; text-align: center; margin-bottom: 0; }
+        .walkover-marcador span { font-weight: 700; color: var(--azul-oscuro); }
+        .walkover-nota { margin: 8px 0 0; font-size: 12px; color: #666; }
+
+        .figura {
+            margin-top: 16px;
+            padding: 14px 16px;
+            background: #fffaf0;
+            border: 1px solid var(--gris-borde);
+            border-left: 3px solid var(--naranja);
+            border-radius: 6px;
+        }
+        .figura label { display: block; font-weight: 600; margin-bottom: 6px; }
+        .figura select { max-width: 420px; margin-bottom: 0; }
+        .figura-nota { margin: 6px 0 0; font-size: 12px; color: #666; }
+
         .marcador-resumen {
             margin-top: 18px;
             padding: 12px 16px;
@@ -169,5 +277,41 @@
             campo.addEventListener('input', recalcularMarcador);
         });
         recalcularMarcador();
+
+        // Walkover: se muestra un bloque u otro, nunca los dos. Los campos
+        // del bloque oculto se deshabilitan para que no viajen en el envio
+        // y no se mezclen los dos caminos.
+        (function () {
+            const casilla = document.getElementById('campo-walkover');
+            const bloqueWalkover = document.getElementById('bloque-walkover');
+            const bloqueNormal = document.getElementById('bloque-normal');
+
+            if (!casilla) {
+                return;
+            }
+
+            const avisoNormal = document.getElementById('aviso-normal');
+
+            function alternar() {
+                const esWalkover = casilla.checked;
+
+                bloqueWalkover.hidden = !esWalkover;
+                bloqueNormal.hidden = esWalkover;
+
+                if (avisoNormal) {
+                    avisoNormal.hidden = esWalkover;
+                }
+
+                bloqueWalkover.querySelectorAll('input, select').forEach(function (campo) {
+                    campo.disabled = !esWalkover;
+                });
+                bloqueNormal.querySelectorAll('input, select').forEach(function (campo) {
+                    campo.disabled = esWalkover;
+                });
+            }
+
+            casilla.addEventListener('change', alternar);
+            alternar();
+        })();
     </script>
 @endsection
