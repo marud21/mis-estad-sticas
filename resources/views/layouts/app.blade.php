@@ -367,6 +367,7 @@
         ];
     @endphp
     <nav class="mainnav">
+        <a href="{{ route('panel.index') }}" class="{{ request()->routeIs('panel.*') ? 'active' : '' }}">Panel</a>
         <a href="{{ route('socios.index') }}" class="{{ request()->routeIs('socios.*') ? 'active' : '' }}">Socios</a>
         <a href="{{ route('equipos.index') }}" class="{{ request()->routeIs('equipos.*') ? 'active' : '' }}">Equipos</a>
 

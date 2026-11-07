@@ -15,6 +15,7 @@ use App\Http\Controllers\NotificacionPushController;
 use App\Http\Controllers\NoticiaController;
 use App\Http\Controllers\NoticiaPublicaController;
 use App\Http\Controllers\PagoController;
+use App\Http\Controllers\PanelController;
 use App\Http\Controllers\PartidoController;
 use App\Http\Controllers\PlanillaJuegoController;
 use App\Http\Controllers\ReporteContableController;
@@ -46,7 +47,9 @@ Route::get('noticias', [NoticiaPublicaController::class, 'index'])->name('notici
 Route::get('noticias/{noticia}', [NoticiaPublicaController::class, 'show'])->name('noticias-publicas.show');
 
 Route::middleware('auth')->group(function () {
-    Route::redirect('/panel', '/socios');
+    // Antes /panel era un atajo que llevaba a la lista de socios. Ahora
+    // es el panel de verdad, asi que ese redireccionamiento se quita.
+    Route::get('panel', [PanelController::class, 'index'])->name('panel.index');
 
     Route::resource('socios', SocioController::class);
     Route::patch('socios/{socio}/estado', [SocioController::class, 'cambiarEstado'])->name('socios.estado');

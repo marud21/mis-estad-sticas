@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Consulta de socio - {{ $nombreSistema }}</title>
     @include('partials.favicon')
+    @include('partials.analitica')
     <style>
         :root {
             --azul-oscuro: #0b2545;
@@ -219,5 +220,6 @@
         @endif
     </main>
     @include('partials.footer-firma')
+    @include('partials.aviso-cookies')
 </body>
 </html>

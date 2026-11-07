@@ -15,6 +15,10 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->appendToGroup('web', \App\Http\Middleware\CerrarSesionPorInactividad::class);
+
+        // Quien ya tiene sesion y abre /login va al panel, no a la portada
+        // publica, que es a donde lo mandaba Laravel por defecto.
+        $middleware->redirectUsersTo('/panel');
     })
     ->withExceptions(function (Exceptions $exceptions) {
         /**

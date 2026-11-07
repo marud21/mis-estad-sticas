@@ -11,7 +11,7 @@ class LoginController extends Controller
     public function create()
     {
         if (Auth::check()) {
-            return redirect()->route('socios.index');
+            return redirect()->route('panel.index');
         }
 
         return view('auth.login');
@@ -27,7 +27,7 @@ class LoginController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('socios.index'));
+        return redirect()->intended(route('panel.index'));
     }
 
     public function destroy()

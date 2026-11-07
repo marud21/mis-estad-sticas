@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $noticia->titulo }} - {{ $nombreSistema }}</title>
     @include('partials.favicon')
+    @include('partials.analitica')
     <style>
         :root {
             --azul-oscuro: #0b2545;
@@ -277,5 +278,6 @@
             if (e.key === 'Escape') cerrarImagen();
         });
     </script>
+    @include('partials.aviso-cookies')
 </body>
 </html>

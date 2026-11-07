@@ -12,6 +12,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Corvepatios">
     @include('partials.favicon')
+    @include('partials.analitica')
     <style>
         :root {
             --azul-oscuro: #0b2545;
@@ -302,5 +303,6 @@
         <p style="margin:0 0 4px;">&copy; {{ date('Y') }} {{ $nombreSistema }}</p>
         @include('partials.footer-firma')
     </footer>
+    @include('partials.aviso-cookies')
 </body>
 </html>

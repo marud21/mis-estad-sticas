@@ -1,6 +1,6 @@
 @props(['items'])
 <nav class="breadcrumbs" aria-label="breadcrumb">
-    <a href="{{ route('socios.index') }}">Inicio</a>
+    <a href="{{ route('panel.index') }}">Inicio</a>
     @foreach ($items as $label => $url)
         <span class="breadcrumb-sep">/</span>
         @if ($url)
