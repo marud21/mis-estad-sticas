@@ -55,8 +55,9 @@ class Permisos
         'configuracion.*',
         'password.*',
 
-        // --- Noticias ---
+        // --- Noticias y carrusel de la portada ---
         'noticias-admin.*',
+        'carrusel.*',
 
         // --- Socios: solo consultar. Ninguna ruta que escriba. ---
         'socios.index',

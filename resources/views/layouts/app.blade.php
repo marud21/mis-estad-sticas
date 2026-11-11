@@ -406,6 +406,9 @@
         @if (\App\Support\Permisos::puede($usuario, 'noticias-admin.index'))
             <a href="{{ route('noticias-admin.index') }}" class="{{ request()->routeIs('noticias-admin.*') ? 'active' : '' }}">Noticias</a>
         @endif
+        @if (\App\Support\Permisos::puede($usuario, 'carrusel.index'))
+            <a href="{{ route('carrusel.index') }}" class="{{ request()->routeIs('carrusel.*') ? 'active' : '' }}">Carrusel</a>
+        @endif
     </nav>
     <script>
         /**

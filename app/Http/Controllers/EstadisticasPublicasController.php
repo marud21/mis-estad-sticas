@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CarruselImagen;
 use App\Models\Torneo;
 use App\Services\CumpleanosService;
 use App\Services\EstadisticasTorneoService;
@@ -27,11 +28,16 @@ class EstadisticasPublicasController extends Controller
         // aunque todavia no haya ninguno publicado.
         $cumpleaneros = $this->cumpleanos->deHoy();
 
+        // El carrusel no depende del torneo: se muestra siempre que haya
+        // alguna imagen publicada.
+        $carrusel = CarruselImagen::visibles()->get();
+
         if (! $torneo) {
             return view('home', [
                 'torneos' => $torneos,
                 'torneo' => null,
                 'cumpleaneros' => $cumpleaneros,
+                'carrusel' => $carrusel,
                 'mejoresPorCategoria' => collect(),
                 'programacionPorCategoria' => collect(),
                 'posicionesPorCategoria' => collect(),
@@ -47,6 +53,7 @@ class EstadisticasPublicasController extends Controller
             'torneos' => $torneos,
             'torneo' => $torneo,
             'cumpleaneros' => $cumpleaneros,
+            'carrusel' => $carrusel,
             'mejoresPorCategoria' => $this->estadisticas->mejoresPorCategoria($torneo),
             'programacionPorCategoria' => $this->estadisticas->programacionPorCategoria($torneo),
             'posicionesPorCategoria' => $this->estadisticas->posicionesPorCategoria($torneo),

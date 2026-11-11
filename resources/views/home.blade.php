@@ -236,6 +236,8 @@
     @include('partials.nav-publico')
 
     <main class="container">
+        @include('partials.carrusel')
+
         @include('partials.avisos-push')
 
         {{-- El encabezado y el saludo de cumpleaños comparten la primera

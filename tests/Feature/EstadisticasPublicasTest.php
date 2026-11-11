@@ -422,6 +422,7 @@ class EstadisticasPublicasTest extends TestCase
             'torneos' => collect(),
             'torneo' => null,
             'cumpleaneros' => collect(),
+            'carrusel' => collect(),
             'programacionPorCategoria' => collect(),
             'posicionesPorCategoria' => collect(),
             'goleadoresPorCategoria' => collect(),

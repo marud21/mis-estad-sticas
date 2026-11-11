@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\CargoController;
+use App\Http\Controllers\CarruselController;
 use App\Http\Controllers\CargoDuplicadoController;
 use App\Http\Controllers\CierreCajaController;
 use App\Http\Controllers\ConfiguracionController;
@@ -33,7 +34,13 @@ Route::post('login', [LoginController::class, 'store'])->name('login.store')->mi
 Route::post('logout', [LoginController::class, 'destroy'])->name('logout')->middleware('auth');
 
 Route::get('consulta', [ConsultaPublicaController::class, 'index'])->name('consulta.index');
-Route::post('consulta', [ConsultaPublicaController::class, 'consultar'])->name('consulta.buscar');
+// La consulta devuelve el nombre y el estado de cuenta de un socio a
+// partir de su documento. Sin freno, alguien podria recorrer numeros de
+// documento y llevarse los datos de todos. 10 por minuto le sobran a una
+// persona y le estorban a un programa.
+Route::post('consulta', [ConsultaPublicaController::class, 'consultar'])
+    ->middleware('throttle:10,1')
+    ->name('consulta.buscar');
 
 // Se conserva para que los enlaces ya compartidos sigan funcionando.
 Route::redirect('estadisticas', '/')->name('estadisticas-publicas.index');
@@ -50,6 +57,11 @@ Route::middleware(['auth', \App\Http\Middleware\VerificarPermisos::class])->grou
     // Antes /panel era un atajo que llevaba a la lista de socios. Ahora
     // es el panel de verdad, asi que ese redireccionamiento se quita.
     Route::get('panel', [PanelController::class, 'index'])->name('panel.index');
+
+    Route::get('carrusel', [CarruselController::class, 'index'])->name('carrusel.index');
+    Route::post('carrusel', [CarruselController::class, 'store'])->name('carrusel.store');
+    Route::put('carrusel/{carrusel}', [CarruselController::class, 'update'])->name('carrusel.update');
+    Route::delete('carrusel/{carrusel}', [CarruselController::class, 'destroy'])->name('carrusel.destroy');
 
     Route::resource('socios', SocioController::class);
     Route::patch('socios/{socio}/estado', [SocioController::class, 'cambiarEstado'])->name('socios.estado');

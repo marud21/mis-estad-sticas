@@ -247,6 +247,7 @@ class CumpleanosTest extends TestCase
             'torneos' => collect(),
             'torneo' => null,
             'cumpleaneros' => $cumpleaneros,
+            'carrusel' => collect(),
             'programacionPorCategoria' => collect(),
             'posicionesPorCategoria' => collect(),
             'goleadoresPorCategoria' => collect(),
