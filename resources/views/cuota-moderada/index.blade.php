@@ -35,12 +35,14 @@
             Cambiar el porcentaje no modifica las cuotas ya fijadas: hay que darle a "Recalcular" para que se aplique.
         </p>
 
+        @if (\App\Support\Permisos::puede(auth()->user(), 'cuota-moderada.recalcular'))
         <h3 style="margin-top:20px;">Recalculo</h3>
         <form action="{{ route('cuota-moderada.recalcular') }}" method="POST"
               onsubmit="return confirm('¿Recalcular la cuota moderada de todos los socios con deuda pendiente usando el {{ rtrim(rtrim(number_format($porcentaje, 2), '0'), '.') }}% actual?\n\nSe fijara ese porcentaje de la deuda de cada uno en este momento, y se mantendra asi (sin bajar en cada pago) hasta el proximo recalculo manual.');">
             @csrf
             <button class="btn" type="submit">Recalcular cuota moderada ahora ({{ rtrim(rtrim(number_format($porcentaje, 2), '0'), '.') }}%)</button>
         </form>
+        @endif
 
         <button type="button" class="btn-anio-toggle" id="btn-toggle-socios" onclick="alternarSocios()">
             <span class="flecha" id="flecha-socios">&#9660;</span> Socios con deuda pendiente

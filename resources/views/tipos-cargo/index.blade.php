@@ -46,7 +46,8 @@
                                 <div style="margin-bottom:18px;">
                                     <h4 style="margin:0 0 4px;">Aplicar cargo nuevo</h4>
                                     <p style="font-size:12px; color:#666; margin:0 0 8px;">Crea el cargo para los socios que aun no lo tengan registrado en esa fecha. Si eliges "Todos los socios", a quien tenga mas de un equipo se le aplica un cargo por cada equipo que tenga.</p>
-                                    <form class="form-nivel" action="{{ route('tipos-cargo.aplicar-masivo', $tipo) }}" method="POST"
+                                    @if (\App\Support\Permisos::puede(auth()->user(), 'tipos-cargo.aplicar-masivo'))
+                                                                        <form class="form-nivel" action="{{ route('tipos-cargo.aplicar-masivo', $tipo) }}" method="POST"
                                           onsubmit="return confirmarCargaMasiva(this, {{ ($tipo->ya_aplicado_este_mes ?? false) ? 'true' : 'false' }}, '{{ $tipo->nombre }}', '{{ $tipo->porcentaje_suspendido }}', 'aplicar');">
                                         @csrf
                                         <div class="grid-4">
@@ -87,6 +88,7 @@
                                         </div>
                                         <button class="btn btn-sm" type="submit">Aplicar cargo</button>
                                     </form>
+                                    @endif
                                 </div>
 
                                 <hr style="border:none; border-top:1px solid var(--gris-borde); margin:16px 0;">
@@ -97,7 +99,8 @@
                                         Cambia el monto de un cargo que ya se le monto a los socios (ej. se les cobro el mes completo y se decidio reducirlo).
                                         Busca por la misma fecha con la que se aplico.
                                     </p>
-                                    <form class="form-nivel" action="{{ route('tipos-cargo.modificar-masivo', $tipo) }}" method="POST"
+                                    @if (\App\Support\Permisos::puede(auth()->user(), 'tipos-cargo.modificar-masivo'))
+                                                                        <form class="form-nivel" action="{{ route('tipos-cargo.modificar-masivo', $tipo) }}" method="POST"
                                           onsubmit="return confirmarCargaMasiva(this, false, '{{ $tipo->nombre }}', '{{ $tipo->porcentaje_suspendido }}', 'modificar');">
                                         @csrf
                                         <div class="grid-4">
@@ -138,6 +141,7 @@
                                         </div>
                                         <button class="btn btn-sm btn-secondary" type="submit">Modificar cargo</button>
                                     </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>

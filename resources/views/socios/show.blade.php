@@ -50,7 +50,8 @@
                 <span style="color:#666; font-size:13px;">(desde {{ $socio->fecha_cambio_estado->format('d/m/Y') }})</span>
             @endif
         </p>
-        <form action="{{ route('socios.estado', $socio) }}" method="POST" style="display:flex; gap:8px; align-items:center;">
+        @unless (\App\Support\Permisos::soloLectura(auth()->user()))
+                <form action="{{ route('socios.estado', $socio) }}" method="POST" style="display:flex; gap:8px; align-items:center;">
             @csrf
             @method('PATCH')
             <select name="estado" style="width:auto; margin-bottom:0;">
@@ -60,12 +61,14 @@
             </select>
             <button class="btn btn-sm" type="submit">Cambiar estado</button>
         </form>
+        @endunless
 
         <p style="margin-top:14px;">
             <strong>Carnet:</strong>
             <span class="badge badge-carnet-{{ $socio->carnet }}">{{ $socio->carnet_etiqueta }}</span>
         </p>
-        <form action="{{ route('socios.carnet', $socio) }}" method="POST" style="display:flex; gap:8px; align-items:center;">
+        @unless (\App\Support\Permisos::soloLectura(auth()->user()))
+                <form action="{{ route('socios.carnet', $socio) }}" method="POST" style="display:flex; gap:8px; align-items:center;">
             @csrf
             @method('PATCH')
             <select name="carnet" style="width:auto; margin-bottom:0;">
@@ -75,6 +78,7 @@
             </select>
             <button class="btn btn-sm" type="submit">Cambiar carnet</button>
         </form>
+        @endunless
 
         <h3 style="margin-top:16px;">Equipos</h3>
         @if ($socio->equipos->isEmpty())
@@ -95,7 +99,8 @@
         @endif
 
         @if ($equiposDisponibles->isNotEmpty())
-            <form action="{{ route('socios.equipos.store', $socio) }}" method="POST" style="display:flex; gap:8px; align-items:center; max-width:360px;">
+            @unless (\App\Support\Permisos::soloLectura(auth()->user()))
+                        <form action="{{ route('socios.equipos.store', $socio) }}" method="POST" style="display:flex; gap:8px; align-items:center; max-width:360px;">
                 @csrf
                 <select name="equipo_id" required style="margin-bottom:0;">
                     <option value="">-- Elegir equipo --</option>
@@ -105,6 +110,7 @@
                 </select>
                 <button class="btn btn-sm btn-secondary" type="submit">Agregar equipo</button>
             </form>
+            @endunless
         @endif
 
         <h2>Resumen financiero</h2>
@@ -189,7 +195,8 @@
         @endif
 
         <h3>Agregar cargo</h3>
-        <form action="{{ route('socios.cargos.store', $socio) }}" method="POST">
+        @unless (\App\Support\Permisos::soloLectura(auth()->user()))
+                <form action="{{ route('socios.cargos.store', $socio) }}" method="POST">
             @csrf
             <div class="grid-4">
                 <div>
@@ -224,6 +231,7 @@
             </div>
             <button class="btn" type="submit">Agregar cargo</button>
         </form>
+        @endunless
     </div>
 
     <div class="card">
@@ -277,7 +285,8 @@
         @endif
 
         <h3>Registrar pago</h3>
-        <form action="{{ route('socios.pagos.store', $socio) }}" method="POST">
+        @unless (\App\Support\Permisos::soloLectura(auth()->user()))
+                <form action="{{ route('socios.pagos.store', $socio) }}" method="POST">
             @csrf
             <div class="grid-5">
                 <div>
@@ -316,6 +325,7 @@
             </div>
             <button class="btn" type="submit">Registrar pago</button>
         </form>
+        @endunless
     </div>
 
     <style>

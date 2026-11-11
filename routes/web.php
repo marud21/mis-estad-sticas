@@ -46,7 +46,7 @@ Route::post('avisos/desuscribir', [NotificacionPushController::class, 'desuscrib
 Route::get('noticias', [NoticiaPublicaController::class, 'index'])->name('noticias-publicas.index');
 Route::get('noticias/{noticia}', [NoticiaPublicaController::class, 'show'])->name('noticias-publicas.show');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\VerificarPermisos::class])->group(function () {
     // Antes /panel era un atajo que llevaba a la lista de socios. Ahora
     // es el panel de verdad, asi que ese redireccionamiento se quita.
     Route::get('panel', [PanelController::class, 'index'])->name('panel.index');

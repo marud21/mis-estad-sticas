@@ -11,7 +11,7 @@ class LoginController extends Controller
     public function create()
     {
         if (Auth::check()) {
-            return redirect()->route('panel.index');
+            return redirect()->to(Auth::user()->pantallaDeInicio());
         }
 
         return view('auth.login');
@@ -27,7 +27,7 @@ class LoginController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('panel.index'));
+        return redirect()->intended(auth()->user()->pantallaDeInicio());
     }
 
     public function destroy()

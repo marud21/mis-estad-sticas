@@ -7,7 +7,9 @@
     <div class="card">
         <div class="card-header" style="margin-bottom: 16px;">
             <h1 style="margin:0;">Socios</h1>
-            <a href="{{ route('socios.create') }}" class="btn">+ Nuevo socio</a>
+            @unless (\App\Support\Permisos::soloLectura(auth()->user()))
+                <a href="{{ route('socios.create') }}" class="btn">+ Nuevo socio</a>
+            @endunless
         </div>
 
         <form id="filtros-socios" action="{{ route('socios.index') }}" method="GET">
@@ -75,12 +77,14 @@
                             ${{ number_format($socio->deuda_total, 0, ',', '.') }}
                         </td>
                         <td class="actions">
-                            <a class="btn btn-sm btn-secondary" href="{{ route('socios.edit', $socio) }}">Editar</a>
-                            <form action="{{ route('socios.destroy', $socio) }}" method="POST" onsubmit="return confirm('¿Eliminar este socio?');">
-                                @csrf
-                                @method('DELETE')
-                                <button class="btn btn-sm btn-danger" type="submit">Eliminar</button>
-                            </form>
+                            @unless (\App\Support\Permisos::soloLectura(auth()->user()))
+                                <a class="btn btn-sm btn-secondary" href="{{ route('socios.edit', $socio) }}">Editar</a>
+                                <form action="{{ route('socios.destroy', $socio) }}" method="POST" onsubmit="return confirm('¿Eliminar este socio?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="btn btn-sm btn-danger" type="submit">Eliminar</button>
+                                </form>
+                            @endunless
                         </td>
                     </tr>
                 @empty

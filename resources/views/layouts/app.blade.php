@@ -347,29 +347,47 @@
         // desplegable y los enlaces sueltos son los de uso diario.
         $grupos = [
             'Competencia' => [
-                ['titulo' => 'Torneos', 'url' => route('torneos.index'), 'activo' => request()->routeIs('torneos.*')],
-                ['titulo' => 'Partidos', 'url' => route('partidos.index'), 'activo' => request()->routeIs('partidos.*') && ! request()->routeIs('partidos.posiciones')],
-                ['titulo' => 'Tabla de posiciones', 'url' => route('partidos.posiciones'), 'activo' => request()->routeIs('partidos.posiciones')],
-                ['titulo' => 'Sanciones', 'url' => route('sanciones.index'), 'activo' => request()->routeIs('sanciones.*')],
-                ['titulo' => 'Planilla de juego', 'url' => route('planilla-juego.index'), 'activo' => request()->routeIs('planilla-juego.*')],
+                ['titulo' => 'Torneos', 'ruta' => 'torneos.index', 'url' => route('torneos.index'), 'activo' => request()->routeIs('torneos.*')],
+                ['titulo' => 'Partidos', 'ruta' => 'partidos.index', 'url' => route('partidos.index'), 'activo' => request()->routeIs('partidos.*') && ! request()->routeIs('partidos.posiciones')],
+                ['titulo' => 'Tabla de posiciones', 'ruta' => 'partidos.posiciones', 'url' => route('partidos.posiciones'), 'activo' => request()->routeIs('partidos.posiciones')],
+                ['titulo' => 'Sanciones', 'ruta' => 'sanciones.index', 'url' => route('sanciones.index'), 'activo' => request()->routeIs('sanciones.*')],
+                ['titulo' => 'Planilla de juego', 'ruta' => 'planilla-juego.index', 'url' => route('planilla-juego.index'), 'activo' => request()->routeIs('planilla-juego.*')],
             ],
             'Finanzas' => [
-                ['titulo' => 'Tipos de cargo', 'url' => route('tipos-cargo.index'), 'activo' => request()->routeIs('tipos-cargo.*')],
-                ['titulo' => 'Cuota moderada', 'url' => route('cuota-moderada.index'), 'activo' => request()->routeIs('cuota-moderada.*')],
-                ['titulo' => 'Cierre de caja', 'url' => route('cierre-caja.index'), 'activo' => request()->routeIs('cierre-caja.*')],
-                ['titulo' => 'Reportes contables', 'url' => route('reportes-contables.index'), 'activo' => request()->routeIs('reportes-contables.*')],
+                ['titulo' => 'Tipos de cargo', 'ruta' => 'tipos-cargo.index', 'url' => route('tipos-cargo.index'), 'activo' => request()->routeIs('tipos-cargo.*')],
+                ['titulo' => 'Cuota moderada', 'ruta' => 'cuota-moderada.index', 'url' => route('cuota-moderada.index'), 'activo' => request()->routeIs('cuota-moderada.*')],
+                ['titulo' => 'Cierre de caja', 'ruta' => 'cierre-caja.index', 'url' => route('cierre-caja.index'), 'activo' => request()->routeIs('cierre-caja.*')],
+                ['titulo' => 'Reportes contables', 'ruta' => 'reportes-contables.index', 'url' => route('reportes-contables.index'), 'activo' => request()->routeIs('reportes-contables.*')],
             ],
             'Sistema' => [
-                ['titulo' => 'Importar datos', 'url' => route('importar.index'), 'activo' => request()->routeIs('importar.*')],
-                ['titulo' => 'Configuracion', 'url' => route('configuracion.index'), 'activo' => request()->routeIs('configuracion.*')],
-                ['titulo' => 'Cambiar contrasena', 'url' => route('password.edit'), 'activo' => request()->routeIs('password.*')],
+                ['titulo' => 'Importar datos', 'ruta' => 'importar.index', 'url' => route('importar.index'), 'activo' => request()->routeIs('importar.*')],
+                ['titulo' => 'Configuracion', 'ruta' => 'configuracion.index', 'url' => route('configuracion.index'), 'activo' => request()->routeIs('configuracion.*')],
+                ['titulo' => 'Cambiar contrasena', 'ruta' => 'password.edit', 'url' => route('password.edit'), 'activo' => request()->routeIs('password.*')],
             ],
         ];
+
+        // Cada rol ve solo lo suyo. Se filtra con el mismo permiso que
+        // protege las rutas, para que el menu nunca ofrezca algo que al
+        // abrirlo rebote.
+        $usuario = auth()->user();
+        $grupos = collect($grupos)
+            ->map(fn (array $enlaces) => array_values(array_filter(
+                $enlaces,
+                fn (array $e) => \App\Support\Permisos::puede($usuario, $e['ruta']),
+            )))
+            ->filter(fn (array $enlaces) => $enlaces !== [])
+            ->all();
     @endphp
     <nav class="mainnav">
-        <a href="{{ route('panel.index') }}" class="{{ request()->routeIs('panel.*') ? 'active' : '' }}">Panel</a>
-        <a href="{{ route('socios.index') }}" class="{{ request()->routeIs('socios.*') ? 'active' : '' }}">Socios</a>
-        <a href="{{ route('equipos.index') }}" class="{{ request()->routeIs('equipos.*') ? 'active' : '' }}">Equipos</a>
+        @if (\App\Support\Permisos::puede($usuario, 'panel.index'))
+            <a href="{{ route('panel.index') }}" class="{{ request()->routeIs('panel.*') ? 'active' : '' }}">Panel</a>
+        @endif
+        @if (\App\Support\Permisos::puede($usuario, 'socios.index'))
+            <a href="{{ route('socios.index') }}" class="{{ request()->routeIs('socios.*') ? 'active' : '' }}">Socios</a>
+        @endif
+        @if (\App\Support\Permisos::puede($usuario, 'equipos.index'))
+            <a href="{{ route('equipos.index') }}" class="{{ request()->routeIs('equipos.*') ? 'active' : '' }}">Equipos</a>
+        @endif
 
         @foreach ($grupos as $nombreGrupo => $enlaces)
             @php($grupoActivo = collect($enlaces)->contains('activo', true))
@@ -385,7 +403,9 @@
             </div>
         @endforeach
 
-        <a href="{{ route('noticias-admin.index') }}" class="{{ request()->routeIs('noticias-admin.*') ? 'active' : '' }}">Noticias</a>
+        @if (\App\Support\Permisos::puede($usuario, 'noticias-admin.index'))
+            <a href="{{ route('noticias-admin.index') }}" class="{{ request()->routeIs('noticias-admin.*') ? 'active' : '' }}">Noticias</a>
+        @endif
     </nav>
     <script>
         /**

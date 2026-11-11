@@ -7,7 +7,9 @@
     <div class="card">
         <div class="card-header" style="margin-bottom: 16px;">
             <h1 style="margin:0;">Equipos</h1>
-            <a href="{{ route('equipos.create') }}" class="btn">+ Nuevo equipo</a>
+            @unless (\App\Support\Permisos::soloLectura(auth()->user()))
+                <a href="{{ route('equipos.create') }}" class="btn">+ Nuevo equipo</a>
+            @endunless
         </div>
 
         <form action="{{ route('equipos.index') }}" method="GET" style="display:flex; gap:8px; margin-bottom:16px;">
@@ -46,12 +48,14 @@
                         <td>{{ $equipo->socios_count }}</td>
                         <td><span class="badge badge-{{ $equipo->estado }}">{{ ucfirst($equipo->estado) }}</span></td>
                         <td class="actions">
-                            <a class="btn btn-sm btn-secondary" href="{{ route('equipos.edit', $equipo) }}">Editar</a>
-                            <form action="{{ route('equipos.destroy', $equipo) }}" method="POST" onsubmit="return confirm('¿Eliminar este equipo?');">
-                                @csrf
-                                @method('DELETE')
-                                <button class="btn btn-sm btn-danger" type="submit">Eliminar</button>
-                            </form>
+                            @unless (\App\Support\Permisos::soloLectura(auth()->user()))
+                                <a class="btn btn-sm btn-secondary" href="{{ route('equipos.edit', $equipo) }}">Editar</a>
+                                <form action="{{ route('equipos.destroy', $equipo) }}" method="POST" onsubmit="return confirm('¿Eliminar este equipo?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="btn btn-sm btn-danger" type="submit">Eliminar</button>
+                                </form>
+                            @endunless
                         </td>
                     </tr>
                 @empty

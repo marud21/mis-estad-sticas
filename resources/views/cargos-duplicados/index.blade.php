@@ -52,12 +52,14 @@
                 </table>
             </div>
 
-            <form action="{{ route('cargos-duplicados.eliminar') }}" method="POST"
-                  onsubmit="return confirm('¿Eliminar {{ $totalAEliminar }} cargo(s) duplicado(s)? Esta accion no se puede deshacer.');"
-                  style="margin-top:16px;">
-                @csrf
-                <button class="btn btn-danger" type="submit">Eliminar los {{ $totalAEliminar }} cargo(s) duplicado(s)</button>
-            </form>
+            @if (\App\Support\Permisos::puede(auth()->user(), 'cargos-duplicados.eliminar'))
+                <form action="{{ route('cargos-duplicados.eliminar') }}" method="POST"
+                      onsubmit="return confirm('¿Eliminar {{ $totalAEliminar }} cargo(s) duplicado(s)? Esta accion no se puede deshacer.');"
+                      style="margin-top:16px;">
+                    @csrf
+                    <button class="btn btn-danger" type="submit">Eliminar los {{ $totalAEliminar }} cargo(s) duplicado(s)</button>
+                </form>
+            @endif
         @endif
     </div>
 @endsection
