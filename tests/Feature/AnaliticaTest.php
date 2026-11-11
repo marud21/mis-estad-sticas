@@ -91,6 +91,25 @@ class AnaliticaTest extends TestCase
 
         $this->assertStringContainsString('id="aviso-cookies"', $html);
         $this->assertStringContainsString('cookies para contar las visitas', $html);
+        $this->assertStringContainsString('se consultan mas', $html);
+    }
+
+    /**
+     * El aviso se esconde poniendole el atributo "hidden", pero su propia
+     * regla trae "display: flex", que le gana al [hidden] del navegador.
+     * Sin una regla explicita el boton "Entendido" no esconde nada y el
+     * aviso vuelve a salir en cada visita. Ya paso una vez.
+     */
+    public function test_el_aviso_tiene_la_regla_que_lo_deja_esconderse(): void
+    {
+        $this->conMedicion();
+        $html = $this->get(route('home'))->assertOk()->getContent();
+
+        $this->assertMatchesRegularExpression(
+            '/\.aviso-cookies\[hidden\]\s*\{\s*display:\s*none/',
+            $html,
+            'Falta la regla que permite esconder el aviso al cerrarlo.',
+        );
     }
 
     public function test_el_aviso_se_puede_apagar_sin_apagar_la_medicion(): void

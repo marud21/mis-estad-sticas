@@ -13,7 +13,7 @@
     <div class="aviso-cookies" id="aviso-cookies" hidden>
         <p>
             Este sitio usa cookies para contar las visitas y entender que secciones
-            se consultan mas. No se recoge informacion que permita identificarte.
+            se consultan mas.
         </p>
         <button type="button" id="aviso-cookies-ok">Entendido</button>
     </div>
@@ -35,6 +35,11 @@
             border-radius: 8px;
             box-shadow: 0 6px 24px rgba(0, 0, 0, .22);
         }
+        /* Hace falta explicitamente: "display: flex" de la regla de arriba
+           le gana al [hidden] del navegador, y sin esto el aviso no se
+           esconde nunca, ni al cerrarlo ni en las visitas siguientes. */
+        .aviso-cookies[hidden] { display: none; }
+
         .aviso-cookies p { margin: 0; font-size: 13px; line-height: 1.45; flex: 1 1 260px; }
         .aviso-cookies button {
             flex: none;
