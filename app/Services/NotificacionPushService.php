@@ -33,17 +33,33 @@ class NotificacionPushService
         return config('push.vapid.public_key');
     }
 
-    /** Guarda (o actualiza) la suscripcion de un navegador. */
-    public function suscribir(array $datos, ?string $navegador = null): SuscripcionPush
+    /**
+     * Guarda (o actualiza) la suscripcion de un navegador.
+     *
+     * Si quien la activa tiene sesion abierta, queda anotado: es lo que
+     * despues permite mandarle los avisos internos, que no pueden salir
+     * hacia los visitantes de la pagina publica.
+     */
+    public function suscribir(array $datos, ?string $navegador = null, ?int $userId = null): SuscripcionPush
     {
+        $valores = [
+            'endpoint' => $datos['endpoint'],
+            'clave_p256dh' => $datos['clave_p256dh'],
+            'clave_auth' => $datos['clave_auth'],
+            'navegador' => $navegador ? substr($navegador, 0, 255) : null,
+        ];
+
+        // Solo se escribe cuando hay sesion. Si un navegador ya estaba
+        // suscrito y se vuelve a suscribir sin sesion, no se le borra el
+        // dueño que tenia: lo contrario dejaria a alguien sin sus avisos
+        // internos por haber entrado una vez sin iniciar sesion.
+        if ($userId !== null) {
+            $valores['user_id'] = $userId;
+        }
+
         return SuscripcionPush::updateOrCreate(
             ['endpoint_huella' => SuscripcionPush::huella($datos['endpoint'])],
-            [
-                'endpoint' => $datos['endpoint'],
-                'clave_p256dh' => $datos['clave_p256dh'],
-                'clave_auth' => $datos['clave_auth'],
-                'navegador' => $navegador ? substr($navegador, 0, 255) : null,
-            ],
+            $valores,
         );
     }
 
@@ -59,6 +75,26 @@ class NotificacionPushService
      */
     public function enviarATodos(string $titulo, string $cuerpo, string $url): array
     {
+        return $this->enviar($titulo, $cuerpo, $url, SuscripcionPush::all());
+    }
+
+    /**
+     * Manda el aviso solo a los navegadores de la administracion.
+     *
+     * Los avisos internos hablan de deudas y de socios con nombre y
+     * apellido. No pueden salir hacia los visitantes de la pagina
+     * publica, que son la mayoria de los suscritos.
+     *
+     * @return array{enviados:int, caducados:int, fallidos:int}
+     */
+    public function enviarALaAdministracion(string $titulo, string $cuerpo, string $url): array
+    {
+        return $this->enviar($titulo, $cuerpo, $url, SuscripcionPush::deLaAdministracion()->get());
+    }
+
+    /** @return array{enviados:int, caducados:int, fallidos:int} */
+    private function enviar(string $titulo, string $cuerpo, string $url, $suscripciones): array
+    {
         $resumen = ['enviados' => 0, 'caducados' => 0, 'fallidos' => 0];
 
         if (! $this->estaConfigurado()) {
@@ -66,8 +102,6 @@ class NotificacionPushService
 
             return $resumen;
         }
-
-        $suscripciones = SuscripcionPush::all();
 
         if ($suscripciones->isEmpty()) {
             return $resumen;

@@ -20,7 +20,9 @@ class NotificacionPushController extends Controller
             return response()->json(['mensaje' => 'Los avisos no estan disponibles por ahora.'], 503);
         }
 
-        $this->push->suscribir($request->validated(), $request->userAgent());
+        // El id solo viaja si hay sesion. Un visitante de la pagina
+        // publica se suscribe igual que siempre, sin identificarse.
+        $this->push->suscribir($request->validated(), $request->userAgent(), $request->user()?->id);
 
         return response()->json(['mensaje' => 'Listo, te avisaremos cuando haya un resultado nuevo.']);
     }

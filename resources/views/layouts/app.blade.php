@@ -230,7 +230,39 @@
         .deuda-positiva { color: var(--rojo); font-weight: 700; }
         .deuda-cero { color: var(--verde); font-weight: 700; }
 
-        nav[role="navigation"] { margin-top: 12px; }
+        /*
+         * Paginacion.
+         *
+         * El <nav> que pinta Laravel no lleva role="navigation" (lo
+         * llevaba en versiones viejas), asi que se le apunta por las
+         * clases que si trae. Habia una regla con ese selector que no
+         * estaba haciendo nada.
+         *
+         * Esa vista trae dos versiones del control: una de telefono con
+         * "Previous / Next" y una de pantalla ancha con los numeros, y
+         * las esconde con clases de Bootstrap. Aqui no se carga Bootstrap,
+         * asi que sin estas reglas se veian las dos a la vez en todas las
+         * pantallas paginadas.
+         */
+        nav:has(> .d-sm-none) { margin-top: 12px; }
+        .d-sm-none { display: none; }
+        .d-none { display: flex; }
+        .small.text-muted {
+            font-size: 13px;
+            color: #666;
+            margin: 0 0 8px;
+        }
+        .d-none.d-sm-flex {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+        }
+
+        @media (max-width: 575px) {
+            .d-sm-none { display: flex; gap: 8px; }
+            .d-none { display: none; }
+        }
+
         .pagination {
             display: flex;
             list-style: none;
@@ -384,6 +416,9 @@
         @endif
         @if (\App\Support\Permisos::puede($usuario, 'socios.index'))
             <a href="{{ route('socios.index') }}" class="{{ request()->routeIs('socios.*') ? 'active' : '' }}">Socios</a>
+        @endif
+        @if (\App\Support\Permisos::puede($usuario, 'socios-inactivos.index'))
+            <a href="{{ route('socios-inactivos.index') }}" class="{{ request()->routeIs('socios-inactivos.*') ? 'active' : '' }}">Sin pagos</a>
         @endif
         @if (\App\Support\Permisos::puede($usuario, 'equipos.index'))
             <a href="{{ route('equipos.index') }}" class="{{ request()->routeIs('equipos.*') ? 'active' : '' }}">Equipos</a>

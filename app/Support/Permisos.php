@@ -60,6 +60,10 @@ class Permisos
         'carrusel.*',
 
         // --- Socios: solo consultar. Ninguna ruta que escriba. ---
+        // La lista de socios sin pagos recientes solo lee y arma el
+        // listado; retirar a alguien pasa por socios.estado, que el
+        // directivo no tiene, asi que puede revisarla pero no actuar.
+        'socios-inactivos.index',
         'socios.index',
         'socios.show',
         'socios.reporte',

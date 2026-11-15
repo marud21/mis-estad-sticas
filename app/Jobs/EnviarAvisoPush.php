@@ -26,11 +26,19 @@ class EnviarAvisoPush implements ShouldQueue
         private readonly string $titulo,
         private readonly string $cuerpo,
         private readonly string $url,
+        /**
+         * Cuando es cierto el aviso va solo a los navegadores de quien
+         * tiene sesion en el sistema. Se usa para lo interno, que nombra
+         * socios y deudas y no puede salir hacia la pagina publica.
+         */
+        private readonly bool $soloAdministracion = false,
     ) {
     }
 
     public function handle(NotificacionPushService $push): void
     {
-        $push->enviarATodos($this->titulo, $this->cuerpo, $this->url);
+        $this->soloAdministracion
+            ? $push->enviarALaAdministracion($this->titulo, $this->cuerpo, $this->url)
+            : $push->enviarATodos($this->titulo, $this->cuerpo, $this->url);
     }
 }

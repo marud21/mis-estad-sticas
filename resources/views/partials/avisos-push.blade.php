@@ -6,11 +6,18 @@
     esta agregado a la pantalla de inicio, asi que a esos se les explica
     el paso en vez de ofrecerles un boton que no les va a funcionar.
 --}}
+@php
+    // El mismo boton sirve para los avisos publicos de resultados y para
+    // los internos de la administracion. Lo unico que cambia es el texto,
+    // que llega por parametro; si no llega, queda el de resultados.
+    $avisoTitulo = $avisoTitulo ?? 'Avisos de resultados';
+    $avisoTexto = $avisoTexto ?? 'Activa los avisos y te llega una notificacion apenas se registre un resultado.';
+@endphp
 @if ($pushDisponible)
     <div class="card avisos" id="caja-avisos" hidden>
         <div class="avisos-texto">
-            <strong>&#128276; Avisos de resultados</strong>
-            <p id="avisos-detalle">Activa los avisos y te llega una notificacion apenas se registre un resultado.</p>
+            <strong>&#128276; {{ $avisoTitulo }}</strong>
+            <p id="avisos-detalle">{{ $avisoTexto }}</p>
         </div>
         <button type="button" class="btn-aviso" id="boton-avisos" hidden>Activar avisos</button>
     </div>
@@ -48,6 +55,7 @@
     <script>
     (function () {
         var CLAVE_PUBLICA = @json($pushClavePublica);
+        var TEXTO_INACTIVO = @json($avisoTexto);
         var caja = document.getElementById('caja-avisos');
         var boton = document.getElementById('boton-avisos');
         var detalle = document.getElementById('avisos-detalle');
@@ -119,7 +127,7 @@
         function pintarComoInactivo() {
             boton.textContent = 'Activar avisos';
             boton.disabled = false;
-            detalle.textContent = 'Activa los avisos y te llega una notificacion apenas se registre un resultado.';
+            detalle.textContent = TEXTO_INACTIVO;
         }
 
         var registro = null;

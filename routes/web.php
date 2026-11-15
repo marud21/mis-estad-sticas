@@ -7,6 +7,7 @@ use App\Http\Controllers\CarruselController;
 use App\Http\Controllers\CargoDuplicadoController;
 use App\Http\Controllers\CierreCajaController;
 use App\Http\Controllers\ConfiguracionController;
+use App\Http\Controllers\SocioInactivoController;
 use App\Http\Controllers\CuotaModeradaController;
 use App\Http\Controllers\ConsultaPublicaController;
 use App\Http\Controllers\EquipoController;
@@ -62,6 +63,10 @@ Route::middleware(['auth', \App\Http\Middleware\VerificarPermisos::class])->grou
     Route::post('carrusel', [CarruselController::class, 'store'])->name('carrusel.store');
     Route::put('carrusel/{carrusel}', [CarruselController::class, 'update'])->name('carrusel.update');
     Route::delete('carrusel/{carrusel}', [CarruselController::class, 'destroy'])->name('carrusel.destroy');
+
+    // Va antes del resource: "socios/inactivos" la tomaria el resource
+    // como "socios/{socio}" y buscaria un socio con id "inactivos".
+    Route::get('socios-inactivos', [SocioInactivoController::class, 'index'])->name('socios-inactivos.index');
 
     Route::resource('socios', SocioController::class);
     Route::patch('socios/{socio}/estado', [SocioController::class, 'cambiarEstado'])->name('socios.estado');

@@ -27,6 +27,10 @@ use Illuminate\Support\Facades\DB;
  */
 class PanelService
 {
+    public function __construct(private readonly SocioInactivoService $inactivos)
+    {
+    }
+
     /** Aplica el filtro de equipos a una consulta que tenga equipo_id. */
     private function soloDelFiltro(Builder $query, FiltroPanel $filtro, string $columna = 'equipo_id'): Builder
     {
@@ -310,6 +314,12 @@ class PanelService
                     ->count(),
                 'porque' => 'No entran en los cobros por equipo.',
                 'enlace' => route('socios.index', ['estado' => Socio::ESTADO_ACTIVO]),
+            ],
+            [
+                'asunto' => 'Socios sin pagar hace '.SocioInactivoService::MESES_LIMITE.' meses o mas',
+                'total' => $this->inactivos->contar(),
+                'porque' => 'Siguen activos o en sostenimiento. Hay que revisarlos y decidir si se retiran.',
+                'enlace' => route('socios-inactivos.index'),
             ],
             [
                 'asunto' => 'Pagos con fecha futura',
