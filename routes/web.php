@@ -7,6 +7,7 @@ use App\Http\Controllers\CarruselController;
 use App\Http\Controllers\CargoDuplicadoController;
 use App\Http\Controllers\CierreCajaController;
 use App\Http\Controllers\ConfiguracionController;
+use App\Http\Controllers\DirectivoController;
 use App\Http\Controllers\SocioInactivoController;
 use App\Http\Controllers\CuotaModeradaController;
 use App\Http\Controllers\ConsultaPublicaController;
@@ -151,4 +152,23 @@ Route::middleware(['auth', \App\Http\Middleware\VerificarPermisos::class])->grou
     Route::post('configuracion/cuentas-bancarias', [ConfiguracionController::class, 'guardarCuenta'])->name('configuracion.cuentas.store');
     Route::put('configuracion/cuentas-bancarias/{cuentaBancaria}', [ConfiguracionController::class, 'actualizarCuenta'])->name('configuracion.cuentas.update');
     Route::delete('configuracion/cuentas-bancarias/{cuentaBancaria}', [ConfiguracionController::class, 'eliminarCuenta'])->name('configuracion.cuentas.destroy');
+
+    /*
+     * Cuentas de directivo. Van aparte de "configuracion" a proposito:
+     * configuracion.* esta en la lista blanca del directivo, asi que
+     * colgarlas de ahi se las habria abierto a el tambien y podria
+     * cambiarle la clave a un compañero o a si mismo. Con nombre propio
+     * nacen cerradas para todo el que no sea administrador.
+     *
+     * El parametro se limita a numeros para que /directivos/crear nunca
+     * se interprete como un id.
+     */
+    Route::get('directivos', [DirectivoController::class, 'index'])->name('directivos.index');
+    Route::post('directivos', [DirectivoController::class, 'store'])->name('directivos.store');
+    Route::put('directivos/{directivo}', [DirectivoController::class, 'update'])
+        ->whereNumber('directivo')->name('directivos.update');
+    Route::put('directivos/{directivo}/password', [DirectivoController::class, 'password'])
+        ->whereNumber('directivo')->name('directivos.password');
+    Route::delete('directivos/{directivo}', [DirectivoController::class, 'destroy'])
+        ->whereNumber('directivo')->name('directivos.destroy');
 });

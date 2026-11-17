@@ -394,6 +394,7 @@
             'Sistema' => [
                 ['titulo' => 'Importar datos', 'ruta' => 'importar.index', 'url' => route('importar.index'), 'activo' => request()->routeIs('importar.*')],
                 ['titulo' => 'Configuracion', 'ruta' => 'configuracion.index', 'url' => route('configuracion.index'), 'activo' => request()->routeIs('configuracion.*')],
+                ['titulo' => 'Cuentas de directivo', 'ruta' => 'directivos.index', 'url' => route('directivos.index'), 'activo' => request()->routeIs('directivos.*')],
                 ['titulo' => 'Cambiar contrasena', 'ruta' => 'password.edit', 'url' => route('password.edit'), 'activo' => request()->routeIs('password.*')],
             ],
         ];
