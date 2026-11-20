@@ -16,11 +16,15 @@
 
 <style>
     .nav-publico {
-        background: var(--azul-claro);
+        background: var(--marca);
         display: flex;
         gap: 4px;
         padding: 0 16px;
         flex-wrap: wrap;
+        /* La linea amarilla separa el verde oscuro del encabezado del
+           verde del menu, y de paso pone el tercer color de la
+           corporacion donde si se lee: sobre el verde. */
+        border-top: 3px solid var(--acento);
     }
     .nav-publico a {
         color: var(--blanco);
@@ -33,7 +37,12 @@
     }
     .nav-publico a:hover, .nav-publico a.activo {
         opacity: 1;
-        border-bottom-color: var(--blanco);
+        border-bottom-color: var(--acento);
+    }
+    .nav-publico a:focus-visible {
+        outline: 2px solid var(--acento);
+        outline-offset: -3px;
+        opacity: 1;
     }
     .nav-publico a.destacado { margin-left: auto; font-weight: 600; }
 

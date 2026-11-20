@@ -8,22 +8,13 @@
     {{-- Permite agregar el sitio a la pantalla de inicio, unico modo de
          recibir avisos en iPhone. --}}
     <link rel="manifest" href="{{ asset('manifest.json') }}">
-    <meta name="theme-color" content="#0b2545">
+    <meta name="theme-color" content="#004d26">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Corvepatios">
     @include('partials.favicon')
     @include('partials.analitica')
     <style>
-        :root {
-            --azul-oscuro: #0b2545;
-            --azul-claro: #1d4e89;
-            --blanco: #ffffff;
-            --gris-claro: #f4f6f9;
-            --gris-borde: #dde3ea;
-            --rojo: #b3261e;
-            --verde: #1e7a3e;
-            --amarillo: #d4a017;
-        }
+        @include('partials.paleta')
         * { box-sizing: border-box; }
         body {
             margin: 0;
@@ -33,7 +24,7 @@
         }
 
         header.portada {
-            background: var(--azul-oscuro);
+            background: var(--marca-oscura);
             color: var(--blanco);
             padding: 22px 24px 18px;
             display: flex;
@@ -57,10 +48,10 @@
             margin-bottom: 18px;
         }
         h2 {
-            color: var(--azul-oscuro); font-size: 17px;
+            color: var(--marca-oscura); font-size: 17px;
             margin: 0 0 12px; display: flex; align-items: center; gap: 8px;
         }
-        h3 { color: var(--azul-claro); font-size: 14px; margin: 18px 0 8px; text-transform: uppercase; letter-spacing: .4px; }
+        h3 { color: var(--marca-media); font-size: 14px; margin: 18px 0 8px; text-transform: uppercase; letter-spacing: .4px; }
         h3:first-of-type { margin-top: 0; }
         .sub { color: #777; font-size: 13px; margin: 0 0 16px; }
         .vacio { color: #999; font-size: 14px; padding: 6px 0; }
@@ -83,8 +74,8 @@
             border: 1px solid var(--gris-borde); border-radius: 8px;
             padding: 14px; background: var(--gris-claro);
         }
-        .noticia:hover { border-color: var(--azul-claro); }
-        .noticia h4 { margin: 0 0 4px; font-size: 15px; color: var(--azul-oscuro); }
+        .noticia:hover { border-color: var(--marca-media); }
+        .noticia h4 { margin: 0 0 4px; font-size: 15px; color: var(--marca-oscura); }
         .noticia .fecha { font-size: 12px; color: #888; margin: 0 0 6px; }
         .noticia p { margin: 0; font-size: 13px; color: #555; line-height: 1.5; }
 
@@ -112,7 +103,7 @@
            archivo que cargar ni que se pueda perder, y se ve nitido en
            cualquier pantalla. */
         .cabecera-torneo {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 130'%3E%3Cg fill='none' stroke='%231d4e89' stroke-opacity='0.16' stroke-width='3'%3E%3Crect x='5' y='5' width='190' height='120' rx='3'/%3E%3Cline x1='100' y1='5' x2='100' y2='125'/%3E%3Ccircle cx='100' cy='65' r='26'/%3E%3Crect x='5' y='35' width='28' height='60'/%3E%3Crect x='167' y='35' width='28' height='60'/%3E%3C/g%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 130'%3E%3Cg fill='none' stroke='%23008043' stroke-opacity='0.16' stroke-width='3'%3E%3Crect x='5' y='5' width='190' height='120' rx='3'/%3E%3Cline x1='100' y1='5' x2='100' y2='125'/%3E%3Ccircle cx='100' cy='65' r='26'/%3E%3Crect x='5' y='35' width='28' height='60'/%3E%3Crect x='167' y='35' width='28' height='60'/%3E%3C/g%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: right 14px center;
             background-size: auto 78%;
@@ -125,7 +116,7 @@
         .cabecera-torneo:hover {
             background-position: right 24px center;
             box-shadow: 0 6px 18px rgba(11, 37, 69, .12);
-            border-color: var(--azul-claro);
+            border-color: var(--marca-media);
         }
 
         /* Por debajo de ~1000px la tarjeta ya no es lo bastante ancha para
@@ -171,11 +162,11 @@
         }
         .cumple-iniciales {
             display: flex; align-items: center; justify-content: center;
-            background: var(--gris-claro); color: var(--azul-oscuro);
+            background: var(--gris-claro); color: var(--marca-oscura);
             font-weight: 700; font-size: 17px;
         }
         .cumple-datos { display: flex; flex-direction: column; min-width: 0; }
-        .cumple-datos strong { color: var(--azul-oscuro); font-size: 14px; line-height: 1.3; }
+        .cumple-datos strong { color: var(--marca-oscura); font-size: 14px; line-height: 1.3; }
         .cumple-datos span { color: #666; font-size: 12px; }
         .cumple-mensaje { margin: 12px 0 0; font-size: 12px; color: #666; }
         .franja-superior.con-cumple .cumple-mensaje { margin-top: auto; padding-top: 12px; }
@@ -286,7 +277,7 @@
             <div class="card">
                 <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
                     <h2 style="margin:0;">&#128240; Ultimas noticias</h2>
-                    <a href="{{ route('noticias-publicas.index') }}" style="color:var(--azul-claro); font-size:14px; font-weight:600; text-decoration:none;">Ver todas &rarr;</a>
+                    <a href="{{ route('noticias-publicas.index') }}" style="color:var(--marca-media); font-size:14px; font-weight:600; text-decoration:none;">Ver todas &rarr;</a>
                 </div>
                 <div class="noticias" style="margin-top:14px;">
                     @foreach ($ultimasNoticias as $noticia)

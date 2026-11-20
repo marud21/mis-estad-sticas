@@ -30,10 +30,10 @@
             gap: 14px;
             flex-wrap: wrap;
         }
-        .avisos-texto strong { color: var(--azul-oscuro); font-size: 15px; }
+        .avisos-texto strong { color: var(--marca-oscura); font-size: 15px; }
         .avisos-texto p { margin: 4px 0 0; font-size: 13px; color: #666; }
         .btn-aviso {
-            background: var(--azul-claro);
+            background: var(--marca-media);
             color: var(--blanco);
             border: 0;
             border-radius: 6px;
@@ -43,7 +43,7 @@
             cursor: pointer;
             white-space: nowrap;
         }
-        .btn-aviso:hover { background: var(--azul-oscuro); }
+        .btn-aviso:hover { background: var(--marca-oscura); }
         .btn-aviso[disabled] { opacity: .6; cursor: default; }
 
         @media (max-width: 560px) {

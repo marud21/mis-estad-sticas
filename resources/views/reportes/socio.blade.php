@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <style>
         body { font-family: sans-serif; font-size: 12px; color: #1a1a1a; }
-        h1 { color: #0b2545; font-size: 18px; margin-bottom: 4px; }
-        h2 { color: #0b2545; font-size: 14px; border-bottom: 1px solid #0b2545; padding-bottom: 4px; }
+        h1 { color: #004d26; font-size: 18px; margin-bottom: 4px; }
+        h2 { color: #004d26; font-size: 14px; border-bottom: 1px solid #004d26; padding-bottom: 4px; }
         table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-        th { background: #0b2545; color: #fff; text-align: left; padding: 6px; }
-        td { padding: 6px; border-bottom: 1px solid #dde3ea; }
+        th { background: #004d26; color: #fff; text-align: left; padding: 6px; }
+        td { padding: 6px; border-bottom: 1px solid #d9e3dc; }
         .info p { margin: 2px 0; }
         .deuda { font-weight: bold; color: #b3261e; }
     </style>

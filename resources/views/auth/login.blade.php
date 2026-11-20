@@ -6,14 +6,7 @@
     <title>Iniciar sesion - {{ $nombreSistema }}</title>
     @include('partials.favicon')
     <style>
-        :root {
-            --azul-oscuro: #0b2545;
-            --azul-claro: #1d4e89;
-            --blanco: #ffffff;
-            --gris-claro: #f4f6f9;
-            --gris-borde: #dde3ea;
-            --rojo: #b3261e;
-        }
+        @include('partials.paleta')
         html, body { height: 100%; }
         * { box-sizing: border-box; }
         body {
@@ -26,7 +19,7 @@
             gap: 16px;
             padding: 24px 16px;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, var(--azul-oscuro), var(--azul-claro));
+            background: linear-gradient(135deg, var(--marca-oscura), var(--marca-media));
         }
         .login-card {
             background: var(--blanco);
@@ -35,10 +28,21 @@
             width: 100%;
             max-width: 360px;
             box-shadow: 0 10px 30px rgba(0,0,0,.2);
+            /* El remate amarillo de la corporacion. Va arriba y como
+               trazo: el amarillo sobre blanco no se lee, asi que no
+               sirve para texto ni para rellenar nada. */
+            border-top: 4px solid var(--acento);
         }
         input[type=email], input[type=password] {
             -webkit-appearance: none;
             appearance: none;
+        }
+        /* El campo activo se marca con el verde, no con el contorno
+           negro que pone el navegador por su cuenta. */
+        input:focus {
+            outline: none;
+            border-color: var(--marca);
+            box-shadow: 0 0 0 3px rgba(0, 109, 54, .18);
         }
 
         @media (max-width: 420px) {
@@ -46,8 +50,8 @@
             .login-card { padding: 22px 18px; max-width: 100%; }
             h1 { font-size: 19px; }
         }
-        h1 { color: var(--azul-oscuro); font-size: 22px; margin-top: 0; text-align: center; }
-        label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: var(--azul-oscuro); }
+        h1 { color: var(--marca-oscura); font-size: 22px; margin-top: 0; text-align: center; }
+        label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: var(--marca-oscura); }
         input[type=email], input[type=password] {
             width: 100%;
             padding: 10px;
@@ -58,7 +62,7 @@
         }
         .btn {
             width: 100%;
-            background: var(--azul-oscuro);
+            background: var(--marca);
             color: var(--blanco);
             border: none;
             padding: 10px;
@@ -66,7 +70,7 @@
             font-size: 15px;
             cursor: pointer;
         }
-        .btn:hover { background: var(--azul-claro); }
+        .btn:hover { background: var(--marca-media); }
         .alert-error {
             background: #fbeaea;
             border: 1px solid var(--rojo);
@@ -77,9 +81,9 @@
             font-size: 13px;
         }
         .alert-info {
-            background: #e7f0fb;
-            border: 1px solid var(--azul-claro);
-            color: var(--azul-oscuro);
+            background: #e8f3ec;
+            border: 1px solid var(--marca-media);
+            color: var(--marca-oscura);
             padding: 8px 12px;
             border-radius: 6px;
             margin-bottom: 16px;
@@ -90,7 +94,7 @@
             margin-top: 16px;
             font-size: 13px;
         }
-        .public-link a { color: var(--azul-claro); }
+        .public-link a { color: var(--marca-media); }
     </style>
 </head>
 <body>

@@ -7,17 +7,7 @@
     <title>@yield('title', $nombreSistema)</title>
     @include('partials.favicon')
     <style>
-        :root {
-            --azul-oscuro: #0b2545;
-            --azul: #13315c;
-            --azul-claro: #1d4e89;
-            --blanco: #ffffff;
-            --gris-claro: #f4f6f9;
-            --gris-borde: #dde3ea;
-            --rojo: #b3261e;
-            --verde: #1e7a3e;
-            --naranja: #b56a00;
-        }
+        @include('partials.paleta')
         * { box-sizing: border-box; }
         body {
             margin: 0;
@@ -26,7 +16,7 @@
             color: #1a1a1a;
         }
         header.topbar {
-            background: var(--azul-oscuro);
+            background: var(--marca-oscura);
             color: var(--blanco);
             padding: 0 24px;
             display: flex;
@@ -50,12 +40,16 @@
             background: var(--blanco);
         }
         nav.mainnav {
-            background: var(--azul);
+            background: var(--marca);
             display: flex;
             gap: 4px;
             padding: 0 16px;
             flex-wrap: wrap;
             position: relative;
+            /* La linea amarilla separa el verde oscuro de arriba del
+               verde del menu. Es el mismo remate que lleva la parte
+               publica, para que se vean del mismo sistema. */
+            border-top: 3px solid var(--acento);
         }
         nav.mainnav > a, nav.mainnav .grupo-boton {
             color: var(--blanco);
@@ -65,10 +59,23 @@
             opacity: 0.85;
             border-bottom: 3px solid transparent;
         }
+        /*
+         * El amarillo de la corporacion se usa aqui, para señalar donde
+         * esta uno. Es un trazo fino sobre el verde, que es la unica
+         * combinacion en la que ese amarillo se lee bien (5,4 a 1);
+         * sobre blanco seria invisible.
+         */
         nav.mainnav > a:hover, nav.mainnav > a.active,
         nav.mainnav .grupo-boton:hover, nav.mainnav .nav-grupo.activo .grupo-boton {
             opacity: 1;
-            border-bottom: 3px solid var(--blanco);
+            border-bottom: 3px solid var(--acento);
+        }
+        /* El foco del teclado tiene que verse sin depender del color de
+           fondo: va por dentro para que no lo recorte la barra. */
+        nav.mainnav > a:focus-visible, nav.mainnav .grupo-boton:focus-visible {
+            outline: 2px solid var(--acento);
+            outline-offset: -3px;
+            opacity: 1;
         }
 
         /* Menus agrupados: el sistema crecio y 14 enlaces sueltos ya no
@@ -96,7 +103,7 @@
             top: 100%;
             left: 0;
             min-width: 210px;
-            background: var(--azul-oscuro);
+            background: var(--marca-oscura);
             border-radius: 0 0 6px 6px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, .3);
             z-index: 60;
@@ -112,10 +119,16 @@
             opacity: .85;
             white-space: nowrap;
         }
+        .grupo-menu a {
+            border-left: 3px solid transparent;
+        }
         .grupo-menu a:hover, .grupo-menu a.active {
             opacity: 1;
-            background: var(--azul-claro);
+            background: var(--marca-media);
         }
+        /* En el desplegable el amarillo marca la pantalla abierta, igual
+           que el subrayado de la barra de arriba. */
+        .grupo-menu a.active { border-left-color: var(--acento); }
         main.container {
             max-width: 1100px;
             margin: 24px auto;
@@ -128,13 +141,13 @@
             padding: 20px;
             margin-bottom: 20px;
         }
-        h1, h2, h3 { color: var(--azul-oscuro); }
+        h1, h2, h3 { color: var(--marca-oscura); }
         table {
             width: 100%;
             border-collapse: collapse;
         }
         table th {
-            background: var(--azul-oscuro);
+            background: var(--marca-oscura);
             color: var(--blanco);
             text-align: left;
             padding: 10px 12px;
@@ -148,7 +161,9 @@
         table tr:hover td { background: var(--gris-claro); }
         .btn {
             display: inline-block;
-            background: var(--azul-oscuro);
+            /* El boton lleva el verde de la corporacion, no el oscuro:
+               es el elemento donde mas se ve el color predominante. */
+            background: var(--marca);
             color: var(--blanco);
             border: none;
             padding: 8px 16px;
@@ -157,8 +172,8 @@
             text-decoration: none;
             font-size: 14px;
         }
-        .btn:hover { background: var(--azul-claro); }
-        .btn-secondary { background: var(--blanco); color: var(--azul-oscuro); border: 1px solid var(--azul-oscuro); }
+        .btn:hover { background: var(--marca-media); }
+        .btn-secondary { background: var(--blanco); color: var(--marca-oscura); border: 1px solid var(--marca-oscura); }
         .btn-danger { background: var(--rojo); }
         .btn-sm { padding: 4px 10px; font-size: 12px; }
         .actions { display: flex; gap: 8px; }
@@ -169,7 +184,7 @@
             flex-wrap: wrap;
             gap: 10px;
         }
-        label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: var(--azul-oscuro); }
+        label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: var(--marca-oscura); }
         input, select, textarea {
             width: 100%;
             padding: 8px 10px;
@@ -189,6 +204,17 @@
             margin: 0;
             flex: none;
         }
+        /* El campo activo se marca con el verde de la corporacion. El
+           amarillo no sirve aqui: sobre blanco no se distingue. */
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--marca);
+            box-shadow: 0 0 0 3px rgba(0, 109, 54, .15);
+        }
+        .btn:focus-visible {
+            outline: 2px solid var(--marca-oscura);
+            outline-offset: 2px;
+        }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
         .grid-4 { display: grid; grid-template-columns: 2fr 1fr 1fr 2fr; gap: 0 16px; }
         .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0 16px; }
@@ -207,16 +233,18 @@
         .badge-carnet-tiene { background: var(--verde); }
         .badge-carnet-extraviado { background: var(--naranja); }
         .badge-carnet-no_tiene { background: #6b7280; }
-        .badge-partido-programado { background: var(--azul-claro); }
+        /* Programado va en gris y no en verde: el verde ya lo usa
+           "jugado" justo al lado y los dos estados se confundirian. */
+        .badge-partido-programado { background: var(--neutro); }
         .badge-partido-jugado { background: var(--verde); }
         .badge-partido-aplazado { background: var(--naranja); }
         .badge-partido-suspendido { background: var(--naranja); }
         .badge-partido-cancelado { background: var(--rojo); }
         .text-center { text-align: center; }
         .alert {
-            background: #e7f0fb;
-            border: 1px solid var(--azul-claro);
-            color: var(--azul-oscuro);
+            background: #e8f3ec;
+            border: 1px solid var(--marca-media);
+            color: var(--marca-oscura);
             padding: 10px 14px;
             border-radius: 6px;
             margin-bottom: 16px;
@@ -281,15 +309,15 @@
             border: 1px solid var(--gris-borde);
             border-radius: 6px;
             background: var(--blanco);
-            color: var(--azul-oscuro);
+            color: var(--marca-oscura);
             text-decoration: none;
             font-size: 13px;
             margin-bottom: 0;
         }
         .pagination .page-item.active .page-link {
-            background: var(--azul-oscuro);
+            background: var(--marca-oscura);
             color: var(--blanco);
-            border-color: var(--azul-oscuro);
+            border-color: var(--marca-oscura);
         }
         .pagination .page-item.disabled .page-link {
             color: #aab4c0;
@@ -309,12 +337,30 @@
             gap: 6px;
         }
         .breadcrumbs a {
-            color: var(--azul-claro);
+            color: var(--marca-media);
             text-decoration: none;
         }
         .breadcrumbs a:hover { text-decoration: underline; }
         .breadcrumbs .breadcrumb-sep { color: #aab4c0; }
-        .breadcrumbs .breadcrumb-current { color: var(--azul-oscuro); font-weight: 600; }
+        .breadcrumbs .breadcrumb-current { color: var(--marca-oscura); font-weight: 600; }
+
+        /*
+         * Los enlaces del contenido.
+         *
+         * No habia ninguna regla para ellos, asi que salian con el azul
+         * que pone el navegador por su cuenta. Con el tema azul anterior
+         * se mezclaba y no se notaba; con el verde quedaba un azul
+         * suelto en cada nombre de socio.
+         *
+         * Se limita al contenido y se excluyen los botones y las migas,
+         * que ya tienen su propio color. El verde de la corporacion
+         * contrasta 6,5 a 1 sobre blanco, de sobra para leerlo.
+         */
+        main.container a:not(.btn) { color: var(--marca); }
+        main.container a:not(.btn):hover { color: var(--marca-oscura); }
+        /* Las migas van un tono mas claro. La regla queda despues de la
+           de arriba a proposito: pesan lo mismo y gana la ultima. */
+        main.container .breadcrumbs a { color: var(--marca-media); }
 
         .table-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
@@ -386,6 +432,9 @@
                 ['titulo' => 'Planilla de juego', 'ruta' => 'planilla-juego.index', 'url' => route('planilla-juego.index'), 'activo' => request()->routeIs('planilla-juego.*')],
             ],
             'Finanzas' => [
+                // Va de primero en el grupo: es la unica de este grupo que
+                // se revisa seguido, y antes estaba a un clic en la barra.
+                ['titulo' => 'Sin pagos', 'ruta' => 'socios-inactivos.index', 'url' => route('socios-inactivos.index'), 'activo' => request()->routeIs('socios-inactivos.*')],
                 ['titulo' => 'Tipos de cargo', 'ruta' => 'tipos-cargo.index', 'url' => route('tipos-cargo.index'), 'activo' => request()->routeIs('tipos-cargo.*')],
                 ['titulo' => 'Cuota moderada', 'ruta' => 'cuota-moderada.index', 'url' => route('cuota-moderada.index'), 'activo' => request()->routeIs('cuota-moderada.*')],
                 ['titulo' => 'Cierre de caja', 'ruta' => 'cierre-caja.index', 'url' => route('cierre-caja.index'), 'activo' => request()->routeIs('cierre-caja.*')],
@@ -417,9 +466,6 @@
         @endif
         @if (\App\Support\Permisos::puede($usuario, 'socios.index'))
             <a href="{{ route('socios.index') }}" class="{{ request()->routeIs('socios.*') ? 'active' : '' }}">Socios</a>
-        @endif
-        @if (\App\Support\Permisos::puede($usuario, 'socios-inactivos.index'))
-            <a href="{{ route('socios-inactivos.index') }}" class="{{ request()->routeIs('socios-inactivos.*') ? 'active' : '' }}">Sin pagos</a>
         @endif
         @if (\App\Support\Permisos::puede($usuario, 'equipos.index'))
             <a href="{{ route('equipos.index') }}" class="{{ request()->routeIs('equipos.*') ? 'active' : '' }}">Equipos</a>

@@ -20,7 +20,7 @@
        dejar una barra decorativa que no haga nada. */
     .desplazable {
         scrollbar-width: thin;
-        scrollbar-color: var(--azul-claro) var(--gris-borde);
+        scrollbar-color: var(--marca-media) var(--gris-borde);
     }
     .desplazable::-webkit-scrollbar {
         -webkit-appearance: none;
@@ -31,7 +31,7 @@
         border-radius: 4px;
     }
     .desplazable::-webkit-scrollbar-thumb {
-        background: var(--azul-claro);
+        background: var(--marca-media);
         border-radius: 4px;
     }
 
@@ -56,7 +56,7 @@
         display: none;
         margin: 8px 0 0;
         font-size: 12px;
-        color: var(--azul-claro);
+        color: var(--marca-media);
         white-space: normal;
     }
     .con-desliz.desborda .aviso-desliz { display: block; }

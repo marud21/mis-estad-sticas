@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <style>
         body { font-family: sans-serif; font-size: 13px; color: #1a1a1a; }
-        h1 { color: #0b2545; font-size: 18px; text-align: center; margin-bottom: 4px; }
+        h1 { color: #004d26; font-size: 18px; text-align: center; margin-bottom: 4px; }
         p.subtitulo { text-align: center; color: #555; margin-top: 0; }
         table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-        td { padding: 6px 4px; border-bottom: 1px solid #dde3ea; }
+        td { padding: 6px 4px; border-bottom: 1px solid #d9e3dc; }
         td.right { text-align: right; }
-        .total { font-size: 16px; font-weight: bold; color: #0b2545; }
+        .total { font-size: 16px; font-weight: bold; color: #004d26; }
         .center { text-align: center; }
-        hr { border: none; border-top: 1px solid #dde3ea; margin: 14px 0; }
+        hr { border: none; border-top: 1px solid #d9e3dc; margin: 14px 0; }
     </style>
 </head>
 <body>

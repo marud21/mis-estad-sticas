@@ -132,7 +132,7 @@
         .reglas {
             background: var(--gris-claro);
             border: 1px solid var(--gris-borde);
-            border-left: 3px solid var(--azul-claro);
+            border-left: 3px solid var(--marca-media);
             border-radius: 6px;
             padding: 14px 16px;
             margin-bottom: 18px;

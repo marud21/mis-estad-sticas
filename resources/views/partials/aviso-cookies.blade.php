@@ -30,7 +30,7 @@
             max-width: 900px;
             margin: 0 auto;
             padding: 14px 16px;
-            background: var(--azul-oscuro, #0b2545);
+            background: var(--marca-oscura, #004d26);
             color: #fff;
             border-radius: 8px;
             box-shadow: 0 6px 24px rgba(0, 0, 0, .22);
@@ -44,7 +44,7 @@
         .aviso-cookies button {
             flex: none;
             background: #fff;
-            color: var(--azul-oscuro, #0b2545);
+            color: var(--marca-oscura, #004d26);
             border: 0;
             border-radius: 6px;
             padding: 9px 18px;

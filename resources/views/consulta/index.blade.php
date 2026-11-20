@@ -7,15 +7,7 @@
     @include('partials.favicon')
     @include('partials.analitica')
     <style>
-        :root {
-            --azul-oscuro: #0b2545;
-            --azul-claro: #1d4e89;
-            --blanco: #ffffff;
-            --gris-claro: #f4f6f9;
-            --gris-borde: #dde3ea;
-            --rojo: #b3261e;
-            --verde: #1e7a3e;
-        }
+        @include('partials.paleta')
         * { box-sizing: border-box; }
         body {
             margin: 0;
@@ -24,7 +16,7 @@
             color: #1a1a1a;
         }
         header.topbar {
-            background: var(--azul-oscuro);
+            background: var(--marca-oscura);
             color: var(--blanco);
             padding: 16px 24px;
             font-size: 20px;
@@ -52,8 +44,8 @@
             padding: 24px;
             margin-bottom: 20px;
         }
-        h1 { color: var(--azul-oscuro); font-size: 20px; margin-top: 0; }
-        label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: var(--azul-oscuro); }
+        h1 { color: var(--marca-oscura); font-size: 20px; margin-top: 0; }
+        label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: var(--marca-oscura); }
         input[type=text] {
             width: 100%;
             padding: 10px;
@@ -63,7 +55,7 @@
             font-size: 14px;
         }
         .btn {
-            background: var(--azul-oscuro);
+            background: var(--marca);
             color: var(--blanco);
             border: none;
             padding: 10px 20px;
@@ -71,10 +63,10 @@
             font-size: 15px;
             cursor: pointer;
         }
-        .btn:hover { background: var(--azul-claro); }
+        .btn:hover { background: var(--marca-media); }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         table th {
-            background: var(--azul-oscuro);
+            background: var(--marca-oscura);
             color: var(--blanco);
             text-align: left;
             padding: 8px 10px;
@@ -103,7 +95,7 @@
             margin-bottom: 10px;
             font-size: 14px;
         }
-        .cuenta-bancaria strong { color: var(--azul-oscuro); }
+        .cuenta-bancaria strong { color: var(--marca-oscura); }
         .alert-info {
             background: #fff8e1;
             border: 1px solid #d4a017;
@@ -141,7 +133,7 @@
                 @else
                     <h1>{{ $socio->nombre_completo }}</h1>
 
-                    <h2 style="font-size:16px; color: var(--azul-oscuro);">Cargos</h2>
+                    <h2 style="font-size:16px; color: var(--marca-oscura);">Cargos</h2>
                     @forelse ($cargosPorAnio as $anio => $cargosPorTorneoDelAnio)
                         <h3 style="font-size:15px; margin-bottom:4px;">{{ $anio }}</h3>
                         @foreach ($cargosPorTorneoDelAnio as $nombreTorneo => $cargosDelTorneo)
@@ -163,7 +155,7 @@
                         <p>Sin cargos registrados.</p>
                     @endforelse
 
-                    <h2 style="font-size:16px; color: var(--azul-oscuro); margin-top:20px;">Pagos</h2>
+                    <h2 style="font-size:16px; color: var(--marca-oscura); margin-top:20px;">Pagos</h2>
                     @forelse ($pagosPorAnio as $anio => $pagosPorTorneoDelAnio)
                         <h3 style="font-size:15px; margin-bottom:4px;">{{ $anio }}</h3>
                         @foreach ($pagosPorTorneoDelAnio as $nombreTorneo => $pagosDelTorneo)

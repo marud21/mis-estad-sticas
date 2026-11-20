@@ -92,7 +92,7 @@
             cursor: pointer;
             transition: background .2s;
         }
-        .carrusel-punto.activo { background: var(--azul-claro); }
+        .carrusel-punto.activo { background: var(--marca-media); }
 
         @media (prefers-reduced-motion: reduce) {
             .carrusel-lista.rotando > .carrusel-item.activo { animation: none; }

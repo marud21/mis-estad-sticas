@@ -342,7 +342,7 @@
             margin-bottom: 8px;
             font-size: 15px;
             font-weight: 600;
-            color: var(--azul-oscuro);
+            color: var(--marca-oscura);
             cursor: pointer;
             text-align: left;
         }

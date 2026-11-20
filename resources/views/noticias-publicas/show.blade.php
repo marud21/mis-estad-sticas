@@ -7,13 +7,7 @@
     @include('partials.favicon')
     @include('partials.analitica')
     <style>
-        :root {
-            --azul-oscuro: #0b2545;
-            --azul-claro: #1d4e89;
-            --blanco: #ffffff;
-            --gris-claro: #f4f6f9;
-            --gris-borde: #dde3ea;
-        }
+        @include('partials.paleta')
         * { box-sizing: border-box; }
         body {
             margin: 0;
@@ -22,7 +16,7 @@
             color: #1a1a1a;
         }
         header.topbar {
-            background: var(--azul-oscuro);
+            background: var(--marca-oscura);
             color: var(--blanco);
             padding: 16px 24px;
             font-size: 20px;
@@ -69,7 +63,7 @@
             margin-bottom: 20px;
             cursor: zoom-in;
         }
-        h1 { color: var(--azul-oscuro); font-size: 24px; margin: 0 0 6px; }
+        h1 { color: var(--marca-oscura); font-size: 24px; margin: 0 0 6px; }
         .fecha { font-size: 13px; color: #888; margin-bottom: 18px; }
         .contenido { font-size: 15px; line-height: 1.6; white-space: pre-line; }
 
@@ -131,7 +125,7 @@
             justify-content: space-between;
             gap: 10px;
             flex-wrap: wrap;
-            background: var(--azul-oscuro);
+            background: var(--marca-oscura);
             color: var(--blanco);
             padding: 10px 14px;
             border-radius: 6px 6px 0 0;
@@ -140,7 +134,7 @@
         .visor-barra a { color: var(--blanco); text-decoration: underline; white-space: nowrap; }
 
         .adjuntos { margin-top: 26px; border-top: 1px solid var(--gris-borde); padding-top: 18px; }
-        .adjuntos h2 { font-size: 16px; color: var(--azul-oscuro); margin: 0 0 12px; }
+        .adjuntos h2 { font-size: 16px; color: var(--marca-oscura); margin: 0 0 12px; }
         .adjuntos ul { list-style: none; margin: 0; padding: 0; }
         .adjuntos li {
             display: flex;
@@ -160,16 +154,16 @@
             font-size: 13px;
             padding: 6px 12px;
             border-radius: 6px;
-            border: 1px solid var(--azul-claro);
+            border: 1px solid var(--marca-media);
             background: var(--blanco);
-            color: var(--azul-claro);
+            color: var(--marca-media);
             text-decoration: none;
             cursor: pointer;
             white-space: nowrap;
         }
-        .adjuntos .accion:hover { background: var(--azul-claro); color: var(--blanco); }
-        .adjuntos .accion.principal { background: var(--azul-claro); color: var(--blanco); }
-        .adjuntos .accion.principal:hover { background: var(--azul-oscuro); border-color: var(--azul-oscuro); }
+        .adjuntos .accion:hover { background: var(--marca-media); color: var(--blanco); }
+        .adjuntos .accion.principal { background: var(--marca-media); color: var(--blanco); }
+        .adjuntos .accion.principal:hover { background: var(--marca-oscura); border-color: var(--marca-oscura); }
 
         @media (max-width: 480px) {
             .adjuntos li { gap: 8px; }

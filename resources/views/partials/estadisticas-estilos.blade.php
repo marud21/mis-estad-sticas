@@ -3,17 +3,17 @@
 .tabla-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
         table { width: 100%; border-collapse: collapse; font-size: 14px; }
         th {
-            background: var(--azul-oscuro); color: var(--blanco);
+            background: var(--marca-oscura); color: var(--blanco);
             text-align: left; padding: 8px 10px; font-size: 12px;
             text-transform: uppercase; letter-spacing: .3px; white-space: nowrap;
         }
         td { padding: 8px 10px; border-bottom: 1px solid var(--gris-borde); }
         tr:last-child td { border-bottom: 0; }
         .c { text-align: center; }
-        .destacado { font-weight: 700; color: var(--azul-oscuro); }
+        .destacado { font-weight: 700; color: var(--marca-oscura); }
         .puesto {
             display: inline-block; min-width: 22px; text-align: center;
-            font-weight: 700; color: var(--azul-claro);
+            font-weight: 700; color: var(--marca-media);
         }
         .lider td { background: #eaf4ea; }
 
@@ -47,15 +47,15 @@
         .ver-mas {
             margin-top: 10px;
             background: none;
-            border: 1px solid var(--azul-claro);
-            color: var(--azul-claro);
+            border: 1px solid var(--marca-media);
+            color: var(--marca-media);
             border-radius: 6px;
             padding: 7px 14px;
             font-size: 13px;
             font-family: inherit;
             cursor: pointer;
         }
-        .ver-mas:hover { background: var(--azul-claro); color: var(--blanco); }
+        .ver-mas:hover { background: var(--marca-media); color: var(--blanco); }
 
         /* Mejores de la jornada: listado con la foto de cada figura. */
         .figuras { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 10px; }
@@ -77,11 +77,11 @@
         }
         .figura-iniciales {
             display: flex; align-items: center; justify-content: center;
-            background: var(--gris-claro); color: var(--azul-oscuro);
+            background: var(--gris-claro); color: var(--marca-oscura);
             font-weight: 700; font-size: 15px;
         }
         .figura-datos { display: flex; flex-direction: column; min-width: 0; }
-        .figura-datos strong { color: var(--azul-oscuro); font-size: 14px; line-height: 1.3; }
+        .figura-datos strong { color: var(--marca-oscura); font-size: 14px; line-height: 1.3; }
         .figura-datos span { color: #666; font-size: 12px; }
         /* El partido se va a la derecha y, si no cabe, baja de renglon. */
         .figura-partido { margin-left: auto; color: #888; font-size: 12px; text-align: right; }

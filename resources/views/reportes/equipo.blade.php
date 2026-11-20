@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <style>
         body { font-family: sans-serif; font-size: 12px; color: #1a1a1a; }
-        h1 { color: #0b2545; font-size: 18px; margin-bottom: 4px; }
+        h1 { color: #004d26; font-size: 18px; margin-bottom: 4px; }
         table { width: 100%; border-collapse: collapse; }
-        th { background: #0b2545; color: #fff; text-align: left; padding: 6px; }
-        td { padding: 6px; border-bottom: 1px solid #dde3ea; }
+        th { background: #004d26; color: #fff; text-align: left; padding: 6px; }
+        td { padding: 6px; border-bottom: 1px solid #d9e3dc; }
         .deuda { font-weight: bold; color: #b3261e; }
     </style>
 </head>
@@ -50,7 +50,7 @@
             @endforeach
         </tbody>
         <tfoot>
-            <tr style="font-weight:bold; background:#eaf0f7;">
+            <tr style="font-weight:bold; background:#e8f3ec;">
                 <td colspan="3">TOTAL GENERAL DEL EQUIPO</td>
                 <td>${{ number_format($totalCargosEquipo, 0, ',', '.') }}</td>
                 <td>${{ number_format($totalPagosEquipo, 0, ',', '.') }}</td>

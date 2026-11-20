@@ -7,13 +7,7 @@
     @include('partials.favicon')
     @include('partials.analitica')
     <style>
-        :root {
-            --azul-oscuro: #0b2545;
-            --azul-claro: #1d4e89;
-            --blanco: #ffffff;
-            --gris-claro: #f4f6f9;
-            --gris-borde: #dde3ea;
-        }
+        @include('partials.paleta')
         * { box-sizing: border-box; }
         body {
             margin: 0;
@@ -22,7 +16,7 @@
             color: #1a1a1a;
         }
         header.topbar {
-            background: var(--azul-oscuro);
+            background: var(--marca-oscura);
             color: var(--blanco);
             padding: 16px 24px;
             font-size: 20px;
@@ -54,7 +48,7 @@
             margin: 32px auto;
             padding: 0 16px 48px;
         }
-        h1 { color: var(--azul-oscuro); font-size: 24px; margin-top: 0; }
+        h1 { color: var(--marca-oscura); font-size: 24px; margin-top: 0; }
         .noticias-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -82,7 +76,7 @@
         }
         .noticia-card h2 {
             font-size: 16px;
-            color: var(--azul-oscuro);
+            color: var(--marca-oscura);
             margin: 0 0 6px;
         }
         .noticia-card .fecha {
@@ -97,7 +91,7 @@
             margin: 0 0 12px;
         }
         .noticia-card a.leer-mas {
-            color: var(--azul-claro);
+            color: var(--marca-media);
             font-weight: 600;
             font-size: 14px;
             text-decoration: none;
@@ -111,10 +105,10 @@
             display: inline-flex; align-items: center; justify-content: center;
             min-width: 32px; height: 32px; padding: 0 8px;
             border: 1px solid var(--gris-borde); border-radius: 6px;
-            background: var(--blanco); color: var(--azul-oscuro);
+            background: var(--blanco); color: var(--marca-oscura);
             text-decoration: none; font-size: 13px;
         }
-        .pagination .page-item.active .page-link { background: var(--azul-oscuro); color: var(--blanco); border-color: var(--azul-oscuro); }
+        .pagination .page-item.active .page-link { background: var(--marca-oscura); color: var(--blanco); border-color: var(--marca-oscura); }
         .pagination .page-item.disabled .page-link { color: #aab4c0; }
 
         .modal-imagen {

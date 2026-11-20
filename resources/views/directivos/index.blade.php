@@ -220,7 +220,7 @@
 
         .panel-cuenta {
             border: 1px solid var(--gris-borde);
-            border-left: 3px solid var(--azul-oscuro);
+            border-left: 3px solid var(--marca-oscura);
             border-radius: 6px;
             padding: 14px 16px;
             margin-top: 16px;

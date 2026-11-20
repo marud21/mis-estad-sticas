@@ -19,7 +19,7 @@
     .cifra {
         background: var(--blanco);
         border: 1px solid var(--gris-borde);
-        border-top: 3px solid var(--azul-claro);
+        border-top: 3px solid var(--marca-media);
         border-radius: 8px;
         padding: 14px 16px;
         display: flex; flex-direction: column; gap: 2px;
@@ -27,7 +27,7 @@
     .cifra-alerta { border-top-color: var(--rojo); }
     .cifra-bien { border-top-color: var(--verde); }
     .cifra-rotulo { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: .3px; }
-    .cifra-valor { font-size: 24px; color: var(--azul-oscuro); line-height: 1.2; }
+    .cifra-valor { font-size: 24px; color: var(--marca-oscura); line-height: 1.2; }
     .cifra-nota { font-size: 12px; color: #888; }
 
     /* ---------- Cifras pequeñas dentro de una seccion ---------- */
@@ -37,7 +37,7 @@
         padding: 10px 12px;
         display: flex; flex-direction: column; gap: 2px;
     }
-    .panel-mini strong { font-size: 18px; color: var(--azul-oscuro); }
+    .panel-mini strong { font-size: 18px; color: var(--marca-oscura); }
     .mini-rotulo { font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: .3px; }
     .mini-nota { font-size: 11px; color: #888; }
 
@@ -57,11 +57,11 @@
     .barra {
         width: 100%;
         max-width: 42px;
-        background: var(--azul-claro);
+        background: var(--marca-media);
         border-radius: 4px 4px 0 0;
         transition: background .2s;
     }
-    .barra-col:hover .barra { background: var(--azul-oscuro); }
+    .barra-col:hover .barra { background: var(--marca-oscura); }
     .barra-valor { font-size: 11px; color: #666; margin-bottom: 4px; white-space: nowrap; }
     .barra-eje { font-size: 10px; color: #888; margin-top: 6px; white-space: nowrap; }
 
@@ -72,7 +72,7 @@
         font-size: 13px; margin-bottom: 4px;
     }
     .proporcion-riel { height: 8px; background: var(--gris-claro); border-radius: 4px; overflow: hidden; }
-    .proporcion-relleno { height: 100%; background: var(--azul-claro); border-radius: 4px; }
+    .proporcion-relleno { height: 100%; background: var(--marca-media); border-radius: 4px; }
     .proporcion-relleno.estado-activo { background: var(--verde); }
     .proporcion-relleno.estado-suspendido { background: var(--naranja); }
     .proporcion-relleno.estado-retirado { background: #9aa6b2; }

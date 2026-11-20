@@ -220,7 +220,7 @@
         }
         .walkover-marcador { display: flex; align-items: center; gap: 8px; }
         .walkover-marcador input { width: 80px; text-align: center; margin-bottom: 0; }
-        .walkover-marcador span { font-weight: 700; color: var(--azul-oscuro); }
+        .walkover-marcador span { font-weight: 700; color: var(--marca-oscura); }
         .walkover-nota { margin: 8px 0 0; font-size: 12px; color: #666; }
 
         .figura {
@@ -243,7 +243,7 @@
             border-radius: 6px;
             font-size: 16px;
             font-weight: 600;
-            color: var(--azul-oscuro);
+            color: var(--marca-oscura);
         }
         .marcador-resumen #marcador { font-size: 20px; }
     </style>

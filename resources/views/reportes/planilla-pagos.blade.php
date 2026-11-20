@@ -40,10 +40,10 @@
 
         table.principal { width: 100%; border-collapse: collapse; border: 1.5px solid #333; }
         th { background: #5a9a3a; color: #fff; text-align: left; padding: 6px; font-size: 11px; text-transform: uppercase; }
-        td { padding: 8px 6px; border-bottom: 1px solid #dde3ea; vertical-align: middle; }
+        td { padding: 8px 6px; border-bottom: 1px solid #d9e3dc; vertical-align: middle; }
         tr:nth-child(even) td { background: #eaf6e0; }
         .deuda { font-weight: bold; color: #b3261e; }
-        .abono { font-weight: bold; color: #0b2545; }
+        .abono { font-weight: bold; color: #004d26; }
         /* Jugadores que recibieron tarjeta en el ultimo partido: llegan con
            una deuda nueva, por eso se resaltan al cobrar. */
         tr.con-tarjeta td { background: #fff4d6 !important; }
