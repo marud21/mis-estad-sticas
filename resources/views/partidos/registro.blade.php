@@ -15,6 +15,25 @@
             ->where('tipo', $tipo)
             ->count() ?: '';
     };
+
+    // Numero de camiseta: lo que se escribio si el formulario ya rebotó
+    // una vez (por el aviso de doble cobro, por ejemplo), y si no, lo que
+    // el socio tiene hoy en su ficha.
+    $numeroDe = function ($jugador) {
+        $previo = old("jugadores.{$jugador->id}.numero");
+
+        return $previo !== null ? $previo : $jugador->numero_camiseta;
+    };
+
+    // Carnet: igual, pero una casilla sin marcar no viaja en el envio, asi
+    // que no se puede preguntar por ella sola. Se mira si el formulario ya
+    // se habia mandado; solo entonces manda lo que venia marcado.
+    $yaSeEnvio = old('jugadores') !== null;
+    $carnetDe = function ($jugador) use ($yaSeEnvio) {
+        return $yaSeEnvio
+            ? (bool) old("jugadores.{$jugador->id}.carnet")
+            : $jugador->carnet === \App\Models\Socio::CARNET_TIENE;
+    };
 @endphp
 
 @section('content')
@@ -55,6 +74,9 @@
             El marcador se calcula solo con los goles que cargues (un autogol suma al rival).
             Cada tarjeta le genera al socio su cargo correspondiente, con el mismo monto del cobro de tarjetas.
             Si vuelves a registrar este partido, se reemplaza lo anterior.
+            <br>
+            <strong>El numero de camiseta y el carnet se guardan en la ficha del socio</strong>, asi que
+            puedes corregirlos aqui mismo mientras tienes al jugador enfrente.
         </div>
 
         <form action="{{ route('partidos.registro.guardar', $partido) }}" method="POST">
@@ -120,8 +142,9 @@
                         <table class="tabla-registro">
                             <thead>
                                 <tr>
-                                    <th>#</th>
+                                    <th class="col-numero">#</th>
                                     <th>Jugador</th>
+                                    <th class="text-center col-carnet">Carnet</th>
                                     <th class="text-center">Goles</th>
                                     <th class="text-center">Autogoles</th>
                                     <th class="text-center">Amarillas</th>
@@ -131,10 +154,27 @@
                             <tbody>
                                 @foreach ($lado['jugadores'] as $jugador)
                                     <tr>
-                                        <td class="text-center">{{ $jugador->numero_camiseta ?? '-' }}</td>
+                                        <td>
+                                            <input type="number" min="1" max="99" placeholder="-"
+                                                   class="celda-numero"
+                                                   name="jugadores[{{ $jugador->id }}][numero]"
+                                                   value="{{ $numeroDe($jugador) }}"
+                                                   aria-label="Numero de camiseta de {{ $jugador->nombre_completo }}">
+                                        </td>
                                         <td>
                                             {{ $jugador->nombre_completo }}
                                             <input type="hidden" name="jugadores[{{ $jugador->id }}][equipo_id]" value="{{ $equipo->id }}">
+                                        </td>
+                                        <td class="text-center">
+                                            <input type="checkbox" value="1"
+                                                   name="jugadores[{{ $jugador->id }}][carnet]"
+                                                   @checked($carnetDe($jugador))
+                                                   aria-label="{{ $jugador->nombre_completo }} presento el carnet">
+                                            @if ($jugador->carnet === \App\Models\Socio::CARNET_EXTRAVIADO)
+                                                {{-- La casilla no puede decir "extraviado", asi que se
+                                                     avisa aqui: dejarla sin marcar no le quita ese estado. --}}
+                                                <div class="marca-extraviado">extraviado</div>
+                                            @endif
                                         </td>
                                         @foreach ([\App\Models\IncidenciaPartido::TIPO_GOL, \App\Models\IncidenciaPartido::TIPO_AUTOGOL, \App\Models\IncidenciaPartido::TIPO_AMARILLA, \App\Models\IncidenciaPartido::TIPO_ROJA] as $tipo)
                                             <td class="text-center">
@@ -198,6 +238,50 @@
             width: 70px;
             margin-bottom: 0;
             text-align: center;
+        }
+        .tabla-registro .col-numero { width: 72px; }
+        .tabla-registro .col-carnet { width: 64px; }
+        .tabla-registro .celda-numero {
+            width: 60px;
+            margin-bottom: 0;
+            text-align: center;
+        }
+        .marca-extraviado {
+            font-size: 10px;
+            color: var(--naranja);
+            line-height: 1.2;
+            margin-top: 2px;
+        }
+
+        /*
+         * En el telefono la tabla se desliza de lado. Sin acotar el
+         * nombre, el numero y la casilla del carnet quedaban en orillas
+         * opuestas y habia que arrastrar para pasar de uno al otro, que
+         * es justo lo que se queria evitar poniendolos aqui. Con el
+         * nombre a dos renglones los tres caben juntos.
+         */
+        @media (max-width: 640px) {
+            .tabla-registro td:nth-child(2),
+            .tabla-registro th:nth-child(2) {
+                max-width: 150px;
+                white-space: normal;
+            }
+            .tabla-registro th, .tabla-registro td { padding: 8px 6px; }
+            .tabla-registro .celda-numero { width: 52px; }
+            .tabla-registro .celda-cantidad { width: 56px; }
+
+            /* Sin las flechitas del campo numerico: en 52px se comen el
+               espacio y un numero de dos cifras queda cortado. Aqui se
+               escribe, no se sube de a uno. */
+            .tabla-registro .celda-numero {
+                -moz-appearance: textfield;
+                appearance: textfield;
+            }
+            .tabla-registro .celda-numero::-webkit-outer-spin-button,
+            .tabla-registro .celda-numero::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+            }
         }
         .walkover-interruptor {
             display: flex;

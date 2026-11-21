@@ -16,6 +16,15 @@ use Throwable;
 class RegistroPartidoService
 {
     /**
+     * Cuantos socios quedaron con el numero o el carnet cambiados en el
+     * ultimo registrar(). Se expone para poder decirlo en el aviso de
+     * pantalla; se reinicia en cada llamada.
+     */
+    public int $sociosActualizados = 0;
+
+    public function __construct(private readonly SocioService $socios) {}
+
+    /**
      * Guarda lo que paso en el partido: goles y tarjetas por jugador.
      *
      * El marcador no se escribe a mano, se arma con los goles cargados
@@ -29,10 +38,16 @@ class RegistroPartidoService
      *
      * @param  array<int, array{socio_id:int, equipo_id:int, tipo:string}>  $incidencias
      * @param  int|null  $jugadorPartidoId  la figura del partido, si se eligio
+     * @param  array<int, array{numero: int|null, tiene_carnet: bool}>  $datosDeJugadores
+     *         numero de camiseta y carnet marcados en la planilla, por id de
+     *         socio. Va dentro de la misma transaccion a proposito: si el
+     *         registro del partido falla, estos cambios tampoco quedan.
      */
-    public function registrar(Partido $partido, array $incidencias, ?int $jugadorPartidoId = null): Partido
+    public function registrar(Partido $partido, array $incidencias, ?int $jugadorPartidoId = null, array $datosDeJugadores = []): Partido
     {
-        $guardado = DB::transaction(function () use ($partido, $incidencias, $jugadorPartidoId) {
+        $this->sociosActualizados = 0;
+
+        $guardado = DB::transaction(function () use ($partido, $incidencias, $jugadorPartidoId, $datosDeJugadores) {
             $this->limpiarRegistroAnterior($partido);
 
             $tiposCargo = $this->tiposDeCargoDeTarjetas();
@@ -49,6 +64,16 @@ class RegistroPartidoService
                 if ($incidencia->es_tarjeta) {
                     $this->cobrarTarjeta($incidencia, $socio, $partido, $tiposCargo);
                 }
+            }
+
+            // El numero de camiseta y el carnet que se marcaron en la
+            // planilla. Se pasan solo los jugadores de los dos equipos:
+            // lo que llega del formulario son ids y no hay que creerles.
+            if ($datosDeJugadores !== []) {
+                $this->sociosActualizados = $this->socios->actualizarDesdeLaPlanilla(
+                    $this->jugadoresDeLosDosEquipos($partido),
+                    $datosDeJugadores,
+                );
             }
 
             [$golesLocal, $golesVisitante] = $this->marcadorSegunGoles($partido->fresh('incidencias'), $partido);
@@ -117,6 +142,27 @@ class RegistroPartidoService
      * si no se jugo, nadie pudo haber hecho un gol ni recibido una
      * tarjeta.
      */
+    /**
+     * Los socios que de verdad pueden aparecer en la planilla de este
+     * partido: los de los dos equipos, en los estados que entran en
+     * planilla. Es la misma lista que se dibuja en pantalla, y sirve de
+     * filtro para no dejar que el formulario toque a nadie mas.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, Socio>
+     */
+    private function jugadoresDeLosDosEquipos(Partido $partido)
+    {
+        $equipos = array_values(array_filter([$partido->equipo_local_id, $partido->equipo_visitante_id]));
+
+        if ($equipos === []) {
+            return Socio::whereRaw('1 = 0')->get();
+        }
+
+        return Socio::whereIn('estado', Socio::ESTADOS_EN_PLANILLA)
+            ->whereHas('equipos', fn ($q) => $q->whereIn('equipos.id', $equipos))
+            ->get();
+    }
+
     public function registrarWalkover(Partido $partido, int $equipoAusenteId, int $golesLocal, int $golesVisitante): Partido
     {
         $guardado = DB::transaction(function () use ($partido, $equipoAusenteId, $golesLocal, $golesVisitante) {

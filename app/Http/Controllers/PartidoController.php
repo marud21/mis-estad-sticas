@@ -138,10 +138,23 @@ class PartidoController extends Controller
             $partido,
             $incidencias,
             $request->filled('jugador_partido_id') ? (int) $request->input('jugador_partido_id') : null,
+            $request->datosDeJugadores(),
         );
 
+        $aviso = "Resultado registrado: {$partido->fresh()->marcador}. Las tarjetas se cargaron a los socios.";
+
+        // Se dice cuantas fichas cambiaron para que no quede como un
+        // efecto escondido: desde esta pantalla tambien se escribe en los
+        // socios, y quien registra tiene que enterarse de que lo hizo.
+        if ($this->registros->sociosActualizados > 0) {
+            $cuantos = $this->registros->sociosActualizados;
+            $aviso .= $cuantos === 1
+                ? ' Se actualizo el numero o el carnet de 1 socio.'
+                : " Se actualizo el numero o el carnet de {$cuantos} socios.";
+        }
+
         return redirect()->route('partidos.index', ['torneo_id' => $partido->torneo_id])
-            ->with('status', "Resultado registrado: {$partido->fresh()->marcador}. Las tarjetas se cargaron a los socios.");
+            ->with('status', $aviso);
     }
 
     /**

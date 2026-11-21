@@ -29,6 +29,13 @@ class RegistroPartidoRequest extends FormRequest
             'jugadores.*.equipo_id' => ['required', 'exists:equipos,id'],
             'jugadores.*.cantidades' => ['sometimes', 'array'],
             'jugadores.*.cantidades.*' => ['nullable', 'integer', 'min:0', 'max:'.self::TOPE_POR_JUGADOR],
+
+            // Numero de camiseta y carnet se pueden poner desde la misma
+            // planilla, que es cuando se tiene al jugador enfrente. El
+            // tope de 99 es el de una camiseta; dejarlo abierto solo deja
+            // pasar errores de digitacion.
+            'jugadores.*.numero' => ['nullable', 'integer', 'min:1', 'max:99'],
+            'jugadores.*.carnet' => ['sometimes', 'boolean'],
             // La figura es opcional, pero si se elige tiene que ser de uno
             // de los dos equipos que jugaron: no vale cualquier socio.
             'jugador_partido_id' => ['nullable', 'integer', $this->deAlgunoDeLosDosEquipos()],
@@ -91,6 +98,9 @@ class RegistroPartidoRequest extends FormRequest
         return [
             'jugadores.*.cantidades.*.max' => 'Un jugador no puede tener mas de '.self::TOPE_POR_JUGADOR.' veces la misma incidencia.',
             'jugadores.*.cantidades.*.min' => 'Las cantidades no pueden ser negativas.',
+            'jugadores.*.numero.integer' => 'El numero de camiseta tiene que ser un numero entero.',
+            'jugadores.*.numero.min' => 'El numero de camiseta va del 1 al 99.',
+            'jugadores.*.numero.max' => 'El numero de camiseta va del 1 al 99.',
             'equipo_ausente_id.required_if' => 'Indica cual de los dos equipos no se presento.',
             'goles_local.required_if' => 'Escribe el marcador con el que queda el partido.',
             'goles_visitante.required_if' => 'Escribe el marcador con el que queda el partido.',
@@ -129,5 +139,36 @@ class RegistroPartidoRequest extends FormRequest
         }
 
         return $incidencias;
+    }
+
+    /**
+     * Lo que se marco en la planilla para cada jugador, aparte de goles y
+     * tarjetas: su numero de camiseta y si mostro el carnet.
+     *
+     * La casilla del carnet no viaja cuando esta sin marcar, que es como
+     * funcionan las casillas en un formulario. Por eso no se puede mirar
+     * si la clave existe: su ausencia ES el "no". Lo que si asegura que
+     * la fila venia en el envio es el equipo_id, que va siempre.
+     *
+     * @return array<int, array{numero: int|null, tiene_carnet: bool}>
+     */
+    public function datosDeJugadores(): array
+    {
+        $datos = [];
+
+        foreach ($this->input('jugadores', []) as $socioId => $fila) {
+            if (! is_array($fila)) {
+                continue;
+            }
+
+            $numero = $fila['numero'] ?? null;
+
+            $datos[(int) $socioId] = [
+                'numero' => ($numero === null || $numero === '') ? null : (int) $numero,
+                'tiene_carnet' => filter_var($fila['carnet'] ?? false, FILTER_VALIDATE_BOOLEAN),
+            ];
+        }
+
+        return $datos;
     }
 }
