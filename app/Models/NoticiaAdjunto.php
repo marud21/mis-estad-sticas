@@ -28,14 +28,49 @@ class NoticiaAdjunto extends Model
 
     public const EXTENSIONES_PREVISUALIZABLES = ['png', 'jpg', 'jpeg', 'pdf', 'xml'];
 
+    /**
+     * Disco donde viven los adjuntos.
+     *
+     * Es el privado, no el publico. En el publico cada archivo queda con
+     * una direccion fija bajo /storage y cualquiera que la vea se lo
+     * lleva, aunque la pagina no ofrezca ningun boton de descarga. Aqui
+     * no hay direccion directa: el unico camino es la ruta que los
+     * entrega, que comprueba antes que la noticia este publicada.
+     */
+    public const DISCO = 'local';
+
     public function noticia(): BelongsTo
     {
         return $this->belongsTo(Noticia::class);
     }
 
+    /** Por donde se ve el adjunto. No es el archivo: es la ruta que lo entrega. */
     public function getUrlAttribute(): string
     {
-        return Storage::disk('public')->url($this->ruta);
+        return route('noticias-publicas.adjunto', [$this->noticia_id, $this->id]);
+    }
+
+    /**
+     * Lo que se le dice al navegador que es.
+     *
+     * No se usa el tipo que mando el navegador al subirlo: ese lo elige
+     * quien sube y no hay por que creerle. Se deduce de la extension, que
+     * es la que ya se valido al aceptar el archivo.
+     */
+    public function getTipoServidoAttribute(): string
+    {
+        return match ($this->extension) {
+            'pdf' => 'application/pdf',
+            'png' => 'image/png',
+            'jpg', 'jpeg' => 'image/jpeg',
+            'xml' => 'text/plain; charset=UTF-8',
+            default => 'application/octet-stream',
+        };
+    }
+
+    public function existeElArchivo(): bool
+    {
+        return Storage::disk(self::DISCO)->exists($this->ruta);
     }
 
     public function getExtensionAttribute(): string

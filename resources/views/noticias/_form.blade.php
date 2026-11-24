@@ -38,7 +38,14 @@
                 <tbody>
                     @foreach ($noticia->adjuntos as $adjunto)
                         <tr>
-                            <td>{{ $adjunto->icono }} {{ $adjunto->nombre_original }}</td>
+                            <td>
+                                {{ $adjunto->icono }} {{ $adjunto->nombre_original }}
+                                @unless ($adjunto->se_puede_previsualizar)
+                                    <br><small style="color:var(--naranja);">
+                                        el publico no va a poder verlo: el navegador no muestra este tipo de archivo
+                                    </small>
+                                @endunless
+                            </td>
                             <td>{{ $adjunto->tamano_legible }}</td>
                             <td class="actions">
                                 <a class="btn btn-sm btn-secondary" href="{{ $adjunto->url }}" target="_blank" rel="noopener">Ver</a>
@@ -59,6 +66,11 @@
             Se permiten archivos .doc, .docx, .xml, .pdf, .png y .jpg: hasta 10 por noticia,
             maximo 15 MB cada uno y {{ \App\Http\Requests\NoticiaRequest::LIMITE_TOTAL_MB }} MB entre todos los que subas de una vez.
             Si necesitas subir mas, guarda y vuelve a editar la noticia: los nuevos se agregan a los que ya tenga.
+            <br>
+            <strong>Los adjuntos se ven en pantalla y no se pueden descargar.</strong>
+            El navegador solo sabe mostrar <strong>.pdf, .png y .jpg</strong>; si subes un
+            .doc o un .docx, el publico lo vera en la lista pero no podra abrirlo.
+            Para documentos, lo mejor es subirlos en PDF.
         </p>
         @error('adjuntos')
             <p style="color:#b3261e; font-size:13px; margin-top:-4px;">{{ $message }}</p>

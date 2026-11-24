@@ -69,7 +69,7 @@ class NoticiaService
         // Los registros se borran en cascada, pero los archivos del disco
         // hay que quitarlos a mano para no dejarlos huerfanos.
         foreach ($noticia->adjuntos as $adjunto) {
-            Storage::disk('public')->delete($adjunto->ruta);
+            Storage::disk(NoticiaAdjunto::DISCO)->delete($adjunto->ruta);
         }
 
         $noticia->delete();
@@ -77,7 +77,7 @@ class NoticiaService
 
     public function eliminarAdjunto(NoticiaAdjunto $adjunto): void
     {
-        Storage::disk('public')->delete($adjunto->ruta);
+        Storage::disk(NoticiaAdjunto::DISCO)->delete($adjunto->ruta);
 
         $adjunto->delete();
     }
@@ -93,7 +93,7 @@ class NoticiaService
         foreach (array_filter($adjuntos) as $archivo) {
             $noticia->adjuntos()->create([
                 'nombre_original' => $archivo->getClientOriginalName(),
-                'ruta' => $archivo->store('noticias/adjuntos', 'public'),
+                'ruta' => $archivo->store('noticias/adjuntos', NoticiaAdjunto::DISCO),
                 'tipo_mime' => $archivo->getClientMimeType(),
                 'tamano' => $archivo->getSize(),
             ]);

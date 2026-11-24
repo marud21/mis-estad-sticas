@@ -297,5 +297,8 @@
         @include('partials.footer-firma')
     </footer>
     @include('partials.aviso-cookies')
+    {{-- Va despues del aviso de cookies a proposito: su javascript mira
+         si ese aviso esta a la vista para no salir los dos encima. --}}
+    @include('partials.aviso-noticia')
 </body>
 </html>

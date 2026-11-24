@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\CierreCaja;
 use App\Models\Equipo;
 use App\Models\Noticia;
+use App\Models\NoticiaAdjunto;
 use App\Models\Pago;
 use App\Models\Partido;
 use App\Models\Socio;
@@ -14,6 +15,7 @@ use App\Models\User;
 use App\Services\ReporteService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 /**
@@ -53,6 +55,24 @@ class SistemaCompletoTest extends TestCase
             'fecha_hora' => '2030-06-15 10:00', 'estado' => Partido::ESTADO_PROGRAMADO,
         ]);
 
+        /*
+         * El adjunto tiene que ser de ESA noticia y tener su archivo en
+         * el disco: la ruta que lo entrega comprueba las dos cosas, y
+         * sin ellas respondería 404 en vez de mostrarlo.
+         *
+         * La noticia que se usa aqui puede ser una real del club, asi
+         * que el adjunto se crea aparte y se borra al final; la fila se
+         * deshace sola con el rollBack, pero el archivo no.
+         */
+        $rutaAdjunto = 'noticias/adjuntos/verificacion-'.uniqid().'.pdf';
+        Storage::disk(NoticiaAdjunto::DISCO)->put($rutaAdjunto, '%PDF-1.4 verificacion');
+        $adjunto = $noticia->adjuntos()->create([
+            'nombre_original' => 'verificacion.pdf',
+            'ruta' => $rutaAdjunto,
+            'tipo_mime' => 'application/pdf',
+            'tamano' => 21,
+        ]);
+
         $sustituciones = [
             'socio' => $socio->getRouteKey(),
             'equipo' => $equipo->getRouteKey(),
@@ -63,6 +83,7 @@ class SistemaCompletoTest extends TestCase
             'cierreCaja' => $cierre->getRouteKey(),
             'cargo' => $socio->cargos()->first()?->getRouteKey(),
             'pago' => Pago::first()?->getRouteKey(),
+            'adjunto' => $adjunto->getRouteKey(),
         ];
 
         $revisadas = 0;
@@ -106,6 +127,7 @@ class SistemaCompletoTest extends TestCase
         }
 
         DB::rollBack();
+        Storage::disk(NoticiaAdjunto::DISCO)->delete($rutaAdjunto);
 
         $this->assertGreaterThanOrEqual(25, $revisadas, 'Se esperaban revisar al menos 25 pantallas.');
         $this->assertEmpty($saltadas, 'Quedaron rutas sin poder revisar: '.implode(', ', $saltadas));

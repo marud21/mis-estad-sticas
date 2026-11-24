@@ -54,6 +54,14 @@ Route::post('avisos/desuscribir', [NotificacionPushController::class, 'desuscrib
 
 Route::get('noticias', [NoticiaPublicaController::class, 'index'])->name('noticias-publicas.index');
 Route::get('noticias/{noticia}', [NoticiaPublicaController::class, 'show'])->name('noticias-publicas.show');
+/*
+ * Los adjuntos no se sirven desde /storage: viven en el disco privado y
+ * salen solo por aqui, que comprueba antes que la noticia este publicada.
+ * Asi no queda una direccion suelta del archivo circulando por ahi.
+ */
+Route::get('noticias/{noticia}/adjuntos/{adjunto}', [NoticiaPublicaController::class, 'adjunto'])
+    ->whereNumber(['noticia', 'adjunto'])
+    ->name('noticias-publicas.adjunto');
 
 Route::middleware(['auth', \App\Http\Middleware\VerificarPermisos::class])->group(function () {
     // Antes /panel era un atajo que llevaba a la lista de socios. Ahora

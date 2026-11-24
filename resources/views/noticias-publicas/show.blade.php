@@ -164,6 +164,18 @@
         .adjuntos .accion:hover { background: var(--marca-media); color: var(--blanco); }
         .adjuntos .accion.principal { background: var(--marca-media); color: var(--blanco); }
         .adjuntos .accion.principal:hover { background: var(--marca-oscura); border-color: var(--marca-oscura); }
+        .adjuntos .sin-vista { font-size: 12px; color: #888; white-space: nowrap; }
+        .visor-cerrar {
+            background: none;
+            border: 1px solid rgba(255, 255, 255, .5);
+            color: #fff;
+            border-radius: 6px;
+            padding: 5px 14px;
+            font-size: 13px;
+            font-family: inherit;
+            cursor: pointer;
+        }
+        .visor-cerrar:hover { background: rgba(255, 255, 255, .15); }
 
         @media (max-width: 480px) {
             .adjuntos li { gap: 8px; }
@@ -203,11 +215,15 @@
                                 <span class="peso">{{ $adjunto->tamano_legible }}</span>
                                 @if ($adjunto->se_puede_previsualizar)
                                     <button type="button" class="accion principal"
-                                            onclick="previsualizar('{{ $adjunto->url }}', @js($adjunto->nombre_original), {{ $adjunto->es_imagen ? 'true' : 'false' }})">
-                                        Previsualizar
+                                            onclick="previsualizar(@js($adjunto->url), @js($adjunto->nombre_original), {{ $adjunto->es_imagen ? 'true' : 'false' }})">
+                                        Ver en pantalla
                                     </button>
+                                @else
+                                    {{-- Un .doc o .docx el navegador no sabe mostrarlo, y ya
+                                         no se ofrece descargarlo. Se dice en vez de dejar un
+                                         boton que no haria nada. --}}
+                                    <span class="sin-vista">No se puede mostrar en pantalla</span>
                                 @endif
-                                <a class="accion" href="{{ $adjunto->url }}" download="{{ $adjunto->nombre_original }}">Descargar</a>
                             </li>
                         @endforeach
                     </ul>
@@ -222,7 +238,10 @@
         <div class="visor-doc" id="visor-doc" style="display:none;" onclick="event.stopPropagation()">
             <div class="visor-barra">
                 <span id="visor-doc-nombre"></span>
-                <a id="visor-doc-enlace" href="#" target="_blank" rel="noopener">Abrir en pestaña nueva &nearr;</a>
+                {{-- Antes habia aqui un "abrir en pestaña nueva": era otra
+                     puerta al archivo suelto, asi que se quito junto con la
+                     descarga. --}}
+                <button type="button" class="visor-cerrar" onclick="cerrarImagen()">Cerrar</button>
             </div>
             <iframe id="visor-doc-frame" src="" title="Documento adjunto"></iframe>
         </div>
@@ -251,11 +270,16 @@
                 return;
             }
 
-            visorFrame.src = url;
+            /*
+             * Al PDF se le pide al visor del navegador que venga sin su
+             * barra de herramientas, que es donde tiene sus propios
+             * botones de descargar e imprimir. Chrome y Edge la respetan;
+             * Firefox la ignora y muestra su barra igual. Es por
+             * prolijidad, no una cerradura.
+             */
+            visorFrame.src = url + '#toolbar=0&navpanes=0&statusbar=0';
             visorFrame.title = nombre;
             document.getElementById('visor-doc-nombre').textContent = nombre;
-            const enlace = document.getElementById('visor-doc-enlace');
-            enlace.href = url;
             modalImg.style.display = 'none';
             visorDoc.style.display = '';
             modal.classList.add('activo');
@@ -263,9 +287,13 @@
 
         function cerrarImagen() {
             modal.classList.remove('activo');
-            // Se descarga el documento del visor para que no siga sonando o
-            // consumiendo memoria mientras el modal esta cerrado.
-            visorFrame.src = '';
+            /*
+             * Se suelta el documento para que no siga ocupando memoria
+             * con el visor cerrado. Va "about:blank" y no una cadena
+             * vacia: vaciar el src no descarga nada, hace que el marco
+             * vuelva a cargar la pagina actual dentro de si mismo.
+             */
+            visorFrame.src = 'about:blank';
         }
 
         document.addEventListener('keydown', function (e) {
