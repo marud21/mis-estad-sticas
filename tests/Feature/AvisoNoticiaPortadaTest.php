@@ -42,6 +42,11 @@ class AvisoNoticiaPortadaTest extends TestCase
         parent::tearDown();
     }
 
+    private function admin(): \App\Models\User
+    {
+        return \App\Models\User::where('role', \App\Models\User::ROLE_ADMIN)->firstOrFail();
+    }
+
     private function noticia(array $extra = []): Noticia
     {
         return Noticia::create(array_merge([
@@ -312,16 +317,16 @@ class AvisoNoticiaPortadaTest extends TestCase
     public function test_el_modelo_elige_bien_la_destacada(): void
     {
         Noticia::query()->delete();
-        $this->assertNull(Noticia::destacada(), 'Sin noticias no hay destacada.');
+        $this->assertNull(Noticia::paraLaVentana(), 'Sin noticias no salta nada.');
 
         $vieja = $this->noticia(['fecha_publicacion' => Carbon::today()->subDays(60)->toDateString()]);
-        $this->assertNull(Noticia::destacada(), 'Una vieja no se destaca.');
+        $this->assertNull(Noticia::paraLaVentana(), 'Una vieja no salta.');
 
         $nueva = $this->noticia(['fecha_publicacion' => Carbon::today()->toDateString()]);
-        $this->assertSame($nueva->id, Noticia::destacada()?->id);
+        $this->assertSame($nueva->id, Noticia::paraLaVentana()?->id);
 
         $nueva->update(['publicado' => false]);
-        $this->assertNull(Noticia::destacada(), 'Despublicarla la quita de la ventana.');
+        $this->assertNull(Noticia::paraLaVentana(), 'Despublicarla la quita de la ventana.');
     }
 
     public function test_despublicar_la_noticia_quita_la_ventana(): void
@@ -332,5 +337,154 @@ class AvisoNoticiaPortadaTest extends TestCase
         $noticia->update(['publicado' => false]);
 
         $this->assertStringNotContainsString('id="aviso-noticia"', $this->portada());
+    }
+
+    // ================= ELEGIR CUAL SALE =================
+
+    public function test_una_noticia_sin_marcar_no_salta(): void
+    {
+        $this->noticia(['destacada' => false]);
+
+        $this->assertStringNotContainsString(
+            'id="aviso-noticia"',
+            $this->portada(),
+            'Publicarla no basta: hay que elegir que interrumpa.',
+        );
+    }
+
+    public function test_salta_la_marcada_aunque_no_sea_la_mas_reciente(): void
+    {
+        $marcada = $this->noticia([
+            'fecha_publicacion' => Carbon::today()->subDays(3)->toDateString(),
+            'destacada' => true,
+        ]);
+        $this->noticia([
+            'fecha_publicacion' => Carbon::today()->toDateString(),
+            'destacada' => false,
+        ]);
+
+        $this->assertTrue(
+            $this->saltaPara($marcada),
+            'La mas nueva esta sin marcar, asi que manda la marcada.',
+        );
+    }
+
+    public function test_entre_varias_marcadas_manda_la_mas_reciente(): void
+    {
+        $this->noticia(['fecha_publicacion' => Carbon::today()->subDays(4)->toDateString(), 'destacada' => true]);
+        $nueva = $this->noticia(['fecha_publicacion' => Carbon::today()->subDay()->toDateString(), 'destacada' => true]);
+
+        $this->assertTrue($this->saltaPara($nueva));
+    }
+
+    public function test_desmarcarla_la_quita_de_la_ventana(): void
+    {
+        $noticia = $this->noticia(['destacada' => true]);
+        $this->assertTrue($this->saltaPara($noticia));
+
+        $noticia->update(['destacada' => false]);
+
+        $this->assertStringNotContainsString('id="aviso-noticia"', $this->portada());
+    }
+
+    public function test_una_marcada_vieja_sigue_sin_saltar(): void
+    {
+        $this->noticia([
+            'destacada' => true,
+            'fecha_publicacion' => Carbon::today()->subDays(Noticia::DIAS_DESTACADA + 1)->toDateString(),
+        ]);
+
+        $this->assertStringNotContainsString(
+            'id="aviso-noticia"',
+            $this->portada(),
+            'Marcarla no la libra del plazo: es la red de seguridad si se olvida desmarcarla.',
+        );
+    }
+
+    public function test_una_marcada_sin_publicar_no_salta(): void
+    {
+        $this->noticia(['destacada' => true, 'publicado' => false]);
+
+        $this->assertStringNotContainsString('id="aviso-noticia"', $this->portada());
+    }
+
+    // ================= EL FORMULARIO DEL ADMINISTRADOR =================
+
+    public function test_una_noticia_nueva_viene_marcada(): void
+    {
+        $html = $this->actingAs($this->admin())
+            ->get(route('noticias-admin.create'))->assertOk()->getContent();
+
+        $this->assertStringContainsString('name="destacada"', $html);
+        $this->assertMatchesRegularExpression(
+            '#<option value="1"[^>]*selected[^>]*>\s*Si: salta#',
+            $html,
+            'Lo normal es que lo que se publica se quiera avisar.',
+        );
+    }
+
+    public function test_el_formulario_respeta_lo_que_ya_tiene_la_noticia(): void
+    {
+        $noticia = $this->noticia(['destacada' => false]);
+
+        $html = $this->actingAs($this->admin())
+            ->get(route('noticias-admin.edit', $noticia))->assertOk()->getContent();
+
+        $this->assertMatchesRegularExpression(
+            '#<option value="0"[^>]*selected[^>]*>\s*No: solo aparece#',
+            $html,
+        );
+    }
+
+    public function test_se_guarda_la_eleccion_al_crear(): void
+    {
+        $this->actingAs($this->admin())->post(route('noticias-admin.store'), [
+            'titulo' => 'SIN VENTANA '.uniqid(),
+            'contenido' => 'Cuerpo.',
+            'fecha_publicacion' => Carbon::today()->toDateString(),
+            'publicado' => '1',
+            'destacada' => '0',
+        ])->assertRedirect();
+
+        $this->assertFalse(Noticia::latest('id')->firstOrFail()->destacada);
+    }
+
+    public function test_se_guarda_la_eleccion_al_editar(): void
+    {
+        $noticia = $this->noticia(['destacada' => true]);
+
+        $this->actingAs($this->admin())->put(route('noticias-admin.update', $noticia), [
+            'titulo' => $noticia->titulo,
+            'contenido' => $noticia->contenido,
+            'fecha_publicacion' => $noticia->fecha_publicacion->toDateString(),
+            'publicado' => '1',
+            'destacada' => '0',
+        ])->assertRedirect();
+
+        $this->assertFalse($noticia->fresh()->destacada);
+    }
+
+    public function test_la_lista_señala_cual_esta_saltando(): void
+    {
+        $saltando = $this->noticia(['destacada' => true]);
+        $marcadaVieja = $this->noticia([
+            'destacada' => true,
+            'fecha_publicacion' => Carbon::today()->subDays(Noticia::DIAS_DESTACADA + 2)->toDateString(),
+        ]);
+        $sinMarcar = $this->noticia(['destacada' => false]);
+
+        $html = $this->actingAs($this->admin())
+            ->get(route('noticias-admin.index'))->assertOk()->getContent();
+
+        $this->assertStringContainsString('Saltando ahora', $html);
+        $this->assertStringContainsString('Marcada', $html);
+        $this->assertSame(
+            1,
+            substr_count($html, 'Saltando ahora'),
+            'Solo una puede estar saltando a la vez.',
+        );
+        $this->assertSame($saltando->id, Noticia::paraLaVentana()?->id);
+        $this->assertTrue($marcadaVieja->destacada);
+        $this->assertFalse($sinMarcar->destacada);
     }
 }

@@ -20,6 +20,10 @@ class NoticiaService
     public function crear(array $datos, ?UploadedFile $imagen, ?int $userId, array $adjuntos = []): Noticia
     {
         $datos['publicado'] = $datos['publicado'] ?? false;
+        // Si no viene, es que se eligio que NO salte: el formulario
+        // manda siempre el valor, asi que su ausencia solo puede ser
+        // una peticion armada por fuera.
+        $datos['destacada'] = $datos['destacada'] ?? false;
         $datos['user_id'] = $userId;
 
         if ($imagen) {
@@ -40,6 +44,7 @@ class NoticiaService
     public function actualizar(Noticia $noticia, array $datos, ?UploadedFile $imagen, array $adjuntos = []): Noticia
     {
         $datos['publicado'] = $datos['publicado'] ?? false;
+        $datos['destacada'] = $datos['destacada'] ?? false;
 
         if ($imagen) {
             if ($noticia->imagen_path) {

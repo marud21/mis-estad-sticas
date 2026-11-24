@@ -20,7 +20,12 @@ class NoticiaController extends Controller
             ->orderByDesc('id')
             ->paginate(15);
 
-        return view('noticias.index', compact('noticias'));
+        // Cual esta saltando ahora mismo en la portada. Se consulta una
+        // sola vez y la lista compara el id: preguntarselo a cada fila
+        // seria una consulta por noticia.
+        $laQueSalta = Noticia::paraLaVentana();
+
+        return view('noticias.index', compact('noticias', 'laQueSalta'));
     }
 
     public function create()

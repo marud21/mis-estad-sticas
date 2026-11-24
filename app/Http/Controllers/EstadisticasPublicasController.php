@@ -33,10 +33,10 @@ class EstadisticasPublicasController extends Controller
         // alguna imagen publicada.
         $carrusel = CarruselImagen::visibles()->get();
 
-        // La ultima noticia, para la ventana que salta al entrar. Puede
-        // venir vacia: si no hay ninguna publicada, o la ultima ya es
-        // vieja, simplemente no salta nada.
-        $noticiaDestacada = Noticia::destacada();
+        // La noticia que salta al entrar. Puede venir vacia: si no hay
+        // ninguna marcada para la ventana, o la marcada ya es vieja,
+        // simplemente no salta nada.
+        $noticiaDestacada = Noticia::paraLaVentana();
 
         if (! $torneo) {
             return view('home', [

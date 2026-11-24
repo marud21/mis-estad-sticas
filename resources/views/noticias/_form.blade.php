@@ -18,6 +18,21 @@
             <option value="0" @selected(old('publicado', ($noticia->publicado ?? true) ? '1' : '0') == '0')>Borrador (no visible)</option>
         </select>
     </div>
+    <div>
+        {{-- Una noticia nueva viene marcada: lo normal es que lo ultimo
+             que se publica se quiera avisar. Se desmarca la que no
+             amerite interrumpir a quien entra. --}}
+        <label>Ventana de la portada</label>
+        <select name="destacada">
+            <option value="1" @selected(old('destacada', ($noticia->destacada ?? true) ? '1' : '0') == '1')>Si: salta al entrar a la portada</option>
+            <option value="0" @selected(old('destacada', ($noticia->destacada ?? true) ? '1' : '0') == '0')>No: solo aparece en Noticias</option>
+        </select>
+        <p style="font-size:12px; color:#666; margin-top:-10px;">
+            Entre las marcadas salta la mas reciente, y deja de saltar
+            {{ \App\Models\Noticia::DIAS_DESTACADA }} dias despues de su fecha de publicacion.
+            A cada visitante le sale una vez.
+        </p>
+    </div>
     <div style="grid-column: 1 / -1;">
         <label>Imagen (opcional)</label>
         @if (($noticia->imagen_path ?? null))

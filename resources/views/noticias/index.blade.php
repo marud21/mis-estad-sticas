@@ -12,7 +12,7 @@
         <div class="table-scroll">
             <table>
                 <thead>
-                    <tr><th>Titulo</th><th>Fecha</th><th>Estado</th><th>Adjuntos</th><th>Autor</th><th></th></tr>
+                    <tr><th>Titulo</th><th>Fecha</th><th>Estado</th><th>Ventana</th><th>Adjuntos</th><th>Autor</th><th></th></tr>
                 </thead>
                 <tbody>
                     @forelse ($noticias as $noticia)
@@ -24,6 +24,17 @@
                                     <span class="badge badge-activo">Publicada</span>
                                 @else
                                     <span class="badge badge-suspendido">Borrador</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if ($laQueSalta && $laQueSalta->id === $noticia->id)
+                                    <span class="badge badge-activo">Saltando ahora</span>
+                                @elseif ($noticia->destacada)
+                                    {{-- Marcada, pero no es la que sale: o ya paso su
+                                         plazo, o hay otra mas reciente tambien marcada. --}}
+                                    <span class="badge badge-inactivo">Marcada</span>
+                                @else
+                                    <span style="color:#999;">-</span>
                                 @endif
                             </td>
                             <td>{{ $noticia->adjuntos_count > 0 ? '📎 '.$noticia->adjuntos_count : '-' }}</td>
@@ -41,7 +52,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="6">No hay noticias registradas.</td></tr>
+                        <tr><td colspan="7">No hay noticias registradas.</td></tr>
                     @endforelse
                 </tbody>
             </table>

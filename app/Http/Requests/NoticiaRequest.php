@@ -19,6 +19,7 @@ class NoticiaRequest extends FormRequest
             'contenido' => ['required', 'string', 'max:10000'],
             'fecha_publicacion' => ['required', 'date'],
             'publicado' => ['sometimes', 'boolean'],
+            'destacada' => ['sometimes', 'boolean'],
             'imagen' => ['nullable', 'image', 'max:15360'],
             'adjuntos' => ['sometimes', 'array', 'max:10'],
             'adjuntos.*' => ['file', 'mimes:'.implode(',', NoticiaAdjunto::EXTENSIONES), 'max:15360'],

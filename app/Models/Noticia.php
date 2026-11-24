@@ -11,11 +11,12 @@ class Noticia extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['titulo', 'contenido', 'imagen_path', 'fecha_publicacion', 'publicado', 'user_id'];
+    protected $fillable = ['titulo', 'contenido', 'imagen_path', 'fecha_publicacion', 'publicado', 'destacada', 'user_id'];
 
     protected $casts = [
         'fecha_publicacion' => 'date',
         'publicado' => 'boolean',
+        'destacada' => 'boolean',
     ];
 
     /**
@@ -33,8 +34,18 @@ class Noticia extends Model
         return $query->where('publicado', true);
     }
 
+    /** Las que se eligieron para que salten en la ventana de la portada. */
+    public function scopeDestacadas($query)
+    {
+        return $query->where('destacada', true);
+    }
+
     /**
-     * La ultima noticia publicada, pero solo si todavia es reciente.
+     * La noticia que saltara en la ventana de la portada, si hay alguna.
+     *
+     * Tiene que estar publicada Y marcada para la ventana: no toda
+     * noticia amerita interrumpir a quien entra. Entre las que cumplen,
+     * manda la mas reciente.
      *
      * Se ordena igual que la lista publica (fecha y luego id) para que
      * "la ultima" signifique lo mismo en los dos lados: si dos noticias
@@ -43,11 +54,12 @@ class Noticia extends Model
      * Las que tengan fecha futura no cuentan: si alguien se equivoca al
      * digitar el año, esa noticia se quedaria saltando para siempre.
      */
-    public static function destacada(): ?self
+    public static function paraLaVentana(): ?self
     {
         $hoy = now()->startOfDay();
 
         return static::publicadas()
+            ->destacadas()
             ->whereDate('fecha_publicacion', '<=', $hoy)
             ->whereDate('fecha_publicacion', '>=', $hoy->copy()->subDays(self::DIAS_DESTACADA))
             ->orderByDesc('fecha_publicacion')
